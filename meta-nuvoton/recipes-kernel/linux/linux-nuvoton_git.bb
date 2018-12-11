@@ -1,0 +1,6 @@
+KBRANCH ?= "dev-4.18"
+LINUX_VERSION ?= "4.18.5"
+
+SRCREV="6082c3474393633ed6452419e9c3e41273201121"
+
+require linux-nuvoton.inc
