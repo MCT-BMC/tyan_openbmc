@@ -1,0 +1,28 @@
+From f75bfac6a213de3a1e5e1be57e3d8491db95f11d Mon Sep 17 00:00:00 2001
+From: Brad Chou <brad.chou@mic.com.tw>
+Date: Fri, 7 Dec 2018 16:20:18 +0800
+Subject: [PATCH] [MCT Common] Fix incorrect Subnet Mask with IPMI Get Lan
+ Configuration Parameters Command Fix always return the first subnet mask for
+ each lan channel. Different lan channel should return indivitual subnet mask
+ field.
+
+---
+ transporthandler.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 transporthandler.cpp
+
+diff --git a/transporthandler.cpp b/transporthandler.cpp
+old mode 100644
+new mode 100755
+index 39b1c9f..8928da8
+--- a/transporthandler.cpp
++++ b/transporthandler.cpp
+@@ -198,7 +198,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
+                     {
+                         auto ipObjectInfo = ipmi::getIPObject(
+                             bus, ipmi::network::IP_INTERFACE,
+-                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
++                            ipmi::network::ROOT, ethIP);
+ 
+                         auto properties = ipmi::getAllDbusProperties(
+                             bus, ipObjectInfo.second, ipObjectInfo.first,

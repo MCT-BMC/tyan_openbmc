@@ -1,0 +1,154 @@
+From e80f3cdfcfc686e5702a22cebdc8b8129e3f8c61 Mon Sep 17 00:00:00 2001
+From: "Mirage.Su" <Mirags.Su@mic.com.tw>
+Date: Tue, 2 Oct 2018 14:37:44 +0800
+Subject: [PATCH] Modified gpioutil to have user friendly option
+
+---
+ gpioutil | 93 +++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 48 insertions(+), 45 deletions(-)
+ mode change 100644 => 100755 pytools/gpioutil
+
+diff --git a/gpioutil b/gpioutil
+old mode 100644
+new mode 100755
+index d06a9a4..479aff1
+--- a/gpioutil
++++ b/gpioutil
+@@ -10,10 +10,16 @@ import obmc_system_config as System
+ 
+ def printUsage():
+ 	print '\nUsage:'
+-	print 'gpioutil -n GPIO_NAME  [-v value]'
+-	print 'gpioutil -i GPIO_NUM  -d <DIRECTION = in,out,falling,rising,both> [-v value]'
+-	print 'gpioutil -p PIN_NAME  -d <DIRECTION = in,out,falling,rising,both> [-v value]'
+-	print 'gpioutil -l PIN_NAME     (lookup pin name only)'
++	print 'gpioutil -h'
++	print 'gpioutil -n GPIO_NAME  --getdir'
++	print 'gpioutil -n GPIO_NAME  --setdir <out/in>'
++	print 'gpioutil -n GPIO_NAME  --getval'
++	print 'gpioutil -n GPIO_NAME  --setval <0/1>'
++	print '\nExample:'
++	print 'gpioutil -n A0 --getdir		- Get direction of A0 gpio pin'
++	print 'gpioutil -n A0 --setdir out 	- Set direction to output of A0 gpio pin'
++	print 'gpioutil -n A0 --getval  	- Get status of A0 gpio pin'
++	print 'gpioutil -n A0 --setval 1  	- Set high of A0 gpio pin'
+ 	exit(1)
+ 
+ 
+@@ -91,6 +97,9 @@ class Gpio:
+ 		if current_direction != self.direction:
+ 			self.write(self.getPath('direction'),self.direction)
+ 
++	def getDirection(self):
++		return self.read(self.getPath('direction'))
++
+ 	def setValue(self,value):
+ 		if (value == '0'):
+ 			self.write(self.getPath('value'),'0')
+@@ -119,7 +128,7 @@ class Gpio:
+ if __name__ == '__main__':
+ 
+ 	try:
+-		opts, args = getopt.getopt(sys.argv,"hn:i:d:v:p:l:")
++		opts, remainder = getopt.getopt(sys.argv, 'n:h', ['num=','setdir=','getdir','getval','setval=','help',])
+  	except getopt.GetoptError:
+  		printUsage()
+ 
+@@ -129,63 +138,57 @@ if __name__ == '__main__':
+ 	gpio_name = ""
+ 	value = ""
+ 	direction = ""
++	getdir = 0
++	setdir = 0
++	getval = 0
++	setval = 0
+ 	for opt, arg in opts:
+- 		if opt == '-h':
+-			printUsage()
++		if opt in ('-n', '--num'):
+ 
+- 		elif opt in ("-n"):
+- 			gpio_name = arg
+-			lookup = True
+- 		elif opt in ("-i"):
+- 			gpio_name = arg
+- 		elif opt in ("-d"):
++			gpio_name = convertGpio(arg)
++		elif opt in ('-s', '--setdir'):
+ 			direction = arg
+- 		elif opt in ("-v"):
++			setdir = 1
++		elif opt == '--getdir':
++			getdir = 1
++		elif opt == '--getval':
++			getval = 1
++		elif opt == '--setval':
+ 			value = arg
+-		elif opt in ("-p"):
+-			gpio_name = convertGpio(arg)
+-		elif opt in ("-l"):
+-			gpio_name = convertGpio(arg)
+-			print gpio_name
+-			exit(0) 
+-
+-	gpio_info = {}
+-	if (lookup == True):
+-		if (System.GPIO_CONFIG.has_key(gpio_name) == False):
+-			print "ERROR - GPIO Name doesn't exist"
+-			print "Valid names: "
+-			for n in System.GPIO_CONFIG:
+-				print "\t"+n
+-			exit(0)
+-		gpio_info = System.GPIO_CONFIG[gpio_name]
+-		direction = gpio_info['direction']
+-		if (gpio_info.has_key('gpio_num')):
+-			gpio_name = str(gpio_info['gpio_num'])
+-		else:
+-			gpio_name = str(convertGpio(gpio_info['gpio_pin']))
+-		print "GPIO ID: "+gpio_name+"; DIRECTION: "+direction
++			setval = 1
++		elif opt in ('-h', '--help'):
++			printUsage()
+ 
+ 
+ 	## Rules
+ 	if (gpio_name == ""):
+-		print "ERROR - Gpio not specified"
++		print "ERROR - Gpio name not specified"
+ 		printUsage()
+ 
+-	if (direction == "in" and value != ""):
+-		print "ERROR - Value cannot be specified when direction = in"
+-		printUsage()
++	if (direction != ""):
++		if(direction != 'out' and direction != 'in'):
++			print "ERROR - Direction should be out or in"
++			printUsage()
++
++	if (value != ""):
++		if(value != '1' and value != '0'):
++			print "ERROR - Value should be 0 or 1"
++			printUsage()
+ 
+ 	gpio = Gpio(gpio_name)
+ 	try:
+ 		gpio.export()
+-		if (direction != ""):
++		if (setdir == 1):
+ 			gpio.setDirection(direction)
+-
+-		if (value == ""):
++		elif (setval == 1):
++			gpio.setValue(value)
++		elif (getdir == 1):
++			print gpio.getDirection()
++		elif (getval == 1):
+ 			print gpio.getValue()
+ 		else:
+-			gpio.setValue(value)
++			printUsage()
+ 
+ 	except Exception as e:
+ 		print e
+-		
++		exit(1)

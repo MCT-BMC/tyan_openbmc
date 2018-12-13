@@ -1,0 +1,43 @@
+From 378fba530e7a10b6742f432e2cb3ccac648697aa Mon Sep 17 00:00:00 2001
+From: "Henbin.Chang" <henbin-chang@mic.com.tw>
+Date: Wed, 3 Oct 2018 11:47:26 +0800
+Subject: [PATCH] [PATCH] [MCT Common] Bug #10583 The Firmware Revision from
+ 'ipmitool mc info' may be '0.00'
+
+Return the CC_D5h while the software redundancy interface isn't created yet.
+---
+ apphandler.cpp         | 5 +++++
+ host-ipmid/ipmid-api.h | 1 +
+ 2 files changed, 6 insertions(+)
+ mode change 100644 => 100755 host-ipmid/ipmid-api.h
+
+diff --git a/apphandler.cpp b/apphandler.cpp
+index 7ffe7b3..954a963 100755
+--- a/apphandler.cpp
++++ b/apphandler.cpp
+@@ -490,6 +490,11 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
+             std::memcpy(&dev_id.aux, rev.d, 4);
+         }
++		else{
++			//MiTAC Henbin Oem addition.
++			rc = IPMI_CC_NOT_SUP_IN_CUR_STAT;
++			return rc;
++		}
+ 
+         // IPMI Spec version 2.0
+         dev_id.ipmi_ver = 2;
+diff --git a/host-ipmid/ipmid-api.h b/host-ipmid/ipmid-api.h
+old mode 100644
+new mode 100755
+index 820776a..350c0e2
+--- a/host-ipmid/ipmid-api.h
++++ b/host-ipmid/ipmid-api.h
+@@ -126,6 +126,7 @@ enum ipmi_return_codes
+     IPMI_CC_ILLEGAL_COMMAND = 0xCD,
+     IPMI_CC_RESPONSE_ERROR = 0xCE,
+     IPMI_CC_INSUFFICIENT_PRIVILEGE = 0xD4,
++    IPMI_CC_NOT_SUP_IN_CUR_STAT, //MiTAC Henbin OEM add
+     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
+ };
+ 
