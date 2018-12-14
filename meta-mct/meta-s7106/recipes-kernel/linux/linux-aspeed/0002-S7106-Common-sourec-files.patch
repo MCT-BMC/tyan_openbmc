@@ -1,0 +1,55 @@
+From bd57b8186bacefbb706729d35bc4827d3d4a3bfe Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Fri, 14 Dec 2018 10:25:28 +0800
+Subject: [PATCH] [S7106] Common sourec files
+
+---
+ arch/arm/boot/dts/aspeed-g5.dtsi | 7 +++++++
+ drivers/misc/Kconfig             | 6 ++++++
+ drivers/misc/Makefile            | 1 +
+ 3 files changed, 14 insertions(+)
+
+diff --git a/arch/arm/boot/dts/aspeed-g5.dtsi b/arch/arm/boot/dts/aspeed-g5.dtsi
+index e4c5de3..1c52d9d 100644
+--- a/arch/arm/boot/dts/aspeed-g5.dtsi
++++ b/arch/arm/boot/dts/aspeed-g5.dtsi
+@@ -448,6 +448,13 @@
+ 				#size-cells = <1>;
+ 				ranges = <0 0x1e78a000 0x1000>;
+ 			};
++
++			hbled: hbled@1e6c0000 {
++				compatible = "aspeed,ast2500-hbled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <0x1e6c0000 0x1000>;
++			};
+ 		};
+ 	};
+ };
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 689d07e..458e4f3 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -520,6 +520,12 @@ config MISC_RTSX
+ 	tristate
+ 	default MISC_RTSX_PCI || MISC_RTSX_USB
+ 
++config ASPEED_G5_HBLED
++	tristate "Aspeed ast2500 Heart Beat (HBLED#) support"
++	depends on (ARCH_ASPEED || COMPILE_TEST) && REGMAP && MFD_SYSCON
++	help
++	  Provides a driver to control the signal of HBLED#
++
+ source "drivers/misc/c2port/Kconfig"
+ source "drivers/misc/eeprom/Kconfig"
+ source "drivers/misc/cb710/Kconfig"
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index e4170f6..86c9e6b 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -59,3 +59,4 @@ obj-$(CONFIG_ASPEED_LPC_MBOX)	+= aspeed-lpc-mbox.o
+ obj-$(CONFIG_PCI_ENDPOINT_TEST)	+= pci_endpoint_test.o
+ obj-$(CONFIG_OCXL)		+= ocxl/
+ obj-$(CONFIG_MISC_RTSX)		+= cardreader/
++obj-$(CONFIG_ASPEED_G5_HBLED)   += aspeed-g5-hbled.o
