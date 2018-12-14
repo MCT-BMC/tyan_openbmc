@@ -1,19 +1,19 @@
-From b2c6caf9e6fbc4f0256b36bc823c7e82e99abf16 Mon Sep 17 00:00:00 2001
+From d3411025adcee4a26f40f4862ee9a77eec73c3f0 Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [S7106] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 255 +++++++++++++++++++++++++++++
- 1 file changed, 255 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 259 +++++++++++++++++++++++++++++
+ 1 file changed, 259 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 new file mode 100755
-index 0000000..498a538
+index 0000000..d32a3e8
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
-@@ -0,0 +1,255 @@
+@@ -0,0 +1,259 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -51,16 +51,20 @@ index 0000000..498a538
 +	};
 +
 +	leds {
-+        compatible = "gpio-leds";
++        	compatible = "gpio-leds";
 +
-+        power {
-+            gpios = <&gpio ASPEED_GPIO(R, 5) GPIO_ACTIVE_LOW>;
-+        };
++        	power {
++        		gpios = <&gpio ASPEED_GPIO(R, 5) GPIO_ACTIVE_LOW>;
++        	};
 +
-+        identify {
-+            gpios = <&gpio ASPEED_GPIO(A, 2) GPIO_ACTIVE_LOW>;
++        	identify {
++        		gpios = <&gpio ASPEED_GPIO(A, 2) GPIO_ACTIVE_LOW>;
++        	};
++
++            heartbeat {
++                gpios = <&gpio ASPEED_GPIO(E, 7) GPIO_ACTIVE_LOW>;
++            };
 +        };
-+    };
 +
 +	iio-hwmon {
 +		compatible = "iio-hwmon";
