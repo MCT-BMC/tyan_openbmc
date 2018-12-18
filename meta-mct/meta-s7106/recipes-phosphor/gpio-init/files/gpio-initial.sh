@@ -249,7 +249,6 @@ output="\
  $GPIO_G1=1\
  $GPIO_N6=1\
  $GPIO_N7=0\
- $GPIO_R5=1\
  $GPIO_AB1=0\
 "
 
