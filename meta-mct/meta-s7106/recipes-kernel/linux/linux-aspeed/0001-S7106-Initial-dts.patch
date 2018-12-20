@@ -1,19 +1,19 @@
-From d3411025adcee4a26f40f4862ee9a77eec73c3f0 Mon Sep 17 00:00:00 2001
+From c4f20d8aaa9a46f94195ce5abfbf05bc8e591f8c Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [S7106] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 259 +++++++++++++++++++++++++++++
- 1 file changed, 259 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 264 +++++++++++++++++++++++++++++
+ 1 file changed, 264 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 new file mode 100755
-index 0000000..d32a3e8
+index 0000000..4e51bd2
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
-@@ -0,0 +1,259 @@
+@@ -0,0 +1,264 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -147,7 +147,12 @@ index 0000000..d32a3e8
 +};
 +
 +&i2c0 {
-+        status = "okay";
++    status = "okay";
++    /* NCT7802 Hardware Monitor @50h*/
++    nct7802@28 {
++        compatible = "nuvoton,nct7802";
++        reg = <0x28>;
++    };
 +};
 +
 +&i2c1 {

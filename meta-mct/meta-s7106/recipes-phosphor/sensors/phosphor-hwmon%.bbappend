@@ -9,6 +9,7 @@ do_install_append() {
 }
 
 NAMES = " \
+        i2c@1e78a000/i2c-bus@40/nct7802@28 \
         pwm-tacho-controller@1e786000 \
         "
 
