@@ -1,0 +1,16 @@
+[Unit]
+Description=Phosphor PCH Hwmon Poller
+ConditionFileNotEmpty=/etc/default/obmc/hwmon/vsensor/pch-temp.conf
+After=ipmb.bridged.start.service
+Requires=xyz.openbmc_project.Ipmi.Ipmb.Pchtemp.service
+After=xyz.openbmc_project.Ipmi.Ipmb.Pchtemp.service
+
+[Service]
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/bin/env phosphor-hwmon-readd -o vsensor/pch-temp
+SyslogIdentifier=phosphor-hwmon-readd
+EnvironmentFile=/etc/default/obmc/hwmon/vsensor/pch-temp.conf
+
+[Install]
+WantedBy={SYSTEMD_DEFAULT_TARGET}

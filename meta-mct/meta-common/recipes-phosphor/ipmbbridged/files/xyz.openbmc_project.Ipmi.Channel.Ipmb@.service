@@ -1,0 +1,9 @@
+[Unit]
+Description=IPMB bridged daemon
+
+After=phosphor-ipmi-host.service
+[Service]
+Restart=always
+ExecStart=/usr/bin/env ipmbbridged --p %I
+SyslogIdentifier=ipmbbridged
+TimeoutSec=infinity

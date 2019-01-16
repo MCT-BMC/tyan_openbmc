@@ -1,19 +1,19 @@
-From c4f20d8aaa9a46f94195ce5abfbf05bc8e591f8c Mon Sep 17 00:00:00 2001
+From 6f61c5ca8f54125ae240076cfd541fa7781481bc Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [S7106] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 264 +++++++++++++++++++++++++++++
- 1 file changed, 264 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 271 +++++++++++++++++++++++++++++
+ 1 file changed, 271 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 new file mode 100755
-index 0000000..4e51bd2
+index 0000000..2a71bf5
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,271 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -156,7 +156,14 @@ index 0000000..4e51bd2
 +};
 +
 +&i2c1 {
++    multi-master =<1>;
 +	status = "okay";
++    spsfw1@10 {
++        compatible = "slave-mqueue";
++        reg = <0x10>;
++        message-size = <256>;
++        queue-size = <32>;
++    };
 +};
 +
 +&i2c2 {

@@ -1,0 +1,13 @@
+[Unit]
+Description=Responsible for starting up IPMB bridged
+After=phosphor-ipmi-host.service
+
+[Service]
+Restart=no
+ExecStart=/usr/bin/env start_ipmbbridged.sh 
+SyslogIdentifier=start_ipmbbridged
+Type=oneshot
+RemainAfterExit=no
+
+[Install]
+WantedBy={SYSTEMD_DEFAULT_TARGET}

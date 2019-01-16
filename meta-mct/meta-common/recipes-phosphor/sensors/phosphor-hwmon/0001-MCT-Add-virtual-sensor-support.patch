@@ -1,0 +1,50 @@
+From f31309c709307d6825a3451b60fd3890067074ff Mon Sep 17 00:00:00 2001
+From: "Henbin.Chang" <henbin-chang@mic.com.tw>
+Date: Tue, 30 Oct 2018 15:14:43 +0800
+Subject: [PATCH] [MCT] Add virtual sensor support
+
+---
+ readd.cpp | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+ mode change 100644 => 100755 readd.cpp
+
+diff --git a/readd.cpp b/readd.cpp
+old mode 100644
+new mode 100755
+index be59962..69d3a5b
+--- a/readd.cpp
++++ b/readd.cpp
+@@ -21,6 +21,7 @@
+ 
+ #include <iostream>
+ #include <memory>
++#include <systemd/sd-journal.h>
+ 
+ static void exit_with_error(const char* err, char** argv)
+ {
+@@ -38,6 +39,17 @@ int main(int argc, char** argv)
+     // Parse out path argument.
+     auto path = (*options)["dev-path"];
+     auto param = path;
++    /*MiTAC Henbin OEM add for vistural sensor start*/
++    if (path.find("vsensor") != std::string::npos){
++	    auto calloutPath = "/run/"+path;		
++	    path = calloutPath;
++	
++	    MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
++                  BUSNAME_PREFIX, SENSOR_ROOT);
++        loop.run();		
++    }
++    else{
++    /*MiTAC Henbin OEM add for vistural sensor end*/	
+     if (path != ArgumentParser::empty_string)
+     {
+         // This path may either be a device path (starts with
+@@ -76,6 +88,7 @@ int main(int argc, char** argv)
+     MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
+                   BUSNAME_PREFIX, SENSOR_ROOT);
+     loop.run();
++    }
+ 
+     return 0;
+ }
