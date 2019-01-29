@@ -130,7 +130,7 @@ index 0000000..a8b1ddd
 +&uart5 {
 +	status = "okay";
 +};
-+
++/*
 +&mac0 {
 +	status = "okay";
 +	
@@ -138,7 +138,7 @@ index 0000000..a8b1ddd
 +	pinctrl-0 = <&pinctrl_rmii1_default>;
 +	use-ncsi;
 +};
-+
++*/
 +&mac1 {
 +	status = "okay";
 +
