@@ -1,13 +1,15 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI_prepend = "file://iio-hwmon.conf \
-                   file://vsensor/pch-temp.conf"
+                   file://vsensor/pch-temp.conf \
+                   file://vsensor/cpudimm-temp.conf"
 
 do_install_append() {
         install -d ${D}/etc/default/obmc/hwmon/
         install -m 644 ${WORKDIR}/iio-hwmon.conf ${D}/etc/default/obmc/hwmon/iio-hwmon.conf
         install -d ${D}/etc/default/obmc/hwmon/vsensor
         install -m 644 ${WORKDIR}/vsensor/pch-temp.conf ${D}/etc/default/obmc/hwmon/vsensor/pch-temp.conf
+        install -m 644 ${WORKDIR}/vsensor/cpudimm-temp.conf ${D}/etc/default/obmc/hwmon/vsensor/cpudimm-temp.conf
 }
 
 NAMES = " \
