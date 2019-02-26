@@ -3,7 +3,7 @@ DESCRIPTION = "Entity Manager provides d-bus configuration data \
 and configures system sensors"
 
 SRC_URI = "git://github.com/openbmc/entity-manager.git"
-SRCREV = "0158eb38b67f8a6751e6b28165456e102a61a5a9"
+SRCREV = "9d74626f71c80384d415a891f70290143f15b10a"
 PV = "0.1+git${SRCPV}"
 
 LICENSE = "Apache-2.0"
@@ -12,7 +12,6 @@ LIC_FILES_CHKSUM = "file://LICENCE;md5=a6a4edad4aed50f39a66d098d74b265b"
 SYSTEMD_SERVICE_${PN} = "xyz.openbmc_project.EntityManager.service \
                          xyz.openbmc_project.FruDevice.service"
 
-PROVIDES += "virtual/phosphor-fans-sensor-inventory"
 DEPENDS = "boost \
            i2c-tools \
            nlohmann-json \

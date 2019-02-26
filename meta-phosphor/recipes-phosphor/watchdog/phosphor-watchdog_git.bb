@@ -13,6 +13,7 @@ RPROVIDES_${PN} += "virtual/obmc-watchdog"
 PROVIDES += "virtual/obmc-watchdog"
 
 DEPENDS += "autoconf-archive-native"
+DEPENDS += "cli11"
 DEPENDS += "sdbusplus sdbusplus-native"
 DEPENDS += "sdeventplus"
 DEPENDS += "phosphor-dbus-interfaces"
@@ -21,7 +22,7 @@ RDEPENDS_${PN} += "libsystemd"
 RDEPENDS_${PN} += "phosphor-logging"
 
 SRC_URI += "git://github.com/openbmc/phosphor-watchdog"
-SRCREV = "f505fc0674d5cf14a8b1903cb894e4a171e28400"
+SRCREV = "976764158af29113103a9a6acd8911f4f06c6b27"
 S = "${WORKDIR}/git"
 
 # Copies config file having arguments for host watchdog

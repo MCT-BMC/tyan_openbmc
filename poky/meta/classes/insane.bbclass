@@ -46,139 +46,6 @@ ALL_QA = "${WARN_QA} ${ERROR_QA}"
 
 UNKNOWN_CONFIGURE_WHITELIST ?= "--enable-nls --disable-nls --disable-silent-rules --disable-dependency-tracking --with-libtool-sysroot --disable-static"
 
-#
-# dictionary for elf headers
-#
-# feel free to add and correct.
-#
-#           TARGET_OS  TARGET_ARCH   MACHINE, OSABI, ABIVERSION, Little Endian, 32bit?
-def package_qa_get_machine_dict(d):
-    machdata = {
-            "darwin9" : { 
-                        "arm" :       (40,     0,    0,          True,          32),
-                      },
-            "eabi" : {
-                        "arm" :       (40,     0,    0,          True,          32),
-                      },
-            "elf" : {
-                        "aarch64" :   (183,    0,    0,          True,          64),
-                        "aarch64_be" :(183,    0,    0,          False,         64),
-                        "i586" :      (3,      0,    0,          True,          32),
-                        "x86_64":     (62,     0,    0,          True,          64),
-                        "epiphany":   (4643,   0,    0,          True,          32),
-                        "mips":       ( 8,     0,    0,          False,         32),
-                        "mipsel":     ( 8,     0,    0,          True,          32),
-                        "microblaze":  (189,   0,    0,          False,         32),
-                        "microblazeeb":(189,   0,    0,          False,         32),
-                        "microblazeel":(189,   0,    0,          True,          32),
-                        "riscv32":    (243,    0,    0,          True,          32),
-                        "riscv64":    (243,    0,    0,          True,          64),
-                      },
-            "linux" : { 
-                        "aarch64" :   (183,    0,    0,          True,          64),
-                        "aarch64_be" :(183,    0,    0,          False,         64),
-                        "arm" :       (40,    97,    0,          True,          32),
-                        "armeb":      (40,    97,    0,          False,         32),
-                        "powerpc":    (20,     0,    0,          False,         32),
-                        "powerpc64":  (21,     0,    0,          False,         64),
-                        "i386":       ( 3,     0,    0,          True,          32),
-                        "i486":       ( 3,     0,    0,          True,          32),
-                        "i586":       ( 3,     0,    0,          True,          32),
-                        "i686":       ( 3,     0,    0,          True,          32),
-                        "x86_64":     (62,     0,    0,          True,          64),
-                        "ia64":       (50,     0,    0,          True,          64),
-                        "alpha":      (36902,  0,    0,          True,          64),
-                        "hppa":       (15,     3,    0,          False,         32),
-                        "m68k":       ( 4,     0,    0,          False,         32),
-                        "mips":       ( 8,     0,    0,          False,         32),
-                        "mipsel":     ( 8,     0,    0,          True,          32),
-                        "mips64":     ( 8,     0,    0,          False,         64),
-                        "mips64el":   ( 8,     0,    0,          True,          64),
-                        "mipsisa32r6":   ( 8,  0,    0,          False,         32),
-                        "mipsisa32r6el": ( 8,  0,    0,          True,          32),
-                        "mipsisa64r6":   ( 8,  0,    0,          False,         64),
-                        "mipsisa64r6el": ( 8,  0,    0,          True,          64),
-                        "nios2":      (113,    0,    0,          True,          32),
-                        "riscv32":    (243,    0,    0,          True,          32),
-                        "riscv64":    (243,    0,    0,          True,          64),
-                        "s390":       (22,     0,    0,          False,         32),
-                        "sh4":        (42,     0,    0,          True,          32),
-                        "sparc":      ( 2,     0,    0,          False,         32),
-                        "microblaze":  (189,   0,    0,          False,         32),
-                        "microblazeeb":(189,   0,    0,          False,         32),
-                        "microblazeel":(189,   0,    0,          True,          32),
-                      },
-            "linux-musl" : { 
-                        "aarch64" :   (183,    0,    0,            True,          64),
-                        "aarch64_be" :(183,    0,    0,            False,         64),
-                        "arm" :       (  40,    97,    0,          True,          32),
-                        "armeb":      (  40,    97,    0,          False,         32),
-                        "powerpc":    (  20,     0,    0,          False,         32),
-                        "i386":       (   3,     0,    0,          True,          32),
-                        "i486":       (   3,     0,    0,          True,          32),
-                        "i586":       (   3,     0,    0,          True,          32),
-                        "i686":       (   3,     0,    0,          True,          32),
-                        "x86_64":     (  62,     0,    0,          True,          64),
-                        "mips":       (   8,     0,    0,          False,         32),
-                        "mipsel":     (   8,     0,    0,          True,          32),
-                        "mips64":     (   8,     0,    0,          False,         64),
-                        "mips64el":   (   8,     0,    0,          True,          64),
-                        "microblaze":  (189,     0,    0,          False,         32),
-                        "microblazeeb":(189,     0,    0,          False,         32),
-                        "microblazeel":(189,     0,    0,          True,          32),
-                        "riscv32":    (243,      0,    0,          True,          32),
-                        "riscv64":    (243,      0,    0,          True,          64),
-                        "sh4":        (  42,     0,    0,          True,          32),
-                      },
-            "uclinux-uclibc" : {
-                        "bfin":       ( 106,     0,    0,          True,         32),
-                      }, 
-            "linux-gnueabi" : {
-                        "arm" :       (40,     0,    0,          True,          32),
-                        "armeb" :     (40,     0,    0,          False,         32),
-                      },
-            "linux-musleabi" : {
-                        "arm" :       (40,     0,    0,          True,          32),
-                        "armeb" :     (40,     0,    0,          False,         32),
-                      },
-            "linux-gnuspe" : {
-                        "powerpc":    (20,     0,    0,          False,         32),
-                      },
-            "linux-muslspe" : {
-                        "powerpc":    (20,     0,    0,          False,         32),
-                      },
-            "linux-gnu" :       {
-                        "powerpc":    (20,     0,    0,          False,         32),
-                        "sh4":        (42,     0,    0,          True,          32),
-                      },
-            "linux-gnu_ilp32" :     {
-                        "aarch64" :   (183,    0,    0,          True,          32),
-                      },
-            "linux-gnux32" :       {
-                        "x86_64":     (62,     0,    0,          True,          32),
-                      },
-            "linux-muslx32" :       {
-                        "x86_64":     (62,     0,    0,          True,          32),
-                      },
-            "linux-gnun32" :       {
-                        "mips64":       ( 8,     0,    0,          False,         32),
-                        "mips64el":     ( 8,     0,    0,          True,          32),
-                        "mipsisa64r6":  ( 8,     0,    0,          False,         32),
-                        "mipsisa64r6el":( 8,     0,    0,          True,          32),
-                      },
-        }
-
-    # Add in any extra user supplied data which may come from a BSP layer, removing the
-    # need to always change this class directly
-    extra_machdata = (d.getVar("PACKAGEQA_EXTRA_MACHDEFFUNCS") or "").split()
-    for m in extra_machdata:
-        call = m + "(machdata, d)"
-        locs = { "machdata" : machdata, "d" : d}
-        machdata = bb.utils.better_eval(call, locs)
-
-    return machdata
-
-
 def package_qa_clean_path(path, d, pkg=None):
     """
     Remove redundant paths from the path for display.  If pkg isn't set then
@@ -244,7 +111,7 @@ def package_qa_check_rpath(file,name, d, elf, messages):
     phdrs = elf.run_objdump("-p", d)
 
     import re
-    rpath_re = re.compile("\s+RPATH\s+(.*)")
+    rpath_re = re.compile(r"\s+RPATH\s+(.*)")
     for line in phdrs.split("\n"):
         m = rpath_re.match(line)
         if m:
@@ -273,7 +140,7 @@ def package_qa_check_useless_rpaths(file, name, d, elf, messages):
     phdrs = elf.run_objdump("-p", d)
 
     import re
-    rpath_re = re.compile("\s+RPATH\s+(.*)")
+    rpath_re = re.compile(r"\s+RPATH\s+(.*)")
     for line in phdrs.split("\n"):
         m = rpath_re.match(line)
         if m:
@@ -336,8 +203,8 @@ def package_qa_check_libdir(d):
     # The re's are purposely fuzzy, as some there are some .so.x.y.z files
     # that don't follow the standard naming convention. It checks later
     # that they are actual ELF files
-    lib_re = re.compile("^/lib.+\.so(\..+)?$")
-    exec_re = re.compile("^%s.*/lib.+\.so(\..+)?$" % exec_prefix)
+    lib_re = re.compile(r"^/lib.+\.so(\..+)?$")
+    exec_re = re.compile(r"^%s.*/lib.+\.so(\..+)?$" % exec_prefix)
 
     for root, dirs, files in os.walk(pkgdest):
         if root == pkgdest:
@@ -403,7 +270,7 @@ def package_qa_check_arch(path,name,d, elf, messages):
     """
     Check if archs are compatible
     """
-    import re
+    import re, oe.elf
 
     if not elf:
         return
@@ -430,12 +297,14 @@ def package_qa_check_arch(path,name,d, elf, messages):
 
     #if this will throw an exception, then fix the dict above
     (machine, osabi, abiversion, littleendian, bits) \
-        = package_qa_get_machine_dict(d)[target_os][target_arch]
+        = oe.elf.machine_dict(d)[target_os][target_arch]
 
     # Check the architecture and endiannes of the binary
     is_32 = (("virtual/kernel" in provides) or bb.data.inherits_class("module", d)) and \
-            (target_os == "linux-gnux32" or target_os == "linux-muslx32" or target_os == "linux-gnu_ilp32" or re.match('mips64.*32', d.getVar('DEFAULTTUNE')))
-    if not ((machine == elf.machine()) or is_32):
+            (target_os == "linux-gnux32" or target_os == "linux-muslx32" or \
+            target_os == "linux-gnu_ilp32" or re.match(r'mips64.*32', d.getVar('DEFAULTTUNE')))
+    is_bpf = (oe.qa.elf_machine_to_string(elf.machine()) == "BPF")
+    if not ((machine == elf.machine()) or is_32 or is_bpf):
         package_qa_add_message(messages, "arch", "Architecture did not match (%s, expected %s) on %s" % \
                  (oe.qa.elf_machine_to_string(elf.machine()), oe.qa.elf_machine_to_string(machine), package_qa_clean_path(path,d)))
     elif not ((bits == elf.abiSize()) or is_32):
@@ -473,7 +342,7 @@ def package_qa_textrel(path, name, d, elf, messages):
     sane = True
 
     import re
-    textrel_re = re.compile("\s+TEXTREL\s+")
+    textrel_re = re.compile(r"\s+TEXTREL\s+")
     for line in phdrs.split("\n"):
         if textrel_re.match(line):
             sane = False
@@ -514,7 +383,7 @@ def package_qa_hash_style(path, name, d, elf, messages):
             sane = True
 
     if has_syms and not sane:
-        package_qa_add_message(messages, "ldflags", "No GNU_HASH in the elf binary: '%s'" % path)
+        package_qa_add_message(messages, "ldflags", "No GNU_HASH in the ELF binary %s, didn't pass LDFLAGS?" % path)
 
 
 QAPATHTEST[buildpaths] = "package_qa_check_buildpaths"
@@ -599,7 +468,7 @@ python populate_lic_qa_checksum() {
         return
 
     if not lic_files and d.getVar('SRC_URI'):
-        sane = package_qa_handle_error("license-checksum", pn + ": Recipe file fetches files and does not have license file information (LIC_FILES_CHKSUM)", d)
+        sane &= package_qa_handle_error("license-checksum", pn + ": Recipe file fetches files and does not have license file information (LIC_FILES_CHKSUM)", d)
 
     srcdir = d.getVar('S')
     corebase_licensefile = d.getVar('COREBASE') + "/LICENSE"
@@ -607,11 +476,11 @@ python populate_lic_qa_checksum() {
         try:
             (type, host, path, user, pswd, parm) = bb.fetch.decodeurl(url)
         except bb.fetch.MalformedUrl:
-            sane = package_qa_handle_error("license-checksum", pn + ": LIC_FILES_CHKSUM contains an invalid URL: " + url, d)
+            sane &= package_qa_handle_error("license-checksum", pn + ": LIC_FILES_CHKSUM contains an invalid URL: " + url, d)
             continue
         srclicfile = os.path.join(srcdir, path)
         if not os.path.isfile(srclicfile):
-            package_qa_handle_error("license-checksum", pn + ": LIC_FILES_CHKSUM points to an invalid file: " + srclicfile, d)
+            sane &= package_qa_handle_error("license-checksum", pn + ": LIC_FILES_CHKSUM points to an invalid file: " + srclicfile, d)
             continue
 
         if (srclicfile == corebase_licensefile):
@@ -695,7 +564,7 @@ python populate_lic_qa_checksum() {
             else:
                 msg = pn + ": LIC_FILES_CHKSUM is not specified for " +  url
                 msg = msg + "\n" + pn + ": The md5 checksum is " + md5chksum
-            sane = package_qa_handle_error("license-checksum", msg, d)
+            sane &= package_qa_handle_error("license-checksum", msg, d)
 
     if not sane:
         bb.fatal("Fatal QA errors found, failing task.")
@@ -732,14 +601,14 @@ def package_qa_check_staged(path,d):
                     file_content = file_content.replace(recipesysroot, "")
                     if workdir in file_content:
                         error_msg = "%s failed sanity test (workdir) in path %s" % (file,root)
-                        sane = package_qa_handle_error("la", error_msg, d)
+                        sane &= package_qa_handle_error("la", error_msg, d)
             elif file.endswith(".pc"):
                 with open(path) as f:
                     file_content = f.read()
                     file_content = file_content.replace(recipesysroot, "")
                     if pkgconfigcheck in file_content:
                         error_msg = "%s failed sanity test (tmpdir) in path %s" % (file,root)
-                        sane = package_qa_handle_error("pkgconfig", error_msg, d)
+                        sane &= package_qa_handle_error("pkgconfig", error_msg, d)
 
     return sane
 
@@ -1083,7 +952,7 @@ python do_package_qa () {
 
     import re
     # The package name matches the [a-z0-9.+-]+ regular expression
-    pkgname_pattern = re.compile("^[a-z0-9.+-]+$")
+    pkgname_pattern = re.compile(r"^[a-z0-9.+-]+$")
 
     taskdepdata = d.getVar("BB_TASKDEPDATA", False)
     taskdeps = set()
@@ -1291,7 +1160,7 @@ python () {
     if pn in overrides:
         msg = 'Recipe %s has PN of "%s" which is in OVERRIDES, this can result in unexpected behaviour.' % (d.getVar("FILE"), pn)
         package_qa_handle_error("pn-overrides", msg, d)
-    prog = re.compile('[A-Z]')
+    prog = re.compile(r'[A-Z]')
     if prog.search(pn):
         package_qa_handle_error("uppercase-pn", 'PN: %s is upper case, this can result in unexpected behavior.' % pn, d)
 

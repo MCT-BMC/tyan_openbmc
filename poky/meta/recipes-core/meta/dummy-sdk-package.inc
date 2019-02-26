@@ -1,6 +1,8 @@
 SUMMARY = "Dummy packages which handle excluding packages from the sdk, e.g. ensuring perl is excluded from buildtools"
 LICENSE = "MIT"
 
+PACKAGE_ARCH = "all"
+
 inherit allarch
 
 python() {
@@ -18,7 +20,7 @@ PR[vardeps] += "DUMMYPROVIDES"
 python populate_packages_prepend() {
     p = d.getVar("PN")
     d.appendVar("RPROVIDES_%s" % p, "${DUMMYPROVIDES}")
-    #d.appendVar("RCONFLICTS_%s" % p, "${DUMMYPROVIDES}")
-    #d.appendVar("RREPLACES_%s" % p, "${DUMMYPROVIDES}")
+    d.appendVar("RCONFLICTS_%s" % p, "${DUMMYPROVIDES}")
+    d.appendVar("RREPLACES_%s" % p, "${DUMMYPROVIDES}")
 }
 

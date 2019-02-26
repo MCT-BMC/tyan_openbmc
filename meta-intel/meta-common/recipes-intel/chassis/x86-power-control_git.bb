@@ -7,11 +7,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
 
 S = "${WORKDIR}/git"
 SRC_URI += "git://github.com/openbmc/x86-power-control.git"
-SRCREV = "80f6d927c220be0e638a0674a986429825a070aa"
+SRCREV = "6ce6ab45484d0dc89f82fe15db024da534c456c1"
 
 inherit cmake pkgconfig  pythonnative systemd
 
-DBUS_SERVICE_${PN} += "xyz.openbmc_project.Chassis.Control.Power@.service"
+SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.Chassis.Control.Power@.service"
 
 # Force the standby target to run these services
 SYSD_TGT = "${SYSTEMD_DEFAULT_TARGET}"
