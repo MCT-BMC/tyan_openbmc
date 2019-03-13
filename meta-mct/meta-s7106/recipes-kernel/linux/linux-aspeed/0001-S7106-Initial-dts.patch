@@ -220,12 +220,12 @@ index 0000000..a8b1ddd
 +    };
 +	
 +	frontfan@2 {
-+        reg = <0x02>;
++        reg = <0x03>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
 +    };
 +
 +	frontfan@3 {
-+        reg = <0x03>;
++        reg = <0x04>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
 +    };
 +

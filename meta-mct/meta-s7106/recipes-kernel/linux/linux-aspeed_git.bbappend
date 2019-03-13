@@ -7,5 +7,6 @@ SRC_URI += "file://s7106.cfg \
             file://0004-Set-RTD_1_2_3-to-thermistor-mode.patch \
             file://0005-Support-IPMB-in-OpenBMC.patch \
             file://0006-Modified-ibm-cffps-driver.patch \
+            file://0001-Fix-fan-sensor-disappear-when-power-off-problem.patch \
             "
 
