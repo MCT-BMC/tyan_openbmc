@@ -52,4 +52,6 @@ SUMMARY_${PN}-system = "MCT System"
 RDEPENDS_${PN}-system = " \
         obmc-mgr-system \
         systemd-analyze \
+        bmcweb \
+        phosphor-webui \
         "
