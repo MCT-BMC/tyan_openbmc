@@ -5,5 +5,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           ipmbbridged \
                                           pch-temp-sensor \
                                           s7106-cpudimm-temp-sensor \ 
-                                          s7106-default-action \ 
+                                          s7106-default-action \
+                                          caterr-update \ 
                                         "

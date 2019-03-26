@@ -1,0 +1,8 @@
+[Unit]
+Description=Update CATERR status
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env caterr_update
+SyslogIdentifier=caterr_update
+
