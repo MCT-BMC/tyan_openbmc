@@ -21,6 +21,7 @@ DEPENDS += " \
         phosphor-dbus-interfaces \
         phosphor-logging \
         gpioplus \
+        cli11 \
         "
 
 
@@ -38,7 +39,7 @@ SRC_URI += "file://70-hwmon.rules"
 SRC_URI += "file://70-iio.rules"
 SRC_URI += "file://start_hwmon.sh"
 
-SRCREV = "09d9c23699f625479c85724c34421c52be7b17e4"
+SRCREV = "7e276658d0a0783eb51303995db1a72daaadc4a2"
 
 S = "${WORKDIR}/git"
 

@@ -119,7 +119,7 @@ VIRTUAL-RUNTIME_obmc-settings-mgmt ?= "phosphor-settings-manager"
 # obmc-network-manager
 #
 # Provide support for managing network
-VIRTUAL-RUNTIME_obmc-network-manager ?= "network"
+VIRTUAL-RUNTIME_obmc-network-manager ?= "phosphor-network"
 
 # Configuration overrides for phosphor-ipmi-fru.
 #
@@ -159,13 +159,6 @@ PREFERRED_PROVIDER_virtual/phosphor-ipmi-fru-read-inventory ?= \
 # the phosphor-host-ipmid build process in the native sysroot.
 PREFERRED_PROVIDER_virtual/phosphor-ipmi-sensor-inventory ?= \
     "phosphor-ipmi-sensor-inventory-native"
-
-# The phosphor-host-ipmid application is data-driven and requires an input
-# mapping of IPMI channel to DBus objects interfaces and properties.
-# This virtual is a native recipe that provides that mapping by installing
-# configuration files in the format and native sysroot location expected by
-# the phosphor-host-ipmid build process in the native sysroot.
-PREFERRED_PROVIDER_virtual/phosphor-ipmi-channel-config ?= "phosphor-ipmi-channel-inventory-native"
 
 # The phosphor-host-ipmid application is data-driven and requires an input
 # yaml of entity association record metadata.

@@ -13707,7 +13707,7 @@
                             </para></listitem>
                         <listitem><para><emphasis><filename>maxdate</filename> -</emphasis>
                             Apply the patch only if <filename>SRCDATE</filename>
-                            is not later than <filename>mindate</filename>.
+                            is not later than <filename>maxdate</filename>.
                             </para></listitem>
                         <listitem><para><emphasis><filename>minrev</filename> -</emphasis>
                             Apply the patch only if <filename>SRCREV</filename>
@@ -16833,7 +16833,7 @@
      USERADD_PACKAGES = "${PN}"
                     </literallayout>
                     <note>
-                        If follows that if you are going to use the
+                        It follows that if you are going to use the
                         <filename>USERADD_PACKAGES</filename> variable,
                         you need to set one or more of the
                         <link linkend='var-USERADD_PARAM'><filename>USERADD_PARAM</filename></link>,

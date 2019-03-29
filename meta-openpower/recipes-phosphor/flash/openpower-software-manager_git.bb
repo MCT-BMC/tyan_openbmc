@@ -28,9 +28,6 @@ DEPENDS += " \
 
 RDEPENDS_${PN} += " \
         mtd-utils-ubifs \
-        phosphor-dbus-interfaces \
-        phosphor-logging \
-        sdbusplus \
         virtual-obmc-image-manager \
         "
 
@@ -40,7 +37,7 @@ SRC_URI += "git://github.com/openbmc/openpower-pnor-code-mgmt"
 
 SRC_URI += "file://obmc-flash-bios"
 
-SRCREV = "0d2f93212461c763ccf50df74485d10729cbdd48"
+SRCREV = "df7a6157b352ed251af7e3d7b7e4ef45f6f9e740"
 
 do_install_append() {
         install -d ${D}${sbindir}

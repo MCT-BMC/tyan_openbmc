@@ -10,6 +10,7 @@ inherit autotools pkgconfig
 
 DEPENDS += " \
         autoconf-archive-native \
+        stdplus \
         systemd \
         "
 
@@ -19,6 +20,6 @@ EXTRA_OECONF_append += " \
         "
 
 SRC_URI += "git://github.com/openbmc/sdeventplus"
-SRCREV = "08ebb3993a2b5a82d0a5ead29a649c95632f7c64"
+SRCREV = "d41a942a125e8400f263414c43af022edf8b2871"
 
 S = "${WORKDIR}/git"

@@ -13,13 +13,11 @@ DEPENDS += "autoconf-archive-native"
 DEPENDS += "phosphor-mapper"
 DEPENDS += "systemd"
 DEPENDS += "phosphor-ipmi-host"
-RDEPENDS_${PN} += "libmapper"
-RDEPENDS_${PN} += "libsystemd"
 RDEPENDS_${PN} += "iptables"
 
 SRC_URI += "git://github.com/openbmc/phosphor-net-ipmid"
 SRC_URI += "file://ipmi-net-firewall.sh"
-SRCREV = "27ebe584bbe4530c6a68bcfe06e0eb15217f16b7"
+SRCREV = "7e5d38d2fb51fc746624ff2f2b3701cea245a8fb"
 
 S = "${WORKDIR}/git"
 

@@ -6,15 +6,16 @@ PV = "1.0+git${SRCPV}"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 
+DEPENDS += "systemd"
+
 RDEPENDS_${PN} += " \
-        systemd \
         ${VIRTUAL-RUNTIME_base-utils} \
         "
 
 S = "${WORKDIR}/git"
 SRC_URI += "git://github.com/openbmc/phosphor-debug-collector"
 
-SRCREV = "6d7f753ba7ecc2dd062758a46ef77ce5c44b9bdb"
+SRCREV = "fa180596fe2a3c6fe65e48055e02e0c3e4ef5977"
 
 do_install() {
        install -d ${D}${bindir}

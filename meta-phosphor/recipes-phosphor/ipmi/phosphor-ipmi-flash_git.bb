@@ -13,10 +13,11 @@ DEPENDS += "autoconf-archive-native"
 DEPENDS += "phosphor-ipmi-blobs"
 DEPENDS += "phosphor-logging"
 DEPENDS += "sdbusplus"
+DEPENDS += "ipmi-blob-tool"
 
 S = "${WORKDIR}/git"
 SRC_URI = "git://github.com/openbmc/phosphor-ipmi-flash"
-SRCREV = "7ef1346f9ee8f35094a8d2ef02de499cce9720d8"
+SRCREV = "4679e50a5e19157b6bb4e4760a9fb92577ad37f5"
 
 FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/blob-ipmid/lib*${SOLIBS}"

@@ -12,10 +12,11 @@ inherit obmc-phosphor-ipmiprovider-symlink
 DEPENDS += "autoconf-archive-native"
 DEPENDS += "phosphor-ipmi-host"
 DEPENDS += "phosphor-logging"
+DEPENDS += "ipmi-blob-tool"
 
 S = "${WORKDIR}/git"
 SRC_URI = "git://github.com/openbmc/phosphor-ipmi-blobs"
-SRCREV = "97898c9056e48d2aa0ec1ec8251377c587b7caee"
+SRCREV = "924bc380c47f33689a1243b2d79cb619674c86fa"
 
 FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/host-ipmid/lib*${SOLIBS}"

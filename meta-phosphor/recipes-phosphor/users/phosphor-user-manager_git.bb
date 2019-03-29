@@ -15,9 +15,8 @@ DEPENDS += "phosphor-logging"
 DEPENDS += "phosphor-dbus-interfaces"
 DEPENDS += "boost"
 DEPENDS += "nss-pam-ldapd"
+DEPENDS += "systemd"
 PACKAGE_BEFORE_PN = "phosphor-ldap"
-RDEPENDS_${PN} += "libsystemd"
-RDEPENDS_${PN} += "phosphor-logging"
 
 inherit useradd
 
@@ -40,5 +39,5 @@ DBUS_SERVICE_phosphor-ldap = " \
         xyz.openbmc_project.LDAP.PrivilegeMapper.service \
 "
 SRC_URI += "git://github.com/openbmc/phosphor-user-manager"
-SRCREV = "5e8ccb979c80044e0fa608f269f55b3613ecfd1c"
+SRCREV = "736648e25eb250d1e200cea961fe75bf791f1355"
 S = "${WORKDIR}/git"
