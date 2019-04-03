@@ -4,8 +4,8 @@ Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [S7106] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 284 +++++++++++++++++++++++++++++
- 1 file changed, 284 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 317 +++++++++++++++++++++++++++++
+ 1 file changed, 317 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
@@ -13,7 +13,7 @@ new file mode 100755
 index 0000000..a8b1ddd
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
-@@ -0,0 +1,284 @@
+@@ -0,0 +1,317 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -48,7 +48,23 @@ index 0000000..a8b1ddd
 +			no-map;
 +			reg = <0x7f000000 0x01000000>;
 +		};
++               safs_memory: region@30000000 {
++                       no-map;
++                       reg = <0x30000000 0x08000000>; /* 128M */
++               };
++
++               gfx_memory: framebuffer {
++                       size = <0x04000000>;
++                       alignment = <0x01000000>;
++                       compatible = "shared-dma-pool";
++                       reusable;
++               };
 +	};
++
++       vga-shared-memory {
++               compatible = "aspeed,ast2500-vga-sharedmem";
++               reg = <0x9ff00000 0x100000>;
++       };
 +
 +	leds {
 +        	compatible = "gpio-leds";
@@ -104,6 +120,10 @@ index 0000000..a8b1ddd
 +		m25p,fast-read;
 +		label = "pnor";
 +	};
++};
++
++&vuart {
++       status = "okay";
 +};
 +
 +&uart1 {
@@ -209,6 +229,19 @@ index 0000000..a8b1ddd
 +	status = "okay";
 +};
 +
++&gfx {
++       status = "okay";
++       memory-region = <&gfx_memory>;
++};
++
++&video {
++       status = "okay";
++       memory-region = <&gfx_memory>;
++};
++
++&vhub {
++       status = "okay";
++};
 +&pwm_tacho {
 +	status = "okay";
 +	pinctrl-names = "default";
