@@ -8,4 +8,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           entity-manager \
                                           dbus-sensors \
                                           obmc-ikvm \ 
+                                          intel-ipmi-oem \
                                         "
