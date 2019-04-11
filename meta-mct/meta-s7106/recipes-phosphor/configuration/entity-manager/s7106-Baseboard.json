@@ -473,7 +473,23 @@
                 }
             ],
             "Type": "AspeedFan"
-        }			
+        },
+		{
+            "Address": "0x28",
+            "Bus": 0,
+            "Name": "SYS_INLET_TEMP",
+			"Name1": "MB_INLET_TEMP",
+			"Name2": "SYS_OUTLET_TEMP",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 50
+                }
+            ],
+            "Type": "TMP75"
+        }		
 	
 	
     ],
