@@ -1,20 +1,30 @@
-From 870c1a320c9895549a26c4adc801d99d96f3e3c8 Mon Sep 17 00:00:00 2001
-From: "Henbin.Chang" <henbin-chang@mic.com.tw>
-Date: Wed, 12 Sep 2018 16:43:50 +0800
-Subject: [PATCH] Support IPMB in OpenBMC
+From 59e2471d9bf64fa7d539520ef66cf5f33c0b0e55 Mon Sep 17 00:00:00 2001
+From: Haiyue Wang <haiyue.wang@linux.intel.com>
+Date: Tue, 13 Feb 2018 14:28:12 +0800
+Subject: [PATCH] i2c: slave-mqueue: add mqueue driver to receive ipmi message
 
+Some protocols over I2C are designed for bi-directional transferring
+messages by using I2C Master Write protocol. Like the MCTP (Management
+Component Transport Protocol) and IPMB (Intelligent Platform Management
+Bus), they both require that the userspace can receive messages from
+I2C dirvers under slave mode.
+
+This new slave mqueue backend is used to receive and queue messages, it
+will exposes these messages to userspace by sysfs bin file.
+
+Signed-off-by: Haiyue Wang <haiyue.wang@linux.intel.com>
 ---
- Documentation/i2c/slave-mqueue-backend.rst | 125 ++++++++++++++++++
- drivers/i2c/Kconfig                        |  13 ++
+ Documentation/i2c/slave-mqueue-backend.rst | 125 +++++++++++++++++
+ drivers/i2c/Kconfig                        |  23 +++
  drivers/i2c/Makefile                       |   1 +
- drivers/i2c/i2c-slave-mqueue.c             | 202 +++++++++++++++++++++++++++++
- 4 files changed, 341 insertions(+)
+ drivers/i2c/i2c-slave-mqueue.c             | 217 +++++++++++++++++++++++++++++
+ 4 files changed, 366 insertions(+)
  create mode 100644 Documentation/i2c/slave-mqueue-backend.rst
  create mode 100644 drivers/i2c/i2c-slave-mqueue.c
 
 diff --git a/Documentation/i2c/slave-mqueue-backend.rst b/Documentation/i2c/slave-mqueue-backend.rst
 new file mode 100644
-index 0000000..69d6437
+index 000000000000..3966cf0ab8da
 --- /dev/null
 +++ b/Documentation/i2c/slave-mqueue-backend.rst
 @@ -0,0 +1,125 @@
@@ -56,7 +66,7 @@ index 0000000..69d6437
 +
 +How to use
 +----------
-+For example, the I2C5 bus has slave address 0x10, bellowing command will create
++For example, the I2C5 bus has slave address 0x10, the below command will create
 +the related message queue interface:
 +
 +    echo slave-mqueue 0x1010 > /sys/bus/i2c/devices/i2c-5/new_device
@@ -144,13 +154,23 @@ index 0000000..69d6437
 +  [10204.468461664] : 20 18 c8 2c 80 01 53
 +
 diff --git a/drivers/i2c/Kconfig b/drivers/i2c/Kconfig
-index efc3354..7053b5b 100644
+index efc3354d60ae..04fb851f2c82 100644
 --- a/drivers/i2c/Kconfig
 +++ b/drivers/i2c/Kconfig
-@@ -118,6 +118,19 @@ if I2C_SLAVE
+@@ -118,6 +118,29 @@ if I2C_SLAVE
  config I2C_SLAVE_EEPROM
  	tristate "I2C eeprom slave driver"
  
++config I2C_SLAVE_MQUEUE_MESSAGE_SIZE
++	int "The message size of I2C mqueue slave"
++	default 120
++
++config I2C_SLAVE_MQUEUE_QUEUE_SIZE
++	int "The queue size of I2C mqueue slave"
++	default 32
++	help
++	  This number MUST be power of 2.
++
 +config I2C_SLAVE_MQUEUE
 +	tristate "I2C mqueue (message queue) slave driver"
 +	help
@@ -168,23 +188,22 @@ index efc3354..7053b5b 100644
  
  config I2C_DEBUG_CORE
 diff --git a/drivers/i2c/Makefile b/drivers/i2c/Makefile
-index 72c94c6..7ec287b 100644
+index bed6ba63c983..9a31bc75a446 100644
 --- a/drivers/i2c/Makefile
 +++ b/drivers/i2c/Makefile
-@@ -16,6 +16,7 @@ obj-$(CONFIG_I2C_MUX)		+= i2c-mux.o
+@@ -16,5 +16,6 @@ obj-$(CONFIG_I2C_MUX)		+= i2c-mux.o
  obj-y				+= algos/ busses/ muxes/
  obj-$(CONFIG_I2C_STUB)		+= i2c-stub.o
  obj-$(CONFIG_I2C_SLAVE_EEPROM)	+= i2c-slave-eeprom.o
 +obj-$(CONFIG_I2C_SLAVE_MQUEUE)	+= i2c-slave-mqueue.o
  
  ccflags-$(CONFIG_I2C_DEBUG_CORE) := -DDEBUG
- CFLAGS_i2c-core-base.o := -Wno-deprecated-declarations
 diff --git a/drivers/i2c/i2c-slave-mqueue.c b/drivers/i2c/i2c-slave-mqueue.c
 new file mode 100644
-index 0000000..a486e85
+index 000000000000..6014bca0ff2a
 --- /dev/null
 +++ b/drivers/i2c/i2c-slave-mqueue.c
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,217 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 - 2018, Intel Corporation.
 +
@@ -196,8 +215,8 @@ index 0000000..a486e85
 +#include <linux/spinlock.h>
 +#include <linux/sysfs.h>
 +
-+#define MQ_MSGBUF_SIZE		128
-+#define MQ_QUEUE_SIZE		32
++#define MQ_MSGBUF_SIZE		CONFIG_I2C_SLAVE_MQUEUE_MESSAGE_SIZE
++#define MQ_QUEUE_SIZE		CONFIG_I2C_SLAVE_MQUEUE_QUEUE_SIZE
 +#define MQ_QUEUE_NEXT(x)	(((x) + 1) & (MQ_QUEUE_SIZE - 1))
 +
 +struct mq_msg {
@@ -215,7 +234,7 @@ index 0000000..a486e85
 +
 +	struct mq_msg		*curr;
 +	int			truncated; /* drop current if truncated */
-+	struct mq_msg		queue[MQ_QUEUE_SIZE];
++	struct mq_msg		*queue;
 +};
 +
 +static int i2c_slave_mqueue_callback(struct i2c_client *client,
@@ -244,12 +263,13 @@ index 0000000..a486e85
 +		break;
 +
 +	case I2C_SLAVE_STOP:
-+		if (unlikely(mq->truncated))
++		if (unlikely(mq->truncated || msg->len < 2))
 +			break;
 +
 +		spin_lock(&mq->lock);
 +		mq->in = MQ_QUEUE_NEXT(mq->in);
 +		mq->curr = &mq->queue[mq->in];
++		mq->curr->len = 0;
 +
 +		/* Flush the oldest message */
 +		if (mq->out == mq->in)
@@ -322,6 +342,11 @@ index 0000000..a486e85
 +	if (!buf)
 +		return -ENOMEM;
 +
++	mq->queue = devm_kzalloc(dev, sizeof(*mq->queue) * MQ_QUEUE_SIZE,
++				 GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
 +	for (i = 0; i < MQ_QUEUE_SIZE; i++)
 +		mq->queue[i].buf = buf + i * MQ_MSGBUF_SIZE;
 +
@@ -354,7 +379,7 @@ index 0000000..a486e85
 +	}
 +
 +	return 0;
-+};
++}
 +
 +static int i2c_slave_mqueue_remove(struct i2c_client *client)
 +{
@@ -374,9 +399,18 @@ index 0000000..a486e85
 +};
 +MODULE_DEVICE_TABLE(i2c, i2c_slave_mqueue_id);
 +
++#if IS_ENABLED(CONFIG_OF)
++static const struct of_device_id i2c_slave_mqueue_of_match[] = {
++	{ .compatible = "slave-mqueue", .data = (void *)0 },
++	{ },
++};
++MODULE_DEVICE_TABLE(of, i2c_slave_mqueue_of_match);
++#endif
++
 +static struct i2c_driver i2c_slave_mqueue_driver = {
 +	.driver = {
 +		.name	= "i2c-slave-mqueue",
++		.of_match_table = of_match_ptr(i2c_slave_mqueue_of_match),
 +	},
 +	.probe		= i2c_slave_mqueue_probe,
 +	.remove		= i2c_slave_mqueue_remove,
@@ -387,3 +421,6 @@ index 0000000..a486e85
 +MODULE_LICENSE("GPL v2");
 +MODULE_AUTHOR("Haiyue Wang <haiyue.wang@linux.intel.com>");
 +MODULE_DESCRIPTION("I2C slave mode for receiving and queuing messages");
+-- 
+2.7.4
+
