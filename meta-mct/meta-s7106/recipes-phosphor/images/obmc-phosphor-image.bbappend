@@ -10,4 +10,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           obmc-ikvm \ 
                                           intel-ipmi-oem \
                                           phosphor-sel-logger \
+                                          s7106-sol-processing \
+                                          s7106-ipmi-oem \
                                         "
