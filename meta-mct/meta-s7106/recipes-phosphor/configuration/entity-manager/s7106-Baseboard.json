@@ -33,6 +33,34 @@
             ],
             "Type": "IpmbSensor"
         },
+		{
+            "Address": "0x0",
+            "Class": "PeciBridgeTemp",
+            "Name": "CPU0 Temp",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+		{
+            "Address": "0x1",
+            "Class": "PeciBridgeTemp",
+            "Name": "CPU1 Temp",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },	
+		{
+            "Address": "0x2",
+            "Class": "PeciBridgeTemp",
+            "Name": "DIMM0 Temp",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+		{
+            "Address": "0x3",
+            "Class": "PeciBridgeTemp",
+            "Name": "DIMM1 Temp",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
         {
             "Index": 0,
             "Name": "PVCCIN_CPU0",
