@@ -1,19 +1,15 @@
-From daf38a53c4cffeb6df12f85c993ab2440899ff2e Mon Sep 17 00:00:00 2001
+From 0621d7187c0898c73a14daf0a6e3526d2a5144b4 Mon Sep 17 00:00:00 2001
 From: "ray.lue" <ray.lue@mic.com.tw>
-Date: Fri, 26 Apr 2019 20:35:29 +0800
-Subject: [PATCH] [s7106]add cpu and dimm sesnor via ME
+Date: Mon, 29 Apr 2019 16:10:08 +0800
+Subject: [PATCH] CPU/DIMM sensors over ME
 
 ---
  include/IpmbSensor.hpp |   2 +
  src/IpmbSensor.cpp     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++-
  2 files changed, 101 insertions(+), 1 deletion(-)
- mode change 100644 => 100755 include/IpmbSensor.hpp
- mode change 100644 => 100755 src/IpmbSensor.cpp
 
 diff --git a/include/IpmbSensor.hpp b/include/IpmbSensor.hpp
-old mode 100644
-new mode 100755
-index 1775c13..22f0460
+index 1775c13..22f0460 100644
 --- a/include/IpmbSensor.hpp
 +++ b/include/IpmbSensor.hpp
 @@ -10,6 +10,7 @@
@@ -33,9 +29,7 @@ index 1775c13..22f0460
    private:
      sdbusplus::asio::object_server& objectServer;
 diff --git a/src/IpmbSensor.cpp b/src/IpmbSensor.cpp
-old mode 100644
-new mode 100755
-index b8dd220..e1928fb
+index b8dd220..36d2762 100644
 --- a/src/IpmbSensor.cpp
 +++ b/src/IpmbSensor.cpp
 @@ -42,6 +42,11 @@ static constexpr double ipmbMinReading = 0;
@@ -97,13 +91,13 @@ index b8dd220..e1928fb
 +                            }
 +                            std::cout << "\n";
 +                            std::cout << "data size "<< data.size() <<"\n";
-+                            if( 3 == data.size()){
-+                                if(0x40 == data[1]){
-+                                    tjmax = data[0];
-+                                }
-+                        
++                        }
++                        if( 3 == data.size()){
++                            if(0x40 == data[1]){
++                                tjmax = data[0];
 +                            }
-+                          }
++                        }
++                          
 +                        read();
 +                    },
 +                    "xyz.openbmc_project.Ipmi.Channel.Ipmb",
