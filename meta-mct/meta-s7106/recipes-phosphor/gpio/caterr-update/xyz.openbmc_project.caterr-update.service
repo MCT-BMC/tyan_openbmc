@@ -1,5 +1,7 @@
 [Unit]
 Description=Update CATERR status
+After=xyz.openbmc_project.gpiosensor.service
+Want=xyz.openbmc_project.gpiosensor.service
 
 [Service]
 Type=oneshot

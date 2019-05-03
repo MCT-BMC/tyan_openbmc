@@ -520,12 +520,16 @@
         },
         {
             "Direction": "Input",
-            "Index": 488,
+            "Index": 496,
             "Name": "CATERR",
             "Polarity": "Low",
-            "Type": "Gpio"
-        }		
-		
+            "Type": "Gpio",
+            "Interface": "xyz.openbmc_project.Control.Processor",
+            "Property" : "ProcessorStatus",
+            "StateActive" : "xyz.openbmc_project.Control.Processor.State.CATERR",
+            "StateNormal": "xyz.openbmc_project.Control.Processor.State.NORMAL",
+            "SensorNumber": "0x86"
+        }
     ],
     "Name": "s7106 Baseboard",
     "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': '.*S7106*'})",

@@ -1,6 +1,0 @@
----
-/xyz/openbmc_project/control/processor:
-    - Interface: xyz.openbmc_project.Control.Processor
-      Properties:
-          ProcessorStatus:
-              Default: Processor::State::NORMAL
