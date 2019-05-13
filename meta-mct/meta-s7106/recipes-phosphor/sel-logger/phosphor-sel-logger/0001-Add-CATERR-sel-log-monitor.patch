@@ -84,19 +84,19 @@ index 0000000..edf9752
 +            return;
 +        }
 +		
-+		FILE *fp;
-+		std::vector<uint8_t> eventData(selEvtDataMaxSize, 0xFF);
-+		bool assert=0;
-+		//set eventdata1 to 0xb  , for now unspecified byte2 & btye3 , not implement A0 in bit[7:4]
-+		eventData[0] |= eventData[0] =
++		
++        std::vector<uint8_t> eventData(selEvtDataMaxSize, 0xFF);
++        bool assert=0;
++        //set eventdata1 to 0xb  , for now unspecified byte2 & btye3 , not implement A0 in bit[7:4]
++        eventData[0] |= eventData[0] =
 +                static_cast<uint8_t>(0xb);  		
 +
 +        std::string event = propertiesChanged.begin()->first;
-+		fp=fopen("/var/tmp/sellog","a");
-+        fprintf(fp,"event:%s\n",event.c_str());
-+		fclose(fp);
++	 
 +        auto variant = sdbusplus::message::variant_ns::get_if<std::string>(
-+            &propertiesChanged.begin()->second);
++	      &propertiesChanged.begin()->second);
++        
++            
 +
 +        if (event.empty() || nullptr == variant)
 +        {
@@ -109,10 +109,10 @@ index 0000000..edf9752
 +        sdbusplus::message::message getSensorValue =
 +            conn->new_method_call(msg.get_sender(), msg.get_path(),
 +                                  "org.freedesktop.DBus.Properties", "Get");
-+        getSensorValue.append("xyz.openbmc_project.Control.Processor","SensorNumber");
++            getSensorValue.append("xyz.openbmc_project.Control.Processor","SensorNumber");
 +        
 +       			
-+		sdbusplus::message::variant<uint16_t> sensorValue;	
++        sdbusplus::message::variant<uint16_t> sensorValue;	
 +			
 +        try
 +        {
@@ -138,35 +138,35 @@ index 0000000..edf9752
 +                assert=1;
 +                std::string redfishMsgId("CATERR!");
 +                sd_journal_send("MESSAGE=%s", message.c_str(),
-+                                "REDFISH_MESSAGE_ID=%s", redfishMsgId.c_str(),
-+                                NULL);
++                                "REDFISH_MESSAGE_ID=%s", redfishMsgId.c_str(), NULL);
++                                
 +								
-+						fp=fopen("/var/tmp/sellog","a");
-+						fprintf(fp,"variant == :xyz.openbmc_project.Control.Processor.State.CATERR\n");
-+						fprintf(fp,"path=%s\n",msg.get_path());
-+						fclose(fp);				
++		 //fp=fopen("/var/tmp/sellog","a");
++                //fprintf(fp,"variant == :xyz.openbmc_project.Control.Processor.State.CATERR\n");
++                //fprintf(fp,"path=%s\n",msg.get_path());
++                //fclose(fp);				
 +            }
 +			
-+			//deassert event  no need (resesrve, add for test)
-+			#if 0
-+            else if (*variant ==
-+                     "xyz.openbmc_project.Control.Processor.State.NORMAL")
-+            {
++            //deassert event  no need (resesrve, add for test)
++#if 0
++            else if (*variant == "xyz.openbmc_project.Control.Processor.State.NORMAL")
++            {         
++            
 +                std::string message("no CATERR occure");
 +                assert=0;
 +
 +                			
-+														fp=fopen("/var/tmp/sellog","a");
-+						fprintf(fp,"variant == :xyz.openbmc_project.Control.Processor.State.NORMAL\n");
-+						fclose(fp);		
++                //fp=fopen("/var/tmp/sellog","a");
++                //fprintf(fp,"variant == :xyz.openbmc_project.Control.Processor.State.NORMAL\n");
++                //fclose(fp);		
 +            }
-+			#endif
-+			std::string journalMsg("Add Caterr event");
-+			selAddSystemRecord(journalMsg, std::string(msg.get_path()), eventData,
-+                           assert, selEventOnlyType, selBIOSGenID,
-+						   "IPMI_SEL_SENSOR_TYPE=%x", sensorType,
-+                           "IPMI_SEL_EVENT_TYPE=%x", eventType,
-+						   "IPMI_SEL_SENSOR_NUMBER=%x",sensorNumber);
++#endif
++            std::string journalMsg("Add Caterr event");
++            selAddSystemRecord(journalMsg, std::string(msg.get_path()), eventData,
++                               assert, selEventOnlyType, selBIOSGenID,
++                               "IPMI_SEL_SENSOR_TYPE=%x", sensorType,
++                               "IPMI_SEL_EVENT_TYPE=%x", eventType,
++			        "IPMI_SEL_SENSOR_NUMBER=%x",sensorNumber);
 +			
 +			
 +        }

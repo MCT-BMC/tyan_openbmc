@@ -135,9 +135,9 @@ index 0000000..496b2d2
 +++ b/service_files/xyz.openbmc_project.gpiosensor.service
 @@ -0,0 +1,12 @@
 +[Unit]
-+Description=Intrusion Sensor
++Description=GPIO Sensor
 +StopWhenUnneeded=false
-+
++After=xyz.openbmc_project.EntityManager.service
 +[Service]
 +Restart=always
 +RestartSec=5
