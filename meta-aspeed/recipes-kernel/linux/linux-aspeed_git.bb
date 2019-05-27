@@ -1,6 +1,6 @@
-KBRANCH ?= "dev-5.0"
-LINUX_VERSION ?= "5.0.4"
+KBRANCH ?= "dev-5.1"
+LINUX_VERSION ?= "5.1.1"
 
-SRCREV="8b3439b5b1608d580628af573000faa7d7db4b48"
+SRCREV="60926c8a1d00a056568cb44da9e96d3ee5f6e654"
 
 require linux-aspeed.inc
