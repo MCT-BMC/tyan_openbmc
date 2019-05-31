@@ -47,17 +47,59 @@
             "PowerState": "BiosPost",
             "Type": "IpmbSensor"
         },	
-		{
+        {
             "Address": "0x2",
             "Class": "PeciBridgeTemp",
-            "Name": "DIMM0 Temp",
+            "Name": "P0_DIMMTempA0",
             "PowerState": "BiosPost",
             "Type": "IpmbSensor"
         },
-		{
-            "Address": "0x3",
+        {
+            "Address": "0x6",
             "Class": "PeciBridgeTemp",
-            "Name": "DIMM1 Temp",
+            "Name": "P0_DIMMTempB0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+        {
+            "Address": "0xa",
+            "Class": "PeciBridgeTemp",
+            "Name": "P0_DIMMTempC0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+		},
+        {
+            "Address": "0xe",
+            "Class": "PeciBridgeTemp",
+            "Name": "P0_DIMMTempD0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        }, 
+        {
+            "Address": "0x12",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempA0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+        {
+            "Address": "0x16",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempB0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+        {
+            "Address": "0x1a",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempC0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+        {
+            "Address": "0x1e",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempD0",
             "PowerState": "BiosPost",
             "Type": "IpmbSensor"
         },
