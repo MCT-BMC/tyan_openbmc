@@ -53,6 +53,7 @@ PACKAGECONFIG[pptp] = "--enable-pptp --with-pptp=${sbindir}/pptp,--disable-pptp,
 PACKAGECONFIG[wispr] = "--enable-wispr,--disable-wispr,gnutls,"
 PACKAGECONFIG[nftables] = "--with-firewall=nftables ,,libmnl libnftnl,,kernel-module-nf-tables-ipv4 kernel-module-nft-chain-nat-ipv4 kernel-module-nft-chain-route-ipv4 kernel-module-nft-meta kernel-module-nft-masq-ipv4 kernel-module-nft-nat"
 PACKAGECONFIG[iptables] = "--with-firewall=iptables ,,iptables,iptables"
+PACKAGECONFIG[nfc] = "--enable-neard, --disable-neard, neard, neard"
 
 INITSCRIPT_NAME = "connman"
 INITSCRIPT_PARAMS = "start 05 5 2 3 . stop 22 0 1 6 ."
@@ -133,14 +134,14 @@ python populate_packages_prepend() {
         add_rdepends(bb, d, file, pkg, depmap, multilib_prefix, False)
     plugin_dir = d.expand('${libdir}/connman/plugins/')
     plugin_name = d.expand('${PN}-plugin-%s')
-    do_split_packages(d, plugin_dir, '^(.*).so$', plugin_name, \
+    do_split_packages(d, plugin_dir, r'^(.*).so$', plugin_name, \
         '${PN} plugin for %s', extra_depends='', hook=hook, prepend=True )
 
     hook = lambda file,pkg,x,y,z: \
         add_rdepends(bb, d, file, pkg, depmap, multilib_prefix, True)
     plugin_dir = d.expand('${libdir}/connman/plugins-vpn/')
     plugin_name = d.expand('${PN}-plugin-vpn-%s')
-    do_split_packages(d, plugin_dir, '^(.*).so$', plugin_name, \
+    do_split_packages(d, plugin_dir, r'^(.*).so$', plugin_name, \
         '${PN} VPN plugin for %s', extra_depends='', hook=hook, prepend=True )
 }
 
@@ -156,7 +157,7 @@ RDEPENDS_${PN}-client ="${PN}"
 
 FILES_${PN} = "${bindir}/* ${sbindir}/* ${libexecdir}/* ${libdir}/lib*.so.* \
             ${libdir}/connman/plugins \
-            ${sysconfdir} ${sharedstatedir} ${localstatedir} \
+            ${sysconfdir} ${sharedstatedir} ${localstatedir} ${datadir} \
             ${base_bindir}/* ${base_sbindir}/* ${base_libdir}/*.so* ${datadir}/${PN} \
             ${datadir}/dbus-1/system-services/* \
             ${sysconfdir}/tmpfiles.d/connman_resolvconf.conf"

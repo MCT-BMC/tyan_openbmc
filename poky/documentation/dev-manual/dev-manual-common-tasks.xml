@@ -1883,7 +1883,8 @@
                 <ulink url='&YOCTO_DOCS_REF_URL;#ref-tasks-fetch'><filename>do_fetch</filename></ulink>
                 task uses the prefix of each entry in the
                 <filename>SRC_URI</filename> variable value to determine which
-                fetcher to use to get your source files.
+                <ulink url='&YOCTO_DOCS_BB_URL;#bb-fetchers'>fetcher</ulink>
+                to use to get your source files.
                 It is the <filename>SRC_URI</filename> variable that triggers
                 the fetcher.
                 The
@@ -5116,15 +5117,15 @@
             So, commands such as the following are useful when exploring the data
             store and running functions:
             <literallayout class='monospaced'>
-     pydevshell> d.getVar("STAGING_DIR", True)
+     pydevshell> d.getVar("STAGING_DIR")
      '/media/build1/poky/build/tmp/sysroots'
-     pydevshell> d.getVar("STAGING_DIR", False)
+     pydevshell> d.getVar("STAGING_DIR")
      '${TMPDIR}/sysroots'
      pydevshell> d.setVar("FOO", "bar")
-     pydevshell> d.getVar("FOO", True)
+     pydevshell> d.getVar("FOO")
      'bar'
      pydevshell> d.delVar("FOO")
-     pydevshell> d.getVar("FOO", True)
+     pydevshell> d.getVar("FOO")
      pydevshell> bb.build.exec_func("do_unpack", d)
      pydevshell>
             </literallayout>
@@ -6323,9 +6324,180 @@
                 </literallayout>
             </para>
         </section>
+
+        <section id="replicating-a-build-offline">
+            <title>Replicating a Build Offline</title>
+
+            <para>
+                It can be useful to take a "snapshot" of upstream sources
+                used in a build and then use that "snapshot" later to
+                replicate the build offline.
+                To do so, you need to first prepare and populate your downloads
+                directory your "snapshot" of files.
+                Once your downloads directory is ready, you can use it at
+                any time and from any machine to replicate your build.
+            </para>
+
+            <para>
+                Follow these steps to populate your Downloads directory:
+                <orderedlist>
+                    <listitem><para>
+                        <emphasis>Create a Clean Downloads Directory:</emphasis>
+                        Start with an empty downloads directory
+                        (<ulink url='&YOCTO_DOCS_REF_URL;#var-DL_DIR'><filename>DL_DIR</filename></ulink>).
+                        You start with an empty downloads directory by either
+                        removing the files in the existing directory or by
+                        setting
+                        <filename>DL_DIR</filename> to point to either an
+                        empty location or one that does not yet exist.
+                        </para></listitem>
+                    <listitem><para>
+                        <emphasis>Generate Tarballs of the Source Git Repositories:</emphasis>
+                        Edit your <filename>local.conf</filename> configuration
+                        file as follows:
+                        <literallayout class='monospaced'>
+     DL_DIR = "/home/<replaceable>your-download-dir</replaceable>/"
+     BB_GENERATE_MIRROR_TARBALLS = "1"
+                        </literallayout>
+                        During the fetch process in the next step, BitBake
+                        gathers the source files and creates tarballs in
+                        the directory pointed to by <filename>DL_DIR</filename>.
+                        See the
+                        <ulink url='&YOCTO_DOCS_REF_URL;#var-BB_GENERATE_MIRROR_TARBALLS'><filename>BB_GENERATE_MIRROR_TARBALLS</filename></ulink>
+                        variable for more information.
+                        </para></listitem>
+                    <listitem><para>
+                        <emphasis>Populate Your Downloads Directory Without Building:</emphasis>
+                        Use BitBake to fetch your sources but inhibit the
+                        build:
+                        <literallayout class='monospaced'>
+     $ bitbake <replaceable>target</replaceable> --runonly=fetch
+                        </literallayout>
+                        The downloads directory (i.e.
+                        <filename>${DL_DIR}</filename>) now has a "snapshot" of
+                        the source files in the form of tarballs, which can
+                        be used for the build.
+                        </para></listitem>
+                    <listitem><para>
+                        <emphasis>Optionally Remove Any Git or other SCM Subdirectories From the Downloads Directory:</emphasis>
+                        If you want, you can clean up your downloads directory
+                        by removing any Git or other Source Control Management
+                        (SCM) subdirectories such as
+                        <filename>${DL_DIR}/git2/*</filename>.
+                        The tarballs already contain these subdirectories.
+                        </para></listitem>
+                </orderedlist>
+            </para>
+
+            <para>
+                Once your downloads directory has everything it needs regarding
+                source files, you can create your "own-mirror" and build
+                your target.
+                Understand that you can use the files to build the target
+                offline from any machine and at any time.
+            </para>
+
+            <para>
+                Follow these steps to build your target using the files in the
+                downloads directory:
+                <orderedlist>
+                    <listitem><para>
+                        <emphasis>Using Local Files Only:</emphasis>
+                        Inside your <filename>local.conf</filename> file, add
+                        the
+                        <ulink url='&YOCTO_DOCS_REF_URL;#var-SOURCE_MIRROR_URL'><filename>SOURCE_MIRROR_URL</filename></ulink>
+                        variable,
+                        inherit the <ulink url='&YOCTO_DOCS_REF_URL;#ref-classes-own-mirrors'><filename>own-mirrors</filename></ulink>
+                        class, and use the
+                        <ulink url='&YOCTO_DOCS_BB_URL;#var-bb-BB_NO_NETWORK'><filename>BB_NO_NETWORK</filename></ulink>
+                        variable to your <filename>local.conf</filename>.
+                        <literallayout class='monospaced'>
+     SOURCE_MIRROR_URL ?= "file:///home/<replaceable>your-download-dir</replaceable>/"
+     INHERIT += "own-mirrors"
+     BB_NO_NETWORK = "1"
+                        </literallayout>
+                        The <filename>SOURCE_MIRROR_URL</filename> and
+                        <filename>own-mirror</filename> class set up the system
+                        to use the downloads directory as your "own mirror".
+                        Using the <filename>BB_NO_NETWORK</filename>
+                        variable makes sure that BitBake's fetching process
+                        in step 3 stays local, which means files from
+                        your "own-mirror" are used.
+                        </para></listitem>
+                    <listitem><para>
+                        <emphasis>Start With a Clean Build:</emphasis>
+                        You can start with a clean build by removing the
+                        <filename>${</filename><ulink url='&YOCTO_DOCS_REF_URL;#var-TMPDIR'><filename>TMPDIR</filename></ulink><filename>}</filename>
+                        directory or using a new
+                        <ulink url='&YOCTO_DOCS_REF_URL;#build-directory'>Build Directory</ulink>.
+                        </para></listitem>
+                    <listitem><para>
+                        <emphasis>Build Your Target:</emphasis>
+                        Use BitBake to build your target:
+                        <literallayout class='monospaced'>
+     $ bitbake <replaceable>target</replaceable>
+                        </literallayout>
+                        The build completes using the known local "snapshot" of
+                        source files from your mirror.
+                        The resulting tarballs for your "snapshot" of source
+                        files are in the downloads directory.
+                        <note>
+                            <para>The offline build does not work if recipes
+                            attempt to find the latest version of software
+                            by setting
+                            <ulink url='&YOCTO_DOCS_REF_URL;#var-SRCREV'><filename>SRCREV</filename></ulink>
+                            to
+                            <filename>${</filename><ulink url='&YOCTO_DOCS_REF_URL;#var-AUTOREV'><filename>AUTOREV</filename></ulink><filename>}</filename>:
+                            <literallayout class='monospaced'>
+     SRCREV = "${AUTOREV}"
+                            </literallayout>
+                            When a recipe sets
+                            <filename>SRCREV</filename> to
+                            <filename>${AUTOREV}</filename>, the build system
+                            accesses the network in an attempt to determine the
+                            latest version of software from the SCM.
+                            Typically, recipes that use
+                            <filename>AUTOREV</filename> are custom or
+                            modified recipes.
+                            Recipes that reside in public repositories
+                            usually do not use <filename>AUTOREV</filename>.
+                            </para>
+
+                            <para>If you do have recipes that use
+                            <filename>AUTOREV</filename>, you can take steps to
+                            still use the recipes in an offline build.
+                            Do the following:
+                                <orderedlist>
+                                    <listitem><para>
+                                        Use a configuration generated by
+                                        enabling
+                                        <link linkend='maintaining-build-output-quality'>build history</link>.
+                                        </para></listitem>
+                                    <listitem><para>
+                                        Use the
+                                        <filename>buildhistory-collect-srcrevs</filename>
+                                        command to collect the stored
+                                        <filename>SRCREV</filename> values from
+                                        the build's history.
+                                        For more information on collecting these
+                                        values, see the
+                                        "<link linkend='build-history-package-information'>Build History Package Information</link>"
+                                        section.
+                                        </para></listitem>
+                                    <listitem><para>
+                                        Once you have the correct source
+                                        revisions, you can modify those recipes
+                                        to to set <filename>SRCREV</filename>
+                                        to specific versions of the software.
+                                        </para></listitem>
+                                </orderedlist>
+                            </para>
+                        </note>
+                        </para></listitem>
+                </orderedlist>
+            </para>
+        </section>
     </section>
-
-
 
     <section id='speeding-up-a-build'>
         <title>Speeding Up a Build</title>
@@ -6892,8 +7064,8 @@
             <literallayout class='monospaced'>
      MACHINE = "qemux86-64"
      DEFAULTTUNE = "x86-64-x32"
-     baselib = "${@d.getVar('BASE_LIB_tune-' + (d.getVar('DEFAULTTUNE', True) \
-        or 'INVALID'), True) or 'lib'}"
+     baselib = "${@d.getVar('BASE_LIB_tune-' + (d.getVar('DEFAULTTUNE') \
+        or 'INVALID')) or 'lib'}"
             </literallayout>
             Once you have set up your configuration file, use BitBake to
             build an image that supports the x32 psABI.
@@ -7216,17 +7388,17 @@
             it is based on is by definition incomplete.
             The purpose of the command is to allow the generation of
             customized images, and as such, was designed to be
-            completely extensible through a plug-in interface.
+            completely extensible through a plugin interface.
             See the
-            "<link linkend='wic-using-the-wic-plug-ins-interface'>Using the Wic Plug-Ins Interface</link>"
-            section for information on these plug-ins.
+            "<link linkend='wic-using-the-wic-plugin-interface'>Using the Wic PlugIn Interface</link>"
+            section for information on these plugins.
         </para>
 
         <para>
             This section provides some background information on Wic,
             describes what you need to have in
             place to run the tool, provides instruction on how to use
-            the Wic utility, provides information on using the Wic plug-ins
+            the Wic utility, provides information on using the Wic plugins
             interface, and provides several examples that show how to use
             Wic.
         </para>
@@ -7621,28 +7793,28 @@
             </para>
         </section>
 
-        <section id='wic-using-the-wic-plug-ins-interface'>
-            <title>Using the Wic Plug-Ins Interface</title>
+        <section id='wic-using-the-wic-plugin-interface'>
+            <title>Using the Wic Plugin Interface</title>
 
             <para>
                 You can extend and specialize Wic functionality by using
-                Wic plug-ins.
-                This section explains the Wic plug-in interface.
+                Wic plugins.
+                This section explains the Wic plugin interface.
                 <note>
-                    Wic plug-ins consist of "source" and "imager" plug-ins.
-                    Imager plug-ins are beyond the scope of this section.
+                    Wic plugins consist of "source" and "imager" plugins.
+                    Imager plugins are beyond the scope of this section.
                 </note>
             </para>
 
             <para>
-                Source plug-ins provide a mechanism to customize partition
+                Source plugins provide a mechanism to customize partition
                 content during the Wic image generation process.
-                You can use source plug-ins to map values that you specify
+                You can use source plugins to map values that you specify
                 using <filename>--source</filename> commands in kickstart
-                files (i.e. <filename>*.wks</filename>) to a plug-in
+                files (i.e. <filename>*.wks</filename>) to a plugin
                 implementation used to populate a given partition.
                 <note>
-                    If you use plug-ins that have build-time dependencies
+                    If you use plugins that have build-time dependencies
                     (e.g. native tools, bootloaders, and so forth)
                     when building a Wic image, you need to specify those
                     dependencies using the
@@ -7652,43 +7824,43 @@
             </para>
 
             <para>
-                Source plug-ins are subclasses defined in plug-in files.
-                As shipped, the Yocto Project provides several plug-in
+                Source plugins are subclasses defined in plugin files.
+                As shipped, the Yocto Project provides several plugin
                 files.
-                You can see the source plug-in files that ship with the
+                You can see the source plugin files that ship with the
                 Yocto Project
                 <ulink url='&YOCTO_GIT_URL;/cgit/cgit.cgi/poky/tree/scripts/lib/wic/plugins/source'>here</ulink>.
-                Each of these plug-in files contains source plug-ins that
+                Each of these plugin files contains source plugins that
                 are designed to populate a specific Wic image partition.
             </para>
 
             <para>
-                Source plug-ins are subclasses of the
+                Source plugins are subclasses of the
                 <filename>SourcePlugin</filename> class, which is
                 defined in the
                 <filename>poky/scripts/lib/wic/pluginbase.py</filename>
                 file.
                 For example, the <filename>BootimgEFIPlugin</filename>
-                source plug-in found in the
+                source plugin found in the
                 <filename>bootimg-efi.py</filename> file is a subclass of
                 the <filename>SourcePlugin</filename> class, which is found
                 in the <filename>pluginbase.py</filename> file.
             </para>
 
             <para>
-                You can also implement source plug-ins in a layer outside
+                You can also implement source plugins in a layer outside
                 of the Source Repositories (external layer).
-                To do so, be sure that your plug-in files are located in
+                To do so, be sure that your plugin files are located in
                 a directory whose path is
                 <filename>scripts/lib/wic/plugins/source/</filename>
                 within your external layer.
-                When the plug-in files are located there, the source
-                plug-ins they contain are made available to Wic.
+                When the plugin files are located there, the source
+                plugins they contain are made available to Wic.
             </para>
 
             <para>
                 When the Wic implementation needs to invoke a
-                partition-specific implementation, it looks for the plug-in
+                partition-specific implementation, it looks for the plugin
                 with the same name as the <filename>--source</filename>
                 parameter used in the kickstart file given to that
                 partition.
@@ -7698,13 +7870,13 @@
      part /boot --source bootimg-pcbios --ondisk sda --label boot --active --align 1024
                 </literallayout>
                 The methods defined as class members of the matching
-                source plug-in (i.e. <filename>bootimg-pcbios</filename>)
-                in the <filename>bootimg-pcbios.py</filename> plug-in file
+                source plugin (i.e. <filename>bootimg-pcbios</filename>)
+                in the <filename>bootimg-pcbios.py</filename> plugin file
                 are used.
             </para>
 
             <para>
-                To be more concrete, here is the corresponding plug-in
+                To be more concrete, here is the corresponding plugin
                 definition from the <filename>bootimg-pcbios.py</filename>
                 file for the previous command along with an example
                 method called by the Wic implementation when it needs to
@@ -7736,19 +7908,19 @@
                   .
                   .
                 </literallayout>
-                If a subclass (plug-in) itself does not implement a
+                If a subclass (plugin) itself does not implement a
                 particular function, Wic locates and uses the default
                 version in the superclass.
-                It is for this reason that all source plug-ins are derived
+                It is for this reason that all source plugins are derived
                 from the <filename>SourcePlugin</filename> class.
             </para>
 
             <para>
                 The <filename>SourcePlugin</filename> class defined in
                 the <filename>pluginbase.py</filename> file defines
-                a set of methods that source plug-ins can implement or
+                a set of methods that source plugins can implement or
                 override.
-                Any plug-ins (subclass of
+                Any plugins (subclass of
                 <filename>SourcePlugin</filename>) that do not implement
                 a particular method inherit the implementation of the
                 method from the <filename>SourcePlugin</filename> class.
@@ -7809,11 +7981,11 @@
             </para>
 
             <para>
-                You can extend the source plug-in mechanism.
-                To add more hooks, create more source plug-in methods
+                You can extend the source plugin mechanism.
+                To add more hooks, create more source plugin methods
                 within <filename>SourcePlugin</filename> and the
                 corresponding derived subclasses.
-                The code that calls the plug-in methods uses the
+                The code that calls the plugin methods uses the
                 <filename>plugin.get_source_plugin_methods()</filename>
                 function to find the method or methods needed by the call.
                 Retrieval of those methods is accomplished by filling up
@@ -9233,7 +9405,7 @@
 
             <para>
                 Many pieces of software split functionality into optional
-                modules (or plug-ins) and the plug-ins that are built
+                modules (or plugins) and the plugins that are built
                 might depend on configuration options.
                 To avoid having to duplicate the logic that determines what
                 modules are available in your recipe or to avoid having
@@ -12318,14 +12490,6 @@
             </itemizedlist>
         </para>
 
-        <para>
-            For debugging information within the popular
-            <trademark class='trade'>Eclipse</trademark> IDE, see the
-            "<ulink url='&YOCTO_DOCS_SDK_URL;#adt-eclipse'>Working within Eclipse</ulink>"
-            section in the Yocto Project Application Development and the
-            Extensible Software Development Kit (eSDK) manual.
-        </para>
-
         <section id='dev-debugging-viewing-logs-from-failed-tasks'>
             <title>Viewing Logs from Failed Tasks</title>
 
@@ -12361,6 +12525,16 @@
 
         <section id='dev-debugging-viewing-variable-values'>
             <title>Viewing Variable Values</title>
+
+            <para>
+                Sometimes you need to know the value of a variable as a
+                result of BitBake's parsing step.
+                This could be because some unexpected behavior occurred
+                in your project.
+                Perhaps an attempt to
+                <ulink url='&YOCTO_DOCS_BB_URL;#modifying-existing-variables'>modify a variable</ulink>
+                did not work out as expected.
+            </para>
 
             <para>
                 BitBake's <filename>-e</filename> option is used to display
@@ -14888,12 +15062,12 @@
                 </para>
 
                 <para>
-                    Specifying audio and video plug-ins as part of the
+                    Specifying audio and video plugins as part of the
                     <filename>COMMERCIAL_AUDIO_PLUGINS</filename> and
                     <filename>COMMERCIAL_VIDEO_PLUGINS</filename> statements
                     (along with the enabling
                     <filename>LICENSE_FLAGS_WHITELIST</filename>) includes the
-                    plug-ins or components into built images, thus adding
+                    plugins or components into built images, thus adding
                     support for media formats or components.
                 </para>
             </section>

@@ -46,6 +46,9 @@ RDEPENDS_${PN} += "phosphor-network"
 RDEPENDS_${PN} += "phosphor-time-manager"
 RDEPENDS_${PN} += "${VIRTUAL-RUNTIME_ipmi-config}"
 RDEPENDS_${PN} += "virtual/obmc-watchdog"
+RDEPENDS_${PN} += "${VIRTUAL-RUNTIME_obmc-bmc-state-manager}"
+RDEPENDS_${PN} += "${VIRTUAL-RUNTIME_obmc-bmc-version}"
+RDEPENDS_${PN} += "${VIRTUAL-RUNTIME_obmc-bmc-updater}"
 
 inherit useradd
 
@@ -72,7 +75,6 @@ EXTRA_OECONF = " \
         SENSOR_YAML_GEN=${STAGING_DIR_NATIVE}${sensor_datadir}/sensor.yaml \
         INVSENSOR_YAML_GEN=${STAGING_DIR_NATIVE}${sensor_datadir}/invsensor.yaml \
         FRU_YAML_GEN=${STAGING_DIR_NATIVE}${config_datadir}/fru_config.yaml \
-        CHANNEL_YAML_GEN=${STAGING_DIR_NATIVE}${sensor_datadir}/channel.yaml \
         ENTITY_YAML_GEN=${STAGING_DIR_NATIVE}${sensor_datadir}/entity.yaml \
         POWER_READING_SENSOR=${datadir}/ipmi-providers/power_reading.json\
         "

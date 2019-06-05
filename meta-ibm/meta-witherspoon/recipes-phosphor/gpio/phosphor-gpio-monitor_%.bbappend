@@ -1,8 +1,8 @@
-FILESEXTRAPATHS_append := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 TMPL_POWERSUPPLY = "phosphor-gpio-presence@.service"
 INSTFMT_POWERSUPPLY = "phosphor-gpio-presence@{0}.service"
-POWERSUPPLY_TGT = "${SYSTEMD_DEFAULT_TARGET}"
+POWERSUPPLY_TGT = "multi-user.target"
 FMT_POWERSUPPLY = "../${TMPL_POWERSUPPLY}:${POWERSUPPLY_TGT}.requires/${INSTFMT_POWERSUPPLY}"
 
 SYSTEMD_LINK_${PN}-presence += "${@compose_list(d, 'FMT_POWERSUPPLY', 'OBMC_POWER_SUPPLY_INSTANCES')}"

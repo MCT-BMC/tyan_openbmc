@@ -1,4 +1,4 @@
-inherit obmc-phosphor-systemd
+inherit systemd
 inherit useradd
 
 USERADD_PACKAGES = "${PN}"
@@ -15,11 +15,13 @@ LIC_FILES_CHKSUM = "file://LICENCE;md5=a6a4edad4aed50f39a66d098d74b265b"
 SRC_URI = "git://github.com/openbmc/bmcweb.git"
 
 PV = "1.0+git${SRCPV}"
-SRCREV = "4418c7f0ddcc5d3518831729a380a0b67e5d4093"
+SRCREV = "57bff08a75362a05d36354918195c5b7c82006f1"
 
 S = "${WORKDIR}/git"
 
 DEPENDS = "openssl zlib boost libpam sdbusplus gtest nlohmann-json libtinyxml2 "
+
+RDEPENDS_${PN} += "jsnbd"
 
 FILES_${PN} += "${datadir}/** "
 
@@ -30,8 +32,3 @@ EXTRA_OECMAKE = "-DBMCWEB_BUILD_UT=OFF -DYOCTO_DEPENDENCIES=ON"
 SYSTEMD_SERVICE_${PN} += "bmcweb.service bmcweb.socket"
 
 FULL_OPTIMIZATION = "-Os -pipe "
-
-do_install_append() {
-    rm -rf ${D}${includedir}/dbus
-    rm -rf ${D}${libdir}/cmake
-}

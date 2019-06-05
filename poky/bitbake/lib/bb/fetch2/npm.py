@@ -1,5 +1,6 @@
-# ex:ts=4:sw=4:sts=4:et
-# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+#
+# SPDX-License-Identifier: GPL-2.0-only
+#
 """
 BitBake 'Fetch' NPM implementation
 
@@ -226,7 +227,7 @@ class Npm(FetchMethod):
                         self._getshrinkeddependencies(obj, data['dependencies'][obj], data['dependencies'][obj]['version'], d, ud, lockdown, manifest, False)
                         return
         outputurl = "invalid"
-        if ('resolved' not in data) or (not data['resolved'].startswith('http')):
+        if ('resolved' not in data) or (not data['resolved'].startswith('http://') and not data['resolved'].startswith('https://')):
             # will be the case for ${PN}
             fetchcmd = "npm view %s@%s dist.tarball --registry %s" % (pkg, version, ud.registry)
             logger.debug(2, "Found this matching URL: %s" % str(fetchcmd))

@@ -27,9 +27,10 @@ SYSROOT_DIRS_BLACKLIST = " \
     ${mandir} \
     ${docdir} \
     ${infodir} \
-    ${datadir}/locale \
     ${datadir}/applications \
     ${datadir}/fonts \
+    ${datadir}/gtk-doc/html \
+    ${datadir}/locale \
     ${datadir}/pixmaps \
     ${libdir}/${PN}/ptest \
 "
@@ -197,6 +198,10 @@ def staging_populate_sysroot_dir(targetsysroot, nativesysroot, native, d):
         for manifest in glob.glob(d.expand("${SSTATE_MANIFESTS}/manifest-%s-*.populate_sysroot" % pkgarch)):
             if manifest.endswith("-initial.populate_sysroot"):
                 # skip glibc-initial and libgcc-initial due to file overlap
+                continue
+            if not native and (manifest.endswith("-native.populate_sysroot") or "nativesdk-" in manifest):
+                continue
+            if native and not (manifest.endswith("-native.populate_sysroot") or manifest.endswith("-cross.populate_sysroot") or "-cross-" in manifest):
                 continue
             tmanifest = targetdir + "/" + os.path.basename(manifest)
             if os.path.exists(tmanifest):
@@ -573,6 +578,7 @@ python extend_recipe_sysroot() {
 }
 extend_recipe_sysroot[vardepsexclude] += "MACHINE_ARCH PACKAGE_EXTRA_ARCHS SDK_ARCH BUILD_ARCH SDK_OS BB_TASKDEPDATA"
 
+do_prepare_recipe_sysroot[deptask] = "do_populate_sysroot"
 python do_prepare_recipe_sysroot () {
     bb.build.exec_func("extend_recipe_sysroot", d)
 }

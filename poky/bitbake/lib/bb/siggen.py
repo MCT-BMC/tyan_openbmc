@@ -1,3 +1,7 @@
+#
+# SPDX-License-Identifier: GPL-2.0-only
+#
+
 import hashlib
 import logging
 import os
@@ -40,6 +44,9 @@ class SignatureGenerator(object):
 
     def finalise(self, fn, d, varient):
         return
+
+    def get_unihash(self, task):
+        return self.taskhash[task]
 
     def get_taskhash(self, fn, task, deps, dataCache):
         return "0"
@@ -87,7 +94,7 @@ class SignatureGeneratorBasic(SignatureGenerator):
         self.taints = {}
         self.gendeps = {}
         self.lookupcache = {}
-        self.pkgnameextract = re.compile("(?P<fn>.*)\..*")
+        self.pkgnameextract = re.compile(r"(?P<fn>.*)\..*")
         self.basewhitelist = set((data.getVar("BB_HASHBASE_WHITELIST") or "").split())
         self.taskwhitelist = None
         self.init_rundepcheck(data)
@@ -116,6 +123,12 @@ class SignatureGeneratorBasic(SignatureGenerator):
             k = fn + "." + task
             if not ignore_mismatch and k in self.basehash and self.basehash[k] != basehash[k]:
                 bb.error("When reparsing %s, the basehash value changed from %s to %s. The metadata is not deterministic and this needs to be fixed." % (k, self.basehash[k], basehash[k]))
+                bb.error("The following commands may help:")
+                cmd = "$ bitbake %s -c%s" % (d.getVar('PN'), task)
+                # Make sure sigdata is dumped before run printdiff
+                bb.error("%s -Snone" % cmd)
+                bb.error("Then:")
+                bb.error("%s -Sprintdiff\n" % cmd)
             self.basehash[k] = basehash[k]
 
         self.taskdeps[fn] = taskdeps
@@ -188,7 +201,7 @@ class SignatureGeneratorBasic(SignatureGenerator):
                 continue
             if dep not in self.taskhash:
                 bb.fatal("%s is not in taskhash, caller isn't calling in dependency order?" % dep)
-            data = data + self.taskhash[dep]
+            data = data + self.get_unihash(dep)
             self.runtaskdeps[k].append(dep)
 
         if task in dataCache.file_checksums[fn]:
@@ -215,7 +228,7 @@ class SignatureGeneratorBasic(SignatureGenerator):
             self.taints[k] = taint
             logger.warning("%s is tainted from a forced run" % k)
 
-        h = hashlib.md5(data.encode("utf-8")).hexdigest()
+        h = hashlib.sha256(data.encode("utf-8")).hexdigest()
         self.taskhash[k] = h
         #d.setVar("BB_TASKHASH_task-%s" % task, taskhash[task])
         return h
@@ -263,7 +276,7 @@ class SignatureGeneratorBasic(SignatureGenerator):
             data['file_checksum_values'] = [(os.path.basename(f), cs) for f,cs in self.file_checksum_values[k]]
             data['runtaskhashes'] = {}
             for dep in data['runtaskdeps']:
-                data['runtaskhashes'][dep] = self.taskhash[dep]
+                data['runtaskhashes'][dep] = self.get_unihash(dep)
             data['taskhash'] = self.taskhash[k]
 
         taint = self.read_taint(fn, task, referencestamp)
@@ -313,6 +326,13 @@ class SignatureGeneratorBasic(SignatureGenerator):
 class SignatureGeneratorBasicHash(SignatureGeneratorBasic):
     name = "basichash"
 
+    def get_stampfile_hash(self, task):
+        if task in self.taskhash:
+            return self.taskhash[task]
+
+        # If task is not in basehash, then error
+        return self.basehash[task]
+
     def stampfile(self, stampbase, fn, taskname, extrainfo, clean=False):
         if taskname != "do_setscene" and taskname.endswith("_setscene"):
             k = fn + "." + taskname[:-9]
@@ -320,11 +340,9 @@ class SignatureGeneratorBasicHash(SignatureGeneratorBasic):
             k = fn + "." + taskname
         if clean:
             h = "*"
-        elif k in self.taskhash:
-            h = self.taskhash[k]
         else:
-            # If k is not in basehash, then error
-            h = self.basehash[k]
+            h = self.get_stampfile_hash(k)
+
         return ("%s.%s.%s.%s" % (stampbase, taskname, h, extrainfo)).rstrip('.')
 
     def stampcleanmask(self, stampbase, fn, taskname, extrainfo):
@@ -625,6 +643,10 @@ def compare_sigfiles(a, b, recursecb=None, color=False, collapsed=False):
     a_taint = a_data.get('taint', None)
     b_taint = b_data.get('taint', None)
     if a_taint != b_taint:
+        if a_taint.startswith('nostamp:'):
+            a_taint = a_taint.replace('nostamp:', 'nostamp(uuid4):')
+        if b_taint.startswith('nostamp:'):
+            b_taint = b_taint.replace('nostamp:', 'nostamp(uuid4):')
         output.append(color_format("{color_title}Taint (by forced/invalidated task) changed{color_default} from %s to %s") % (a_taint, b_taint))
 
     return output
@@ -644,7 +666,7 @@ def calc_basehash(sigdata):
         if val is not None:
             basedata = basedata + str(val)
 
-    return hashlib.md5(basedata.encode("utf-8")).hexdigest()
+    return hashlib.sha256(basedata.encode("utf-8")).hexdigest()
 
 def calc_taskhash(sigdata):
     data = sigdata['basehash']
@@ -662,7 +684,7 @@ def calc_taskhash(sigdata):
         else:
             data = data + sigdata['taint']
 
-    return hashlib.md5(data.encode("utf-8")).hexdigest()
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
 def dump_sigfile(a):
@@ -697,7 +719,11 @@ def dump_sigfile(a):
             output.append("Hash for dependent task %s is %s" % (dep, a_data['runtaskhashes'][dep]))
 
     if 'taint' in a_data:
-        output.append("Tainted (by forced/invalidated task): %s" % a_data['taint'])
+        if a_data['taint'].startswith('nostamp:'):
+            msg = a_data['taint'].replace('nostamp:', 'nostamp(uuid4):')
+        else:
+            msg = a_data['taint']
+        output.append("Tainted (by forced/invalidated task): %s" % msg)
 
     if 'task' in a_data:
         computed_basehash = calc_basehash(a_data)

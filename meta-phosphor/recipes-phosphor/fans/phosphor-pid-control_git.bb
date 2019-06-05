@@ -13,7 +13,7 @@ inherit obmc-phosphor-ipmiprovider-symlink
 
 S = "${WORKDIR}/git"
 SRC_URI = "git://github.com/openbmc/phosphor-pid-control"
-SRCREV = "e3eeef45a722b57d4c3bb379df165e0bd14993bd"
+SRCREV = "375f7098c232d38adcaab99b2f3ee561ded8c256"
 
 # Each platform will need a service file that starts
 # at an appropriate time per system.  For instance, if
@@ -24,15 +24,15 @@ DEPENDS += "autoconf-archive-native"
 DEPENDS += "sdbusplus"
 DEPENDS += "phosphor-dbus-interfaces"
 DEPENDS += "phosphor-logging"
-DEPENDS += "phosphor-dbus-interfaces"
 DEPENDS += "libevdev"
 DEPENDS += "nlohmann-json"
 DEPENDS += "cli11"
+DEPENDS += "boost"
 
 # We depend on this to be built first so we can build our providers.
 DEPENDS += "phosphor-ipmi-host"
 
-FILES_${PN} = "${sbindir}/swampd ${sbindir}/setsensor"
+FILES_${PN} = "${bindir}/swampd ${bindir}/setsensor"
 
 # The following installs the OEM IPMI handler for the fan controls.
 FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"

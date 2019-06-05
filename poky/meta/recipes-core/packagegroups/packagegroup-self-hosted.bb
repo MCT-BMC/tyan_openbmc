@@ -128,7 +128,6 @@ RDEPENDS_packagegroup-self-hosted-extended = "\
     libaio \
     libusb1 \
     libxml2 \
-    lrzsz \
     lsof \
     lzo \
     man \
@@ -190,7 +189,6 @@ RDEPENDS_packagegroup-self-hosted-graphics = "\
     libx11-dev \
     adwaita-icon-theme \
     xdg-utils \
-    epiphany \
     l3afpad \
     pcmanfm \
     vte \

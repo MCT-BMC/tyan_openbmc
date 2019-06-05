@@ -2,9 +2,7 @@ GCCMULTILIB = "--enable-multilib"
 require gcc-configure-common.inc
 
 EXTRA_OECONF_PATHS = "\
-    --with-sysroot=/ \
     --with-build-sysroot=${STAGING_DIR_TARGET} \
-    --with-gxx-include-dir=${includedir}/c++/${BINV} \
 "
 
 EXTRA_OECONF_append_linuxstdbase = " --enable-clocale=gnu"
@@ -20,6 +18,7 @@ ARMFPARCHEXT ?= ""
 EXTRA_OECONF_append_armv6 = " --with-arch=armv6${ARMFPARCHEXT}"
 EXTRA_OECONF_append_armv7a = " --with-arch=armv7-a${ARMFPARCHEXT}"
 EXTRA_OECONF_append_armv7ve = " --with-arch=armv7ve${ARMFPARCHEXT}"
+EXTRA_OECONF_append_arc = " --with-cpu=${TUNE_PKGARCH}"
 
 # libcc1 requres gcc_cv_objdump when cross build, but gcc_cv_objdump is
 # set in subdir gcc, so subdir libcc1 can't use it, export it here to

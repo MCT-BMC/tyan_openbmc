@@ -1,5 +1,3 @@
-# ex:ts=4:sw=4:sts=4:et
-# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 """
 BitBake 'Fetch' git submodules implementation
 
@@ -16,18 +14,8 @@ NOTE: Switching a SRC_URI from "git://" to "gitsm://" requires a clean of your r
 
 # Copyright (C) 2013 Richard Purdie
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
-# published by the Free Software Foundation.
+# SPDX-License-Identifier: GPL-2.0-only
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
 import bb
@@ -129,7 +117,7 @@ class GitSM(Git):
 
             url += ';protocol=%s' % proto
             url += ";name=%s" % module
-            url += ";subpath=%s" % paths[module]
+            url += ";subpath=%s" % module
 
             ld = d.createCopy()
             # Not necessary to set SRC_URI, since we're passing the URI to
@@ -147,6 +135,23 @@ class GitSM(Git):
 
         return submodules != []
 
+    def need_update(self, ud, d):
+        if Git.need_update(self, ud, d):
+            return True
+
+        try:
+            # Check for the nugget dropped by the download operation
+            known_srcrevs = runfetchcmd("%s config --get-all bitbake.srcrev" % \
+                            (ud.basecmd), d, workdir=ud.clonedir)
+
+            if ud.revisions[ud.names[0]] not in known_srcrevs.split():
+                return True
+        except bb.fetch2.FetchError:
+            # No srcrev nuggets, so this is new and needs to be updated
+            return True
+
+        return False
+
     def download(self, ud, d):
         def download_submodule(ud, url, module, modpath, d):
             url += ";bareclone=1;nobranch=1"
@@ -157,6 +162,9 @@ class GitSM(Git):
             try:
                 newfetch = Fetch([url], d, cache=False)
                 newfetch.download()
+                # Drop a nugget to add each of the srcrevs we've fetched (used by need_update)
+                runfetchcmd("%s config --add bitbake.srcrev %s" % \
+                            (ud.basecmd, ud.revisions[ud.names[0]]), d, workdir=ud.clonedir)
             except Exception as e:
                 logger.error('gitsm: submodule download failed: %s %s' % (type(e).__name__, str(e)))
                 raise
@@ -176,7 +184,7 @@ class GitSM(Git):
 
             try:
                 newfetch = Fetch([url], d, cache=False)
-                newfetch.unpack(root=os.path.dirname(os.path.join(repo_conf, 'modules', modpath)))
+                newfetch.unpack(root=os.path.dirname(os.path.join(repo_conf, 'modules', module)))
             except Exception as e:
                 logger.error('gitsm: submodule unpack failed: %s %s' % (type(e).__name__, str(e)))
                 raise
@@ -191,9 +199,9 @@ class GitSM(Git):
 
             # Ensure the submodule repository is NOT set to bare, since we're checking it out...
             try:
-                runfetchcmd("%s config core.bare false" % (ud.basecmd), d, quiet=True, workdir=os.path.join(repo_conf, 'modules', modpath))
+                runfetchcmd("%s config core.bare false" % (ud.basecmd), d, quiet=True, workdir=os.path.join(repo_conf, 'modules', module))
             except:
-                logger.error("Unable to set git config core.bare to false for %s" % os.path.join(repo_conf, 'modules', modpath))
+                logger.error("Unable to set git config core.bare to false for %s" % os.path.join(repo_conf, 'modules', module))
                 raise
 
         Git.unpack(self, ud, destdir, d)
@@ -201,5 +209,7 @@ class GitSM(Git):
         ret = self.process_submodules(ud, ud.destdir, unpack_submodules, d)
 
         if not ud.bareclone and ret:
-            # Run submodule update, this sets up the directories -- without touching the config
+            # All submodules should already be downloaded and configured in the tree.  This simply sets
+            # up the configuration and checks out the files.  The main project config should remain
+            # unmodified, and no download from the internet should occur.
             runfetchcmd("%s submodule update --recursive --no-fetch" % (ud.basecmd), d, quiet=True, workdir=ud.destdir)

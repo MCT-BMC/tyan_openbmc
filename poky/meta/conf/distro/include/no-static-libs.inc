@@ -4,6 +4,7 @@ DISABLE_STATIC ?= " --disable-static"
 DISABLE_STATIC_pn-qemu = ""
 DISABLE_STATIC_pn-qemu-native = ""
 DISABLE_STATIC_pn-nativesdk-qemu = ""
+DISABLE_STATIC_pn-qemu-system-native = ""
 # pciutils fails build
 DISABLE_STATIC_pn-pciutils = ""
 # libcap aborts on unrecognised option
@@ -25,9 +26,6 @@ DISABLE_STATIC_pn-openjade-native = ""
 DISABLE_STATIC_pn-openssl = ""
 DISABLE_STATIC_pn-openssl-native = ""
 DISABLE_STATIC_pn-nativesdk-openssl = ""
-DISABLE_STATIC_pn-openssl10 = ""
-DISABLE_STATIC_pn-openssl10-native = ""
-DISABLE_STATIC_pn-nativesdk-openssl10 = ""
 # libssp-static-dev included in build-appliance
 DISABLE_STATIC_pn-gcc-runtime = ""
 # libusb1-native is used to build static dfu-util-native

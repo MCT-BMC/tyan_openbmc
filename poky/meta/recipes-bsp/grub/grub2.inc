@@ -17,7 +17,6 @@ SRC_URI = "https://ftp.gnu.org/gnu/grub/grub-${PV}.tar.gz \
            file://autogen.sh-exclude-pc.patch \
            file://grub-module-explicitly-keeps-symbole-.module_license.patch \
            file://0001-grub.d-10_linux.in-add-oe-s-kernel-name.patch \
-           file://fix.build.with.gcc-7.patch \
            file://gcc8.patch \
            file://0001-x86-64-Treat-R_X86_64_PLT32-as-R_X86_64_PC32.patch \
            file://0001-grub-setup-Debug-message-cleanup.patch \
@@ -60,6 +59,8 @@ BUILD_CPPFLAGS = ""
 BUILD_CFLAGS = ""
 BUILD_CXXFLAGS = ""
 BUILD_LDFLAGS = ""
+
+CFLAGS_append = "-Wno-error"
 
 do_configure_prepend() {
 	# The grub2 configure script uses variables such as TARGET_CFLAGS etc

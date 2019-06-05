@@ -30,15 +30,15 @@ DEPENDS += "virtual/${PN}-config-native"
 
 S = "${WORKDIR}/git"
 
-FILES_${PN}-ledmanager += "${sbindir}/phosphor-ledmanager"
-FILES_${PN}-faultmonitor += "${sbindir}/phosphor-fru-fault-monitor"
+FILES_${PN}-ledmanager += "${bindir}/phosphor-ledmanager"
+FILES_${PN}-faultmonitor += "${bindir}/phosphor-fru-fault-monitor"
 
 DBUS_SERVICE_${PN}-ledmanager += "xyz.openbmc_project.LED.GroupManager.service"
 
 SYSTEMD_SERVICE_${PN}-ledmanager += "obmc-led-group-start@.service obmc-led-group-stop@.service"
 SYSTEMD_SERVICE_${PN}-faultmonitor += "obmc-fru-fault-monitor.service"
 
-SYSTEMD_LINK_${PN}-ledmanager += "../obmc-led-group-start@.service:${SYSTEMD_DEFAULT_TARGET}.wants/obmc-led-group-start@bmc_booted.service"
+SYSTEMD_LINK_${PN}-ledmanager += "../obmc-led-group-start@.service:multi-user.target.wants/obmc-led-group-start@bmc_booted.service"
 
 STATES = "start stop"
 TMPLFMT = "obmc-led-group-{0}@.service"

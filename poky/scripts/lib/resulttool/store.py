@@ -3,15 +3,9 @@
 # Copyright (c) 2019, Intel Corporation.
 # Copyright (c) 2019, Linux Foundation
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms and conditions of the GNU General Public License,
-# version 2, as published by the Free Software Foundation.
+# SPDX-License-Identifier: GPL-2.0-only
 #
-# This program is distributed in the hope it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-# more details.
-#
+
 import tempfile
 import os
 import subprocess
@@ -29,15 +23,18 @@ def store(args, logger):
     try:
         results = {}
         logger.info('Reading files from %s' % args.source)
-        for root, dirs,  files in os.walk(args.source):
-            for name in files:
-                f = os.path.join(root, name)
-                if name == "testresults.json":
-                    resultutils.append_resultsdata(results, f)
-                elif args.all:
-                    dst = f.replace(args.source, tempdir + "/")
-                    os.makedirs(os.path.dirname(dst), exist_ok=True)
-                    shutil.copyfile(f, dst)
+        if resultutils.is_url(args.source) or os.path.isfile(args.source):
+            resultutils.append_resultsdata(results, args.source)
+        else:
+            for root, dirs,  files in os.walk(args.source):
+                for name in files:
+                    f = os.path.join(root, name)
+                    if name == "testresults.json":
+                        resultutils.append_resultsdata(results, f)
+                    elif args.all:
+                        dst = f.replace(args.source, tempdir + "/")
+                        os.makedirs(os.path.dirname(dst), exist_ok=True)
+                        shutil.copyfile(f, dst)
 
         revisions = {}
 
@@ -65,7 +62,7 @@ def store(args, logger):
             results = revisions[r]
             keywords = {'commit': r[0], 'branch': r[1], "commit_count": r[2]}
             subprocess.check_call(["find", tempdir, "!", "-path", "./.git/*", "-delete"])
-            resultutils.save_resultsdata(results, tempdir)
+            resultutils.save_resultsdata(results, tempdir, ptestlogs=True)
 
             logger.info('Storing test result into git repository %s' % args.git_dir)
 
@@ -89,7 +86,7 @@ def register_commands(subparsers):
                                          group='setup')
     parser_build.set_defaults(func=store)
     parser_build.add_argument('source',
-                              help='source file or directory that contain the test result files to be stored')
+                              help='source file/directory/URL that contain the test result files to be stored')
     parser_build.add_argument('git_dir',
                               help='the location of the git repository to store the results in')
     parser_build.add_argument('-a', '--all', action='store_true',

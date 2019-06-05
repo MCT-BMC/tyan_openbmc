@@ -22,13 +22,14 @@ IMAGE_FSTYPES = "wic.vmdk"
 
 inherit core-image module-base setuptools3
 
-SRCREV ?= "9dfebdaf7af11b69006996f3253e435bce0dfbfb"
-SRC_URI = "git://git.yoctoproject.org/poky;branch=thud \
+SRCREV ?= "5c504dd014a1bd3e6b3fea528a11aca7dff4d931"
+SRC_URI = "git://git.yoctoproject.org/poky \
            file://Yocto_Build_Appliance.vmx \
            file://Yocto_Build_Appliance.vmxf \
            file://README_VirtualBox_Guest_Additions.txt \
            file://README_VirtualBox_Toaster.txt \
           "
+RECIPE_NO_UPDATE_REASON = "Recipe is recursive and handled as part of the release process"
 BA_INCLUDE_SOURCES ??= "0"
 
 IMAGE_CMD_ext4_append () {

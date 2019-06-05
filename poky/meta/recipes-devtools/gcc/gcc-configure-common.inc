@@ -5,19 +5,12 @@ require gcc-shared-source.inc
 #
 # These can be overridden by the version specific .inc file.
 
-# Java (gcj doesn't work on all architectures)
-JAVA ?= ",java"
-JAVA_arm ?= ""
-JAVA_armeb ?= ""
-JAVA_mipsel ?= ""
-JAVA_sh3 ?= ""
 # gcc 3.x expects 'f77', 4.0 expects 'f95', 4.1 and 4.2 expect 'fortran'
 FORTRAN ?= ",f77"
-LANGUAGES ?= "c,c++${FORTRAN}${JAVA}"
+LANGUAGES ?= "c,c++${FORTRAN}"
 
 EXTRA_OECONF_BASE ?= ""
 EXTRA_OECONF_PATHS ?= ""
-EXTRA_OECONF_INITIAL ?= ""
 
 GCCMULTILIB ?= "--disable-multilib"
 GCCTHREADS ?= "posix"
@@ -46,6 +39,10 @@ EXTRA_OECONF = "\
     ${@get_long_double_setting(bb, d)} \
     ${@get_gcc_multiarch_setting(bb, d)} \
 "
+
+# glibc version is a minimum controlling whether features are enabled. 
+# Doesn't need to track glibc exactly
+EXTRA_OECONF_append_libc-glibc = " --with-glibc-version=2.28 "
 
 # Set this here since GCC configure won't auto-detect and enable
 # initfini-arry when cross compiling.

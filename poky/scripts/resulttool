@@ -25,14 +25,7 @@
 #
 # Copyright (c) 2019, Intel Corporation.
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms and conditions of the GNU General Public License,
-# version 2, as published by the Free Software Foundation.
-#
-# This program is distributed in the hope it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-# more details.
+# SPDX-License-Identifier: GPL-2.0-only
 #
 
 import os
@@ -49,14 +42,8 @@ import resulttool.store
 import resulttool.regression
 import resulttool.report
 import resulttool.manualexecution
+import resulttool.log
 logger = scriptutils.logger_create('resulttool')
-
-def _validate_user_input_arguments(args):
-    if hasattr(args, "source_dir"):
-        if not os.path.isdir(args.source_dir):
-            logger.error('source_dir argument need to be a directory : %s' % args.source_dir)
-            return False
-    return True
 
 def main():
     parser = argparse_oe.ArgumentParser(description="OEQA test result manipulation tool.",
@@ -73,15 +60,13 @@ def main():
     subparsers.add_subparser_group('analysis', 'analysis', 100)
     resulttool.regression.register_commands(subparsers)
     resulttool.report.register_commands(subparsers)
+    resulttool.log.register_commands(subparsers)
 
     args = parser.parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     elif args.quiet:
         logger.setLevel(logging.ERROR)
-
-    if not _validate_user_input_arguments(args):
-        return -1
 
     try:
         ret = args.func(args, logger)

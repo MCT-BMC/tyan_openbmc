@@ -6,20 +6,20 @@ PV = "0.1+git${SRCPV}"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 
-inherit autotools pkgconfig
+inherit meson pkgconfig
 
 DEPENDS += " \
-        autoconf-archive-native \
+        function2 \
         stdplus \
         systemd \
         "
 
-EXTRA_OECONF_append += " \
-        --disable-examples \
-        --disable-tests \
+EXTRA_OEMESON = " \
+        -Dexamples=false \
+        -Dtests=disabled \
         "
 
 SRC_URI += "git://github.com/openbmc/sdeventplus"
-SRCREV = "d41a942a125e8400f263414c43af022edf8b2871"
+SRCREV = "e19c3cf6493d068d600db959de44a00a8097bbf5"
 
 S = "${WORKDIR}/git"
