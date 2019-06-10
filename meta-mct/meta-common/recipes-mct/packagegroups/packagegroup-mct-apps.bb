@@ -29,8 +29,6 @@ RPROVIDES_${PN}-host += "virtual-obmc-host-ctl"
 
 SUMMARY_${PN}-chassis = "MCT Chassis"
 RDEPENDS_${PN}-chassis = " \
-        obmc-button-power \
-        obmc-button-reset \
         obmc-control-chassis \
         obmc-op-control-power \
         obmc-host-failure-reboots \
@@ -50,7 +48,6 @@ RDEPENDS_${PN}-flash = " \
 
 SUMMARY_${PN}-system = "MCT System"
 RDEPENDS_${PN}-system = " \
-        obmc-mgr-system \
         systemd-analyze \
         bmcweb \
         phosphor-webui \

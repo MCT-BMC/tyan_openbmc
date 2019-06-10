@@ -1,21 +1,20 @@
-From 5f74d5abcca4e1fe75fe3b01bfec8634320de1ba Mon Sep 17 00:00:00 2001
-From: "ray.lue" <ray.lue@mic.com.tw>
-Date: Wed, 10 Apr 2019 13:16:53 +0800
-Subject: [PATCH] [s7106] hard coded patch for s7106 FRU scaning, need to be
- updated in the future.
+From 98bba0445742f2e7035a40cfb5e2a780f93103ab Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 4 Jun 2019 13:34:40 +0800
+Subject: [PATCH 1/1] [s7106]Support baseboard fru reading
 
 ---
- src/FruDevice.cpp | 25 ++++++++++++++++++-------
- 1 file changed, 18 insertions(+), 7 deletions(-)
+ src/FruDevice.cpp | 23 ++++++++++++++++-------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
  mode change 100644 => 100755 src/FruDevice.cpp
 
 diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
 old mode 100644
 new mode 100755
-index a8c6805..a3936c6
+index d129403..a6e5ac6
 --- a/src/FruDevice.cpp
 +++ b/src/FruDevice.cpp
-@@ -95,6 +95,7 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
+@@ -98,6 +98,7 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
  {
      uint8_t low_addr = offset & 0xFF;
      uint8_t high_addr = (offset >> 8) & 0xFF;
@@ -23,7 +22,7 @@ index a8c6805..a3936c6
  
      if (flag == 0)
      {
-@@ -104,15 +105,23 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
+@@ -107,13 +108,19 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
      /* This is for 16 bit addressing EEPROM device. First an offset
       * needs to be written before read data from a offset
       */
@@ -34,34 +33,38 @@ index a8c6805..a3936c6
      {
          return ret;
      }
--
+ 
 -    return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
-+	while (index < len){
-+	//  ioctl(file, BLKFLSBUF); // clear kernel read buffer
-+		buf[index] = i2c_smbus_read_byte(file);
-+		index++;
-+	}
 +    //return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
++    while (index < len){
++        buf[index] = i2c_smbus_read_byte(file);
++        index++;
++    }
 +    return len;
  }
  
+ bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
+@@ -159,7 +166,7 @@ bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
+     }
+     return true;
+ }
+-
 +#define FRU_OFFSET  0x6000
-+
  int get_bus_frus(int file, int first, int last, int bus,
                   std::shared_ptr<DeviceMap> devices)
  {
-@@ -143,7 +152,9 @@ int get_bus_frus(int file, int first, int last, int bus,
+@@ -190,7 +197,9 @@ int get_bus_frus(int file, int first, int last, int bus,
              }
  
              /* Check for Device type if it is 8 bit or 16 bit */
 -            int flag = isDevice16Bit(file);
-+            //int flag = isDevice16Bit(file);
-+			int flag = 1;
-+			
++              int flag = isDevice16Bit(file);
++			 flag = 1;
++			 if (bus == 3 ) flag = 0;
              if (flag < 0)
              {
                  std::cerr << "failed to read bus " << bus << " address " << ii
-@@ -151,7 +162,7 @@ int get_bus_frus(int file, int first, int last, int bus,
+@@ -198,7 +207,7 @@ int get_bus_frus(int file, int first, int last, int bus,
                  continue;
              }
  
@@ -70,7 +73,7 @@ index a8c6805..a3936c6
              {
                  std::cerr << "failed to read bus " << bus << " address " << ii
                            << "\n";
-@@ -177,7 +188,7 @@ int get_bus_frus(int file, int first, int last, int bus,
+@@ -218,7 +227,7 @@ int get_bus_frus(int file, int first, int last, int bus,
                      if (area_offset != 0)
                      {
                          area_offset *= 8;
@@ -79,7 +82,7 @@ index a8c6805..a3936c6
                                              block_data.data()) < 0)
                          {
                              std::cerr << "failed to read bus " << bus
-@@ -193,7 +204,7 @@ int get_bus_frus(int file, int first, int last, int bus,
+@@ -234,7 +243,7 @@ int get_bus_frus(int file, int first, int last, int bus,
                          while (length > 0)
                          {
                              auto to_get = std::min(0x20, length);
@@ -88,3 +91,6 @@ index a8c6805..a3936c6
                                                  block_data.data()) < 0)
                              {
                                  std::cerr << "failed to read bus " << bus
+-- 
+2.7.4
+
