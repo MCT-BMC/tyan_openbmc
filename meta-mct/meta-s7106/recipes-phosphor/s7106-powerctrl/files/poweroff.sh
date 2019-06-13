@@ -2,7 +2,8 @@
 
 echo "Enter Power off System action"
 
-pwrstatus=$(/usr/sbin/gpioutil -n D2 --getval)
+#pwrstatus=$(/usr/sbin/gpioutil -n D2 --getval)
+pwrstatus=$(/usr/bin/gpioget gpiochip0 26)
 if [ $pwrstatus -eq 1 ]; then   
     # *** Push power button ***
     GPIO_BASE=$(cat /sys/devices/platform/ahb/ahb:apb/1e780000.gpio/gpio/*/base)
@@ -16,7 +17,8 @@ if [ $pwrstatus -eq 1 ]; then
     for (( i=0; i<=6; i=i+1 ))
     do
         sleep 1
-        pwrstatus=$(/usr/sbin/gpioutil -n D2 --getval)
+        #pwrstatus=$(/usr/sbin/gpioutil -n D2 --getval)
+        pwrstatus=$(/usr/bin/gpioget gpiochip0 26)
         if [ $pwrstatus -eq 0 ]; then
              break;    
         fi
