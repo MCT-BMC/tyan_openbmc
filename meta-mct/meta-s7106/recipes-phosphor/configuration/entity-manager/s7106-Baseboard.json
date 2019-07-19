@@ -118,6 +118,20 @@
             "Type": "IpmbSensor"
         },
         {
+            "Address": "0x90",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempE0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },
+        {
+            "Address": "0x94",
+            "Class": "PeciBridgeTemp",
+            "Name": "P1_DIMMTempF0",
+            "PowerState": "BiosPost",
+            "Type": "IpmbSensor"
+        },        
+        {
             "Index": 0,
             "Name": "PVCCIN_CPU0",
             "PowerState": "On",
