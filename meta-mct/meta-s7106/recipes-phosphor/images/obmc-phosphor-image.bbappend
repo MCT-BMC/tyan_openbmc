@@ -14,4 +14,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           s7106-ipmi-oem \
                                           phosphor-pid-control \
                                           id-button \
+                                          bios-update \
                                         "

@@ -1,6 +1,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://0001-Add-web-entry-for-sol-log-download.patch"
+SRC_URI += "file://0001-Add-web-entry-for-sol-log-download.patch \
+            file://0002-s7106-Add-bios-upload-URI.patch \
+            "
 
 # add a user called bmcweb for the server to assume
 # bmcweb is part of group shadow for non-root pam authentication
