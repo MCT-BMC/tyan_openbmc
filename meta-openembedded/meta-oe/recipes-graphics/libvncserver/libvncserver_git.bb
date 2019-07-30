@@ -31,7 +31,7 @@ FILES_libvncclient = "${libdir}/libvncclient.*"
 inherit cmake
 
 SRC_URI = "git://github.com/LibVNC/libvncserver"
-SRCREV = "3b3a5c478344d4f6faba47c9229f76423c87101d"
+SRCREV = "c0a23857a5c42b45b6d22ccf7218becd1fa69402"
 PV = "0.9.12+git${SRCPV}"
 
 S = "${WORKDIR}/git"

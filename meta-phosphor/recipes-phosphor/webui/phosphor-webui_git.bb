@@ -6,7 +6,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 
 SRC_URI = "git://github.com/openbmc/phosphor-webui.git"
-SRCREV = "5bd1dec7fdc8f6a3a20e6c23dc491b3d31392bc5"
+SRCREV = "ae0353989abe7d9194dba47ca26d803fe11f46b6"
 S = "${WORKDIR}/git"
 
 DEPENDS_prepend = "nodejs-native "
@@ -33,7 +33,7 @@ FILES_${PN} += "${datadir}/www/*"
 do_compile () {
     cd ${S}
     rm -rf node_modules
-    npm --loglevel info --proxy=${HTTP_PROXY} --https-proxy=${HTTPS_PROXY} install
+    npm --loglevel info --proxy=${http_proxy} --https-proxy=${https_proxy} install
     npm run-script build
 }
 
