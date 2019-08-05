@@ -1,8 +1,8 @@
-From bb59b6ad36c7ae10a5908510d1001afdedd6e766 Mon Sep 17 00:00:00 2001
+From 89efd1016ab09a078e8e131c92de58cce5eec1a3 Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
 Date: Tue, 16 Jul 2019 21:03:48 +0800
-Subject: [PATCH] [s7106]ipmbsensor: add DIMM temperature channl 4-7 support
- for peciSensor
+Subject: [PATCH] ipmbsensor: add DIMM temperature channl 4-7 support for
+ peciSensor
 
 ---
  src/IpmbSensor.cpp | 28 ++++++++++++++++++++--------
@@ -12,10 +12,10 @@ Subject: [PATCH] [s7106]ipmbsensor: add DIMM temperature channl 4-7 support
 diff --git a/src/IpmbSensor.cpp b/src/IpmbSensor.cpp
 old mode 100644
 new mode 100755
-index 36d2762..fe5caea
+index 9b1746f..c84c623
 --- a/src/IpmbSensor.cpp
 +++ b/src/IpmbSensor.cpp
-@@ -176,8 +176,14 @@ void IpmbSensor::loadDefaults()
+@@ -203,8 +203,14 @@ void IpmbSensor::loadDefaults()
          commandAddress = meAddress;
          netfn = 0x2e;       // me bridge
          command = 0x4b;     // Get CPU and Memory Temperature
@@ -32,7 +32,7 @@ index 36d2762..fe5caea
      }
      else
      {
-@@ -262,6 +268,7 @@ void IpmbSensor::read(void)
+@@ -289,6 +295,7 @@ void IpmbSensor::read(void)
                  cpuDimmTempScaner = true;
              }else{
                  uint16_t value = 0;
@@ -40,7 +40,7 @@ index 36d2762..fe5caea
                  if(0xff == data_buffer[deviceAddress]) value = -1;
                  else{
                       value = deviceAddress > 1 ? data_buffer[deviceAddress]:tjmax - data_buffer[deviceAddress];
-@@ -334,13 +341,18 @@ void IpmbSensor::read(void)
+@@ -361,13 +368,18 @@ void IpmbSensor::read(void)
                          read();
                          return;
                      }

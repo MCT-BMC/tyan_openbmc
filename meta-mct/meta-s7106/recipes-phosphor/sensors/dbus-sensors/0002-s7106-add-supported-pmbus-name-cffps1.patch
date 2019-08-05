@@ -1,7 +1,7 @@
-From af87aeec8584335a02cc6fa8bbe14e5fff5e67f8 Mon Sep 17 00:00:00 2001
+From 3f1f6da607e6f539dfe58dcafe4be64243b4a4b7 Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
 Date: Mon, 5 Aug 2019 14:07:11 +0800
-Subject: [PATCH 2/2] [s7106]add supported pmbus name : cffps1
+Subject: [PATCH] add supported pmbus name : cffps1
 
 ---
  src/PSUSensorMain.cpp | 2 +-
@@ -23,6 +23,3 @@ index 93d88d0..afde15d
  namespace fs = std::filesystem;
  
  static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>>
--- 
-2.22.0
-

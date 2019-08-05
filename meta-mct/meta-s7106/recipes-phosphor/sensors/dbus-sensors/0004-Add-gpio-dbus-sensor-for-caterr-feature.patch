@@ -1,14 +1,14 @@
-From 2b1cb7965d60fa2b719e0b83d8191f7ae80130bd Mon Sep 17 00:00:00 2001
+From 84436b08cfde78ad42011f4d3d6fb67c62dbde5b Mon Sep 17 00:00:00 2001
 From: jeannie <jeannie@localhost.localdomain>
 Date: Fri, 3 May 2019 11:17:59 +0800
 Subject: [PATCH] Add gpio dbus sensor for caterr feature
 
 ---
- CMakeLists.txt                                     |  17 ++
- include/GPIOSensor.hpp                             |  51 ++++
- .../xyz.openbmc_project.gpiosensor.service         |  12 +
- src/GPIOSensor.cpp                                 | 225 +++++++++++++++++
- src/GPIOSensorMain.cpp                             | 268 +++++++++++++++++++++
+ CMakeLists.txt                                |  17 ++
+ include/GPIOSensor.hpp                        |  51 ++++
+ .../xyz.openbmc_project.gpiosensor.service    |  12 +
+ src/GPIOSensor.cpp                            | 225 +++++++++++++++
+ src/GPIOSensorMain.cpp                        | 268 ++++++++++++++++++
  5 files changed, 573 insertions(+)
  create mode 100755 include/GPIOSensor.hpp
  create mode 100644 service_files/xyz.openbmc_project.gpiosensor.service
@@ -16,18 +16,18 @@ Subject: [PATCH] Add gpio dbus sensor for caterr feature
  create mode 100755 src/GPIOSensorMain.cpp
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e3bf538..6d48371 100644
+index 60a608b..2cbd069 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -16,6 +16,7 @@ option (DISABLE_EXIT_AIR "Disable installing Exit Air Temp sensor" OFF)
+@@ -42,6 +42,7 @@ option (DISABLE_EXIT_AIR "Disable installing Exit Air Temp sensor" OFF)
  option (DISABLE_FAN "Disable installing fan sensor" OFF)
  option (DISABLE_HWMON_TEMP "Disable installing hwmon temp sensor" OFF)
  option (DISABLE_INTRUSION "Disable installing intrusion sensor" OFF)
 +option (DISABLE_GPIO "Disable installing gpio sensor" OFF)
  option (DISABLE_IPMB "Disable installing IPMB sensor" OFF)
+ option (DISABLE_MCUTEMP "Disable installing MCU temperature sensor" OFF)
  option (DISABLE_PSU "Disable installing PSU sensor" OFF)
- 
-@@ -40,6 +41,8 @@ set (HWMON_TEMP_SRC_FILES src/Utils.cpp src/HwmonTempSensor.cpp
+@@ -67,6 +68,8 @@ set (HWMON_TEMP_SRC_FILES src/Utils.cpp src/HwmonTempSensor.cpp
  
  set (INTRUSION_SRC_FILES src/Utils.cpp src/ChassisIntrusionSensor.cpp)
  
@@ -35,8 +35,8 @@ index e3bf538..6d48371 100644
 +
  set (IPMB_SRC_FILES src/Utils.cpp src/Thresholds.cpp)
  
- set (PSU_SRC_FILES src/Utils.cpp src/PSUSensor.cpp src/Thresholds.cpp)
-@@ -145,6 +148,10 @@ add_dependencies (intrusionsensor sdbusplus-project)
+ set (MCUTEMP_SRC_FILES src/Utils.cpp src/Thresholds.cpp)
+@@ -177,6 +180,10 @@ add_dependencies (intrusionsensor sdbusplus-project)
  target_link_libraries (intrusionsensor ${SENSOR_LINK_LIBS})
  target_link_libraries (intrusionsensor i2c)
  
@@ -45,17 +45,17 @@ index e3bf538..6d48371 100644
 +target_link_libraries (gpiosensor ${SENSOR_LINK_LIBS})
 +
  add_executable (ipmbsensor src/IpmbSensor.cpp ${IPMB_SRC_FILES})
- add_dependencies (ipmbsensor sdbusplus)
+ add_dependencies (ipmbsensor sdbusplus-project)
  target_link_libraries (ipmbsensor ${SENSOR_LINK_LIBS})
-@@ -160,6 +167,7 @@ if (NOT YOCTO)
+@@ -197,6 +204,7 @@ if (NOT YOCTO)
      add_dependencies (fansensor ${EXTERNAL_PACKAGES})
      add_dependencies (hwmontempsensor ${EXTERNAL_PACKAGES})
      add_dependencies (intrusionsensor ${EXTERNAL_PACKAGES})
 +    add_dependencies (gpiosensor ${EXTERNAL_PACKAGES})
      add_dependencies (ipmbsensor ${EXTERNAL_PACKAGES})
- endif ()
- 
-@@ -213,6 +221,15 @@ if (NOT DISABLE_INTRUSION)
+     add_dependencies (mcutempsensor ${EXTERNAL_PACKAGES})
+     add_dependencies (psusensor ${EXTERNAL_PACKAGES})
+@@ -252,6 +260,15 @@ if (NOT DISABLE_INTRUSION)
      )
  endif ()
  
@@ -130,7 +130,7 @@ index 0000000..b460845
 +};
 diff --git a/service_files/xyz.openbmc_project.gpiosensor.service b/service_files/xyz.openbmc_project.gpiosensor.service
 new file mode 100644
-index 0000000..496b2d2
+index 0000000..f2c6e80
 --- /dev/null
 +++ b/service_files/xyz.openbmc_project.gpiosensor.service
 @@ -0,0 +1,12 @@

@@ -1,4 +1,4 @@
-From 7d0bb9f979bf0e73a1bb650a0f4f0ac1c693272c Mon Sep 17 00:00:00 2001
+From 79aafd6d29fa09ba3670cb30cbd5b226d5e391a0 Mon Sep 17 00:00:00 2001
 From: "ray.lue" <ray.lue@mic.com.tw>
 Date: Thu, 11 Apr 2019 15:25:55 +0800
 Subject: [PATCH] Support temp2 and share the same threshold 1. take threshold
@@ -12,10 +12,10 @@ Subject: [PATCH] Support temp2 and share the same threshold 1. take threshold
 diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
 old mode 100644
 new mode 100755
-index 430793a..cec849d
+index 7eaea30..1ed9bcb
 --- a/src/HwmonTempMain.cpp
 +++ b/src/HwmonTempMain.cpp
-@@ -183,12 +183,14 @@ void createSensors(
+@@ -184,12 +184,14 @@ void createSensors(
              }
          }
          std::vector<thresholds::Threshold> sensorThresholds;
@@ -31,7 +31,7 @@ index 430793a..cec849d
          sensors[sensorName] = std::make_unique<HwmonTempSensor>(
              directory.string() + "/temp1_input", sensorType, objectServer,
              dbusConnection, io, sensorName, std::move(sensorThresholds),
-@@ -200,10 +202,25 @@ void createSensors(
+@@ -201,10 +203,25 @@ void createSensors(
          }
  
          sensorName = std::get<std::string>(findSecondName->second);
