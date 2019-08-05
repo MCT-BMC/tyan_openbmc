@@ -1,24 +1,24 @@
-From 98bba0445742f2e7035a40cfb5e2a780f93103ab Mon Sep 17 00:00:00 2001
+From 31e4a14074e224e91ea03cbe376919c2c181134f Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Tue, 4 Jun 2019 13:34:40 +0800
+Date: Mon, 5 Aug 2019 16:15:27 +0800
 Subject: [PATCH 1/1] [s7106]Support baseboard fru reading
 
 ---
- src/FruDevice.cpp | 23 ++++++++++++++++-------
- 1 file changed, 16 insertions(+), 7 deletions(-)
+ src/FruDevice.cpp | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
  mode change 100644 => 100755 src/FruDevice.cpp
 
 diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
 old mode 100644
 new mode 100755
-index d129403..a6e5ac6
+index baa90d4..124bc14
 --- a/src/FruDevice.cpp
 +++ b/src/FruDevice.cpp
 @@ -98,6 +98,7 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
  {
-     uint8_t low_addr = offset & 0xFF;
-     uint8_t high_addr = (offset >> 8) & 0xFF;
-+	uint8_t index = 0;	
+     uint8_t low_addr = static_cast<uint8_t>(offset);
+     uint8_t high_addr = static_cast<uint8_t>(offset >> 8);
++    uint8_t index = 0;
  
      if (flag == 0)
      {
@@ -37,7 +37,7 @@ index d129403..a6e5ac6
 -    return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
 +    //return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
 +    while (index < len){
-+        buf[index] = i2c_smbus_read_byte(file);
++        buf[index] = static_cast<uint8_t>(i2c_smbus_read_byte(file));
 +        index++;
 +    }
 +    return len;
@@ -73,24 +73,30 @@ index d129403..a6e5ac6
              {
                  std::cerr << "failed to read bus " << bus << " address " << ii
                            << "\n";
-@@ -218,7 +227,7 @@ int get_bus_frus(int file, int first, int last, int bus,
+@@ -218,7 +227,8 @@ int get_bus_frus(int file, int first, int last, int bus,
                      if (area_offset != 0)
                      {
-                         area_offset *= 8;
+                         area_offset = static_cast<char>(area_offset * 8);
 -                        if (read_block_data(flag, file, area_offset, 0x8,
-+                        if (read_block_data(flag, file, area_offset + FRU_OFFSET, 0x8,
++                        //if (read_block_data(flag, file, area_offset, 0x8,
++                        if (read_block_data(flag, file, static_cast<uint16_t>(area_offset + FRU_OFFSET), 0x8,
                                              block_data.data()) < 0)
                          {
                              std::cerr << "failed to read bus " << bus
-@@ -234,7 +243,7 @@ int get_bus_frus(int file, int first, int last, int bus,
-                         while (length > 0)
+@@ -235,9 +245,10 @@ int get_bus_frus(int file, int first, int last, int bus,
                          {
                              auto to_get = std::min(0x20, length);
--                            if (read_block_data(flag, file, area_offset, to_get,
-+                            if (read_block_data(flag, file, area_offset + FRU_OFFSET, to_get,
-                                                 block_data.data()) < 0)
+ 
+-                            if (read_block_data(flag, file, area_offset,
+-                                                static_cast<uint8_t>(to_get),
+-                                                block_data.data()) < 0)
++                            //if (read_block_data(flag, file, area_offset,
++                            //                    static_cast<uint8_t>(to_get),
++                            if (read_block_data(flag, file, static_cast<uint16_t>(area_offset + FRU_OFFSET), 
++                                               static_cast<uint8_t>(to_get), block_data.data()) < 0)
                              {
                                  std::cerr << "failed to read bus " << bus
+                                           << " address " << ii << "\n";
 -- 
-2.7.4
+2.22.0
 

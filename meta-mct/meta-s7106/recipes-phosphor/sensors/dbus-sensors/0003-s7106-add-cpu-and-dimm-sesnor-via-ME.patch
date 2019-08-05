@@ -1,15 +1,15 @@
-From 0621d7187c0898c73a14daf0a6e3526d2a5144b4 Mon Sep 17 00:00:00 2001
-From: "ray.lue" <ray.lue@mic.com.tw>
-Date: Mon, 29 Apr 2019 16:10:08 +0800
-Subject: [PATCH] CPU/DIMM sensors over ME
+From 42d87f723b25f07e6349dc2e7a4ba0a5f0b88091 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Mon, 5 Aug 2019 14:24:14 +0800
+Subject: [PATCH 3/3] CPU/DIMM sensors over ME
 
 ---
  include/IpmbSensor.hpp |   2 +
- src/IpmbSensor.cpp     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/IpmbSensor.cpp     | 100 ++++++++++++++++++++++++++++++++++++++++-
  2 files changed, 101 insertions(+), 1 deletion(-)
 
 diff --git a/include/IpmbSensor.hpp b/include/IpmbSensor.hpp
-index 1775c13..22f0460 100644
+index e7a9540..5b68b6b 100644
 --- a/include/IpmbSensor.hpp
 +++ b/include/IpmbSensor.hpp
 @@ -10,6 +10,7 @@
@@ -19,32 +19,32 @@ index 1775c13..22f0460 100644
 +    peciSensor,
      PXE1410CVR,
      IR38363VR,
-     mpsVR
-@@ -42,6 +43,7 @@ struct IpmbSensor : public Sensor
+     ADM1278HSC,
+@@ -54,6 +55,7 @@ struct IpmbSensor : public Sensor
  
      // to date all ipmb sensors are power on only
-     PowerState readState = PowerState::on;
+     PowerState readState;
 +    bool cpuDimmTempScaner = false;
  
    private:
      sdbusplus::asio::object_server& objectServer;
 diff --git a/src/IpmbSensor.cpp b/src/IpmbSensor.cpp
-index b8dd220..36d2762 100644
+index 946c060..9b1746f 100644
 --- a/src/IpmbSensor.cpp
 +++ b/src/IpmbSensor.cpp
 @@ -42,6 +42,11 @@ static constexpr double ipmbMinReading = 0;
  static constexpr uint8_t meAddress = 1;
  static constexpr uint8_t lun = 0;
  
-+//ray__ for cpudimm
++//MiTAC__ for cpudimm
 +static uint8_t cpuDimmTempMutex = 1;
 +static std::vector<uint8_t> data_buffer(100);
 +static uint8_t tjmax = 0;
 +
- using IpmbMethodType =
-     std::tuple<int, uint8_t, uint8_t, uint8_t, uint8_t, std::vector<uint8_t>>;
+ static constexpr const char* sensorPathPrefix = "/xyz/openbmc_project/sensors/";
  
-@@ -166,6 +171,14 @@ void IpmbSensor::loadDefaults()
+ using IpmbMethodType =
+@@ -193,6 +198,14 @@ void IpmbSensor::loadDefaults()
          initData = {0x57, 0x01, 0x00, 0x14, 0x03, deviceAddress, 0x00,
                      0x00, 0x00, 0x00, 0x02, 0x00, 0x00,          0x00};
      }
@@ -59,7 +59,7 @@ index b8dd220..36d2762 100644
      else
      {
          throw std::runtime_error("Invalid sensor type");
-@@ -201,6 +214,64 @@ void IpmbSensor::read(void)
+@@ -228,6 +241,64 @@ void IpmbSensor::read(void)
              read();
              return;
          }
@@ -124,7 +124,7 @@ index b8dd220..36d2762 100644
          dbusConnection->async_method_call(
              [this](boost::system::error_code ec,
                     const IpmbMethodType& response) {
-@@ -230,7 +301,7 @@ void IpmbSensor::read(void)
+@@ -257,7 +328,7 @@ void IpmbSensor::read(void)
                      std::cout << name << ": ";
                      for (size_t d : data)
                      {
@@ -133,7 +133,7 @@ index b8dd220..36d2762 100644
                      }
                      std::cout << "\n";
                  }
-@@ -250,6 +321,29 @@ void IpmbSensor::read(void)
+@@ -277,6 +348,29 @@ void IpmbSensor::read(void)
                      }
                      value = data[0];
                  }
@@ -163,7 +163,7 @@ index b8dd220..36d2762 100644
                  else if (type == IpmbType::PXE1410CVR ||
                           type == IpmbType::IR38363VR)
                  {
-@@ -367,6 +461,10 @@ void createSensors(
+@@ -456,6 +550,10 @@ void createSensors(
                      {
                          sensor->type = IpmbType::meSensor;
                      }
@@ -174,3 +174,6 @@ index b8dd220..36d2762 100644
                      else
                      {
                          std::cerr << "Invalid class " << sensorClass << "\n";
+-- 
+2.22.0
+

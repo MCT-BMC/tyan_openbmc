@@ -1,26 +1,28 @@
-From 34d56af56976596e4e17eb23dc4c278a279f1ed9 Mon Sep 17 00:00:00 2001
-From: "ray.lue" <ray.lue@mic.com.tw>
-Date: Wed, 17 Apr 2019 18:31:58 +0800
-Subject: [PATCH] [s7106]add supported pmbus name : cffps1
+From af87aeec8584335a02cc6fa8bbe14e5fff5e67f8 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Mon, 5 Aug 2019 14:07:11 +0800
+Subject: [PATCH 2/2] [s7106]add supported pmbus name : cffps1
 
 ---
- src/PSUSensorMain.cpp | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ src/PSUSensorMain.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
  mode change 100644 => 100755 src/PSUSensorMain.cpp
 
 diff --git a/src/PSUSensorMain.cpp b/src/PSUSensorMain.cpp
 old mode 100644
 new mode 100755
-index ef74aa3..82e0a24
+index 93d88d0..afde15d
 --- a/src/PSUSensorMain.cpp
 +++ b/src/PSUSensorMain.cpp
-@@ -106,7 +106,8 @@ void createSensors(
-         std::string pmbusName;
-         std::getline(nameFile, pmbusName);
-         nameFile.close();
--        if (pmbusName != "pmbus")
-+        if (pmbusName != "pmbus" && pmbusName != "cffps1")
-+        //if (pmbusName != "pmbus")
-         {
-             continue;
-         }
+@@ -31,7 +31,7 @@ static constexpr std::array<const char*, 1> sensorTypes = {
+     "xyz.openbmc_project.Configuration.pmbus"};
+ 
+ static std::vector<std::string> pmbusNames = {"pmbus", "pxe1610", "ina219",
+-                                              "ina230"};
++                                              "ina230", "cffps1"};
+ namespace fs = std::filesystem;
+ 
+ static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>>
+-- 
+2.22.0
+
