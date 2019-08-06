@@ -436,7 +436,11 @@
         {
             "Name": "Pwm 4",
             "Type": "Pwm"
-        },		
+        },
+        {
+            "Name": "Pwm 5",
+            "Type": "Pwm"
+        },
 		{
 
             "Connector": {
@@ -522,7 +526,7 @@
         {
             "Connector": {
                 "Name": "Sys FAN Connector 1",
-                "Pwm": 2,
+                "Pwm": 3,
                 "Tachs": [
                     3
                 ]
@@ -549,7 +553,7 @@
         {
 	        "Connector": {
                 "Name": "Sys FAN Connector 2",
-                "Pwm": 3,
+                "Pwm": 4,
                 "Tachs": [
                     4
                 ]
@@ -685,8 +689,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN0_TACH",
-				"SYS_FAN1_TACH"
+                "SYS_FAN0_TACH"
             ],
             "Name": "SYS_FAN01_TACH",
             "OutLimitMax": 100.0,
@@ -710,9 +713,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN2_TACH"
+                "SYS_FAN1_TACH"
 	        ],
-            "Name": "SYS_FAN2_TACH",
+            "Name": "SYS_FAN1_TACH",
             "OutLimitMax": 100.0,
             "OutLimitMin": 30.0,
             "Outputs": [
@@ -725,7 +728,31 @@
             "Zones": [
                 "Pid 1"
             ]
-        }
+        },
+		{
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "SYS_FAN2_TACH"
+	        ],
+            "Name": "SYS_FAN2_TACH",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 30.0,
+            "Outputs": [
+                "Pwm 5"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 1"
+            ]
+        }        
     ],
     "Name": "s7106 Baseboard",
     "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': '.*S7106*'})",
