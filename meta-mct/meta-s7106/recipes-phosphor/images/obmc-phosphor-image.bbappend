@@ -1,3 +1,5 @@
+FLASH_RWFS_OFFSET = "30720"
+
 OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           gpio-initial \
                                           hbled-ctrl \

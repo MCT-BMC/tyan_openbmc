@@ -19,3 +19,4 @@ BBLAYERS ?= " \
   ##OEROOT##/meta-mct \
   ##OEROOT##/meta-mct/meta-s7106 \
 "
+BBMASK = "##OEROOT##/meta-phosphor/recipes-extended/rsyslog/rsyslog_%.bbappend"

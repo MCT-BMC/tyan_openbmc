@@ -1,7 +1,8 @@
 SUMMARY = "Intel IPMI Providers"
 DESCRIPTION = "IPMI Provider Libraries"
 
-SRC_URI = "file://*"
+SRC_URI = "git://github.com/Intel-BMC/intel-ipmi-providers"
+SRCREV = "3f8aa7959d2e8475e50743d32ff178257aafc1e7"
 
 S = "${WORKDIR}/git"
 PV = "0.1+git${SRCPV}"
@@ -28,3 +29,4 @@ FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/host-ipmid/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/net-ipmid/lib*${SOLIBS}"
 FILES_${PN}-dev_append = " ${libdir}/ipmid-providers/lib*${SOLIBSDEV}"
+
