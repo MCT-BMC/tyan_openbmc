@@ -5,8 +5,8 @@
 #include <sdbusplus/server/interface.hpp>
 
 
-#define CATERR_OBJECTPATH_BASE "/xyz/openbmc_project/sensors/gpio/CATERR"
-#define CATERR_SERVICE "xyz.openbmc_project.GpioSensor"
+#define CATERR_OBJECTPATH_BASE "/xyz/openbmc_project/control/processor"
+#define CATERR_SERVICE "xyz.openbmc_project.Settings"
 #define CATERR_INTERFACE "xyz.openbmc_project.Control.Processor"
 #define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 

@@ -207,30 +207,6 @@ index 28214e3..426346c
 -                       const std::vector<uint8_t> &selData, const bool &assert,
 +                       const std::vector<uint8_t> &selData, const bool &assert, const uint8_t &selType, 
                         const uint16_t &genId, T &&... metadata);
-diff --git a/include/threshold_event_monitor.hpp b/include/threshold_event_monitor.hpp
-old mode 100644
-new mode 100755
-index b29717d..348c766
---- a/include/threshold_event_monitor.hpp
-+++ b/include/threshold_event_monitor.hpp
-@@ -235,7 +235,7 @@ inline static sdbusplus::bus::match::match startThresholdEventMonitor(
-         {
-             threshold = "warning high";
-             if (assert)
--            {
-+            {                                                         
-                 direction = "high";
-                 redfishMessageID += ".ResourceWarningThresholdExceeded";
-             }
-@@ -267,7 +267,7 @@ inline static sdbusplus::bus::match::match startThresholdEventMonitor(
-                                ".");
- 
-         selAddSystemRecord(journalMsg, std::string(msg.get_path()), eventData,
--                           assert, selBMCGenID, "REDFISH_MESSAGE_ID=%.*s",
-+                           assert, selSystemType, selBMCGenID, "REDFISH_MESSAGE_ID=%.*s",
-                            redfishMessageID.length(), redfishMessageID.data(),
-                            "REDFISH_MESSAGE_ARG_1=%.*s", sensorName.length(),
-                            sensorName.data(), "REDFISH_MESSAGE_ARG_2=%f",
 diff --git a/src/sel_logger.cpp b/src/sel_logger.cpp
 old mode 100644
 new mode 100755
