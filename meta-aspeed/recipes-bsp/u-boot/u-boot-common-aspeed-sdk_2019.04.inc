@@ -8,10 +8,11 @@ PE = "1"
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "baa29d5ecc47e6b32a3422c897dcbe30e7209e2b"
+SRCREV = "4d29b04c7aca4121d542b759575fbb93e52aef47"
 
-UBRANCH = "aspeed-master-v2019.04"
+UBRANCH = "aspeed-dev-v2019.04"
 SRC_URI = "git://github.com/AspeedTech-BMC/u-boot;branch=${UBRANCH};protocol=https"
+SRC_URI += "file://0001-arm-evb-ast2600-put-environment-back-at-512KiB.patch"
 
 S = "${WORKDIR}/git"
 

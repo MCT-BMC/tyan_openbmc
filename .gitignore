@@ -2,5 +2,3 @@ build*/*
 customrc
 *.sw?
 .repo/
-ray*
-build

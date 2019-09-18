@@ -22,14 +22,12 @@ SRC_URI += "file://touchscreen.rules \
            file://0003-implment-systemd-sysv-install-for-OE.patch \
            file://0004-rules-whitelist-hd-devices.patch \
            file://0005-rules-watch-metadata-changes-in-ide-devices.patch \
-           file://0006-network-remove-redunant-link-name-in-message.patch \
            file://99-default.preset \
-           file://0001-resolved-Fix-incorrect-use-of-OpenSSL-BUF_MEM.patch \
            "
 
 # patches needed by musl
 SRC_URI_append_libc-musl = " ${SRC_URI_MUSL}"
-SRC_URI_MUSL = "file://0001-Use-getenv-when-secure-versions-are-not-available.patch \
+SRC_URI_MUSL = "\
                file://0002-don-t-use-glibc-specific-qsort_r.patch \
                file://0003-missing_type.h-add-__compare_fn_t-and-comparison_fn_.patch \
                file://0004-add-fallback-parse_printf_format-implementation.patch \
@@ -85,6 +83,7 @@ PACKAGECONFIG ??= " \
     quotacheck \
     randomseed \
     resolved \
+    set-time-epoch \
     smack \
     sysusers \
     timedated \
@@ -123,6 +122,7 @@ PACKAGECONFIG[coredump] = "-Dcoredump=true,-Dcoredump=false"
 PACKAGECONFIG[cryptsetup] = "-Dlibcryptsetup=true,-Dlibcryptsetup=false,cryptsetup"
 PACKAGECONFIG[dbus] = "-Ddbus=true,-Ddbus=false,dbus"
 PACKAGECONFIG[efi] = "-Defi=true,-Defi=false"
+PACKAGECONFIG[gnu-efi] = "-Dgnu-efi=true -Defi-libdir=${STAGING_LIBDIR} -Defi-includedir=${STAGING_INCDIR}/efi,-Dgnu-efi=false,gnu-efi"
 PACKAGECONFIG[elfutils] = "-Delfutils=true,-Delfutils=false,elfutils"
 PACKAGECONFIG[firstboot] = "-Dfirstboot=true,-Dfirstboot=false"
 # Sign the journal for anti-tampering
@@ -167,7 +167,12 @@ PACKAGECONFIG[seccomp] = "-Dseccomp=true,-Dseccomp=false,libseccomp"
 PACKAGECONFIG[selinux] = "-Dselinux=true,-Dselinux=false,libselinux,initscripts-sushell"
 PACKAGECONFIG[smack] = "-Dsmack=true,-Dsmack=false"
 PACKAGECONFIG[sysusers] = "-Dsysusers=true,-Dsysusers=false"
-PACKAGECONFIG[time-epoch] = "-Dtime-epoch=0,,"
+# When enabled use reproducble build timestamp if set as time epoch,
+# or build time if not. When disabled, time epoch is unset.
+def build_epoch(d):
+    epoch = d.getVar('SOURCE_DATE_EPOCH') or "-1"
+    return '-Dtime-epoch=%d' % int(epoch)
+PACKAGECONFIG[set-time-epoch] = "${@build_epoch(d)},-Dtime-epoch=0"
 PACKAGECONFIG[timedated] = "-Dtimedated=true,-Dtimedated=false"
 PACKAGECONFIG[timesyncd] = "-Dtimesyncd=true,-Dtimesyncd=false"
 PACKAGECONFIG[usrmerge] = "-Dsplit-usr=false,-Dsplit-usr=true"
@@ -206,6 +211,7 @@ EXTRA_OEMESON += "-Dkexec-path=${sbindir}/kexec \
                   -Dquotacheck-path=${sbindir}/quotacheck \
                   -Dquotaon-path=${sbindir}/quotaon \
                   -Dsulogin-path=${base_sbindir}/sulogin \
+                  -Dnologin-path=${base_sbindir}/nologin \
                   -Dumount-path=${base_bindir}/umount"
 
 do_install() {
@@ -614,6 +620,12 @@ python __anonymous() {
     if not bb.utils.contains('DISTRO_FEATURES', 'sysvinit', True, False, d):
         d.setVar("INHIBIT_UPDATERCD_BBCLASS", "1")
 }
+
+python do_warn_musl() {
+    if d.getVar('TCLIBC') == "musl":
+        bb.warn("Using systemd with musl is not recommended since it is not supported upstream and some patches are known to be problematic.")
+}
+addtask warn_musl before do_configure
 
 ALTERNATIVE_${PN} = "halt reboot shutdown poweroff runlevel resolv-conf"
 

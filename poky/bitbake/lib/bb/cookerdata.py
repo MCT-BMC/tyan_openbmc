@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (C) 2003, 2004  Chris Larson
 # Copyright (C) 2003, 2004  Phil Blundell
@@ -122,6 +121,7 @@ class CookerConfiguration(object):
         self.profile = False
         self.nosetscene = False
         self.setsceneonly = False
+        self.skipsetscene = False
         self.invalidate_stamp = False
         self.dump_signatures = []
         self.dry_run = False
@@ -268,11 +268,11 @@ class CookerDataBuilder(object):
 
     def parseBaseConfiguration(self):
         try:
-            bb.parse.init_parser(self.basedata)
             self.data = self.parseConfigurationFiles(self.prefiles, self.postfiles)
 
             if self.data.getVar("BB_WORKERCONTEXT", False) is None:
                 bb.fetch.fetcher_init(self.data)
+            bb.parse.init_parser(self.data)
             bb.codeparser.parser_cache_init(self.data)
 
             bb.event.fire(bb.event.ConfigParsed(), self.data)
