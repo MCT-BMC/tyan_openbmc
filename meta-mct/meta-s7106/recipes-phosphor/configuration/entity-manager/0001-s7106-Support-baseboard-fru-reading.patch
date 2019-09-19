@@ -1,102 +1,34 @@
-From 31e4a14074e224e91ea03cbe376919c2c181134f Mon Sep 17 00:00:00 2001
+From cf7e317891212192e533116e349096d7122f7d1c Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Mon, 5 Aug 2019 16:15:27 +0800
-Subject: [PATCH 1/1] [s7106]Support baseboard fru reading
+Date: Thu, 19 Sep 2019 20:28:36 +0800
+Subject: [PATCH] [s7106]Support baseboard fru reading
 
 ---
- src/FruDevice.cpp | 29 ++++++++++++++++++++---------
- 1 file changed, 20 insertions(+), 9 deletions(-)
+ src/FruDevice.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
  mode change 100644 => 100755 src/FruDevice.cpp
 
 diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
 old mode 100644
 new mode 100755
-index baa90d4..124bc14
+index b20b0d3..841dcd4
 --- a/src/FruDevice.cpp
 +++ b/src/FruDevice.cpp
-@@ -98,6 +98,7 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
- {
-     uint8_t low_addr = static_cast<uint8_t>(offset);
-     uint8_t high_addr = static_cast<uint8_t>(offset >> 8);
-+    uint8_t index = 0;
- 
-     if (flag == 0)
-     {
-@@ -107,13 +108,19 @@ static int read_block_data(int flag, int file, uint16_t offset, uint8_t len,
-     /* This is for 16 bit addressing EEPROM device. First an offset
-      * needs to be written before read data from a offset
-      */
--    int ret = i2c_smbus_write_byte_data(file, 0, low_addr);
-+    //int ret = i2c_smbus_write_byte_data(file, 0, low_addr);
-+    int ret = i2c_smbus_write_byte_data(file, high_addr, low_addr);
-     if (ret < 0)
-     {
-         return ret;
-     }
- 
--    return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
-+    //return i2c_smbus_read_i2c_block_data(file, high_addr, len, buf);
-+    while (index < len){
-+        buf[index] = static_cast<uint8_t>(i2c_smbus_read_byte(file));
-+        index++;
-+    }
-+    return len;
- }
- 
- bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
-@@ -159,7 +166,7 @@ bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
-     }
-     return true;
- }
--
+@@ -50,6 +50,8 @@ static size_t UNKNOWN_BUS_OBJECT_COUNT = 0;
+ constexpr size_t MAX_FRU_SIZE = 512;
+ constexpr size_t MAX_EEPROM_PAGE_INDEX = 255;
+ constexpr size_t busTimeoutSeconds = 5;
 +#define FRU_OFFSET  0x6000
- int get_bus_frus(int file, int first, int last, int bus,
-                  std::shared_ptr<DeviceMap> devices)
++
+ 
+ constexpr const char* blacklistPath = PACKAGE_DIR "blacklist.json";
+ 
+@@ -95,7 +97,7 @@ static bool hasEepromFile(size_t bus, size_t address)
+ static ssize_t readFromEeprom(int fd, uint16_t offset, uint8_t len,
+                               uint8_t* buf)
  {
-@@ -190,7 +197,9 @@ int get_bus_frus(int file, int first, int last, int bus,
-             }
- 
-             /* Check for Device type if it is 8 bit or 16 bit */
--            int flag = isDevice16Bit(file);
-+              int flag = isDevice16Bit(file);
-+			 flag = 1;
-+			 if (bus == 3 ) flag = 0;
-             if (flag < 0)
-             {
-                 std::cerr << "failed to read bus " << bus << " address " << ii
-@@ -198,7 +207,7 @@ int get_bus_frus(int file, int first, int last, int bus,
-                 continue;
-             }
- 
--            if (read_block_data(flag, file, 0x0, 0x8, block_data.data()) < 0)
-+            if (read_block_data(flag, file, 0x0 + FRU_OFFSET, 0x8, block_data.data()) < 0)
-             {
-                 std::cerr << "failed to read bus " << bus << " address " << ii
-                           << "\n";
-@@ -218,7 +227,8 @@ int get_bus_frus(int file, int first, int last, int bus,
-                     if (area_offset != 0)
-                     {
-                         area_offset = static_cast<char>(area_offset * 8);
--                        if (read_block_data(flag, file, area_offset, 0x8,
-+                        //if (read_block_data(flag, file, area_offset, 0x8,
-+                        if (read_block_data(flag, file, static_cast<uint16_t>(area_offset + FRU_OFFSET), 0x8,
-                                             block_data.data()) < 0)
-                         {
-                             std::cerr << "failed to read bus " << bus
-@@ -235,9 +245,10 @@ int get_bus_frus(int file, int first, int last, int bus,
-                         {
-                             auto to_get = std::min(0x20, length);
- 
--                            if (read_block_data(flag, file, area_offset,
--                                                static_cast<uint8_t>(to_get),
--                                                block_data.data()) < 0)
-+                            //if (read_block_data(flag, file, area_offset,
-+                            //                    static_cast<uint8_t>(to_get),
-+                            if (read_block_data(flag, file, static_cast<uint16_t>(area_offset + FRU_OFFSET), 
-+                                               static_cast<uint8_t>(to_get), block_data.data()) < 0)
-                             {
-                                 std::cerr << "failed to read bus " << bus
-                                           << " address " << ii << "\n";
--- 
-2.22.0
-
+-    auto result = lseek(fd, offset, SEEK_SET);
++    auto result = lseek(fd, offset + FRU_OFFSET, SEEK_SET);
+     if (result < 0)
+     {
+         std::cerr << "failed to seek\n";

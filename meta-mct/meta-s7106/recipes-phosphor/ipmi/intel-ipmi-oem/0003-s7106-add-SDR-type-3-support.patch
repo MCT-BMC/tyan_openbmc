@@ -1,7 +1,7 @@
-From 16192fc58696e4f70a04696b7aa29078523f6ea4 Mon Sep 17 00:00:00 2001
+From 6a75b9e952948dad21b2c127e1cb2918c1556e0f Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
 Date: Thu, 5 Sep 2019 13:43:13 +0800
-Subject: [PATCH] [s7106]add SDR type 3 support
+Subject: [PATCH] add SDR type 3 support
 
 ---
  include/sdrutils.hpp   | 18 ++++++++-
