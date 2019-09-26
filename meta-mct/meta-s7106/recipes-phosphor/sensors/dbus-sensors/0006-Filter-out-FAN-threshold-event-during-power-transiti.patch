@@ -1,52 +1,33 @@
-From 5c3c43ac7bcf272df9c998b95fdd8fa426055914 Mon Sep 17 00:00:00 2001
+From fc0a71288ce029ec475bd552fe7c4e8959fd1811 Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Tue, 20 Aug 2019 18:27:51 +0800
-Subject: [PATCH] [s7106]filter out FAN threshold event during power transition
- period
+Date: Thu, 26 Sep 2019 19:32:57 +0800
+Subject: [PATCH] Filter out FAN threshold event during power transition
 
 ---
- include/TachSensor.hpp |  2 ++
- include/Thresholds.hpp |  2 +-
- src/TachSensor.cpp     | 11 ++++++++++-
- 3 files changed, 13 insertions(+), 2 deletions(-)
+ include/TachSensor.hpp | 1 +
+ src/TachSensor.cpp     | 5 ++++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
  mode change 100644 => 100755 include/TachSensor.hpp
- mode change 100644 => 100755 include/Thresholds.hpp
  mode change 100644 => 100755 src/TachSensor.cpp
 
 diff --git a/include/TachSensor.hpp b/include/TachSensor.hpp
 old mode 100644
 new mode 100755
-index f79fb4d..aee8dea
+index f79fb4d..dde0eb9
 --- a/include/TachSensor.hpp
 +++ b/include/TachSensor.hpp
-@@ -82,6 +82,8 @@ class TachSensor : public Sensor
+@@ -82,6 +82,7 @@ class TachSensor : public Sensor
      void setupRead(void);
      void handleResponse(const boost::system::error_code& err);
      void checkThresholds(void) override;
 +    thresholds::ThresholdTimer thresholdTimer;
-+    
  };
  
  inline void logFanInserted(const std::string& device)
-diff --git a/include/Thresholds.hpp b/include/Thresholds.hpp
-old mode 100644
-new mode 100755
-index f374ab6..5dfdc5d
---- a/include/Thresholds.hpp
-+++ b/include/Thresholds.hpp
-@@ -49,7 +49,7 @@ struct ThresholdTimer
- 
-     void startTimer(const Threshold& threshold)
-     {
--        constexpr const size_t waitTime = 2;
-+        constexpr const size_t waitTime = 5;
- 
-         if (threshold.level == WARNING && !warningRunning)
-         {
 diff --git a/src/TachSensor.cpp b/src/TachSensor.cpp
 old mode 100644
 new mode 100755
-index 46f5389..8e68896
+index 23ae477..f645c25
 --- a/src/TachSensor.cpp
 +++ b/src/TachSensor.cpp
 @@ -46,7 +46,7 @@ TachSensor::TachSensor(const std::string& path, const std::string& objectType,
@@ -58,21 +39,16 @@ index 46f5389..8e68896
  {
      sensorInterface = objectServer.add_interface(
          "/xyz/openbmc_project/sensors/fan_tach/" + name,
-@@ -197,12 +197,21 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+@@ -202,6 +202,8 @@ void TachSensor::checkThresholds(void)
+         return;
+     }
  
- void TachSensor::checkThresholds(void)
- {
-+    //TODO: ray__ need to date PowerState in configuration file
-+    if (!isPowerOn())
-+    {
-+        return;
-+    }
-+
 +    thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
-+#if 0
++# if 0    
      bool status = thresholds::checkThresholds(this);
+ 
      if (redundancy && *redundancy)
-     {
+@@ -209,6 +211,7 @@ void TachSensor::checkThresholds(void)
          (*redundancy)
              ->update("/xyz/openbmc_project/sensors/fan_tach/" + name, !status);
      }

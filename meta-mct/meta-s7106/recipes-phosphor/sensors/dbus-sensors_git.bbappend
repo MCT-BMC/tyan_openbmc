@@ -5,6 +5,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0003-s7106-add-cpu-and-dimm-sesnor-via-ME.patch \
             file://0004-Add-gpio-dbus-sensor-for-caterr-feature.patch \
             file://0005-s7106-ipmbsensor-add-DIMM-temperature-channl-4-7-sup.patch \
+            file://0006-Filter-out-FAN-threshold-event-during-power-transiti.patch \
             file://0007-s7106-new-processor-sensor-to-replace-gpio-sensor.patch \
             file://0008-s7106-add-ipmi-ACPI-sensor.patch \
             file://0009-Support-system-restart-sensor-for-IPMI.patch \
