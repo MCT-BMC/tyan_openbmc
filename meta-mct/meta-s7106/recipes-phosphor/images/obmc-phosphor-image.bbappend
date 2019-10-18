@@ -19,4 +19,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           pwr-button \
                                           bios-update \
                                           s7106-config \
+                                          memrw-utility \
                                         "
