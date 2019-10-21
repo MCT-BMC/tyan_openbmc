@@ -5,5 +5,6 @@ SRC_URI += "file://0001-s7106-disable-Intel-OEM-command.patch \
             file://0003-s7106-add-SDR-type-3-support.patch \
             file://0004-s7106-add-ipmi-acpi-support.patch \
             file://0005-Support-IPMI-system-restart-event.patch \
+            file://0006-pwr-button-sel-log.patch \
             "
 

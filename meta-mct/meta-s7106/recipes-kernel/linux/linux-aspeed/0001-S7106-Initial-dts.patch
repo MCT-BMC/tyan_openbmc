@@ -4,8 +4,8 @@ Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [S7106] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 322 +++++++++++++++++++++++++++++
- 1 file changed, 322 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts | 327 +++++++++++++++++++++++++++++
+ 1 file changed, 327 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
@@ -13,7 +13,7 @@ new file mode 100755
 index 0000000..a8b1ddd
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s7106.dts
-@@ -0,0 +1,322 @@
+@@ -0,0 +1,327 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -93,6 +93,11 @@ index 0000000..a8b1ddd
 +                                  label = "id-button";
 +                                  gpios = <&gpio ASPEED_GPIO(C, 4) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(C, 4)>;
++                           };
++                              pwrbutton {
++                                  label = "pwrbutton";
++                                  gpios = <&gpio ASPEED_GPIO(E, 0) GPIO_ACTIVE_LOW>;
++                                  linux,code = <ASPEED_GPIO(E, 0)>;
 +                           };
 +        };
 +
