@@ -20,4 +20,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           bios-update \
                                           s7106-config \
                                           memrw-utility \
+                                          system-watchdog \
+                                          phosphor-u-boot-mgr \
                                         "
