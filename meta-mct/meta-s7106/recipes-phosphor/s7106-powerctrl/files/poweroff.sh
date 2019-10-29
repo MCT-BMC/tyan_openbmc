@@ -17,8 +17,9 @@ if [ $pwrstatus -eq 1 ]; then
     done    
     /usr/bin/gpioset gpiochip0 33=1
     sleep 1
-    obmcutil chassisoff 
 fi
+
+obmcutil chassisoff
 
 echo "Exit Power off System action"
 exit 0;

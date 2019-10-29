@@ -94,11 +94,11 @@ index 0000000..a8b1ddd
 +                                  gpios = <&gpio ASPEED_GPIO(C, 4) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(C, 4)>;
 +                           };
-+                              pwrbutton {
-+                                  label = "pwrbutton";
-+                                  gpios = <&gpio ASPEED_GPIO(E, 0) GPIO_ACTIVE_LOW>;
-+                                  linux,code = <ASPEED_GPIO(E, 0)>;
-+                           };
++                           //   pwrbutton {
++                           //       label = "pwrbutton";
++                           //       gpios = <&gpio ASPEED_GPIO(E, 0) GPIO_ACTIVE_LOW>;
++                           //       linux,code = <ASPEED_GPIO(E, 0)>;
++                           //};
 +        };
 +
 +	iio-hwmon {
