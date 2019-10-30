@@ -44,6 +44,9 @@ def main():
 
     print "sync time=20"+YEAR+"-"+MON+"-"+DAY+" "+HOUR+":"+MIN+":"+SEC
     newDate = subprocess.call("/bin/date", shell=True)
+    
+    # Inform other services time sync is done. 
+    os.mknod("/run/time_sync_done")
     return 0
 
 if __name__ == '__main__':

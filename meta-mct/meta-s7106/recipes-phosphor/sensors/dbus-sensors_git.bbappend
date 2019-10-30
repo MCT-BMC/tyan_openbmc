@@ -11,6 +11,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0009-Support-system-restart-sensor-for-IPMI.patch \
             file://0010-pwr-button-sel-log.patch \
             file://0011-s7106-add-OCP-NIC-temperature-sensor.patch \
+            file://0012-version-change-sel-log.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
@@ -18,3 +19,4 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.acpisensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.hostresetsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.pwrbuttonsensor.service"
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.versionchangesensor.service"

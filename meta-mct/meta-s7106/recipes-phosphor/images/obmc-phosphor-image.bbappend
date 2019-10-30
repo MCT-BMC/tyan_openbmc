@@ -22,4 +22,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           memrw-utility \
                                           system-watchdog \
                                           phosphor-u-boot-mgr \
+                                          bmc-sel \
                                         "
