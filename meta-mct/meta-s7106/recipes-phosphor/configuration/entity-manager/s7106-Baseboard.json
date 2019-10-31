@@ -573,6 +573,21 @@
             "Type": "TMP75"
         },
         {
+            "Address": "0x1f",
+            "Bus": 6,
+            "Name": "OCP_TEMP",
+            "Name1": "OCP_NIC_TEMP",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 50
+                }
+            ],
+            "Type": "TMP421"
+        },
+        {
             "Direction": "Input",
             "Index": 496,
             "Name": "CATERR",
