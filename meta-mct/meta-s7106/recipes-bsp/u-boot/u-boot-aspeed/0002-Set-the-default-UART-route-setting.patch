@@ -24,7 +24,7 @@ index e1d3011..9ddd18e 100755
 +void Set_Default_UART_Route(void)
 +{
 +    puts("Set the default UART Route(UART2 <-> UART3 for SOL)...\n");
-+    *(volatile ulong *)(0x1E78909C) = 0x1A00000 ;
++    *(volatile ulong *)(0x1E78909C) = 0x1800000 ;
 +}
 +
 +
