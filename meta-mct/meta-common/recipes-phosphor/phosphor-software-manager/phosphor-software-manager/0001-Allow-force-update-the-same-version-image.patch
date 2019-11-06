@@ -1,0 +1,41 @@
+From def74adf9b4cc5278933f091f6bbbfeb3a96772d Mon Sep 17 00:00:00 2001
+From: "Henbin.Chang" <henbin-chang@mic.com.tw>
+Date: Wed, 6 Nov 2019 09:03:00 +0800
+Subject: [PATCH] Allow force update the same version image
+
+In the original design of image update, it does not allow the same version of image to be flashed onto itself.
+But this blocks validation tests and in most of the cases we don't
+prevent user from doing such update.
+
+This patch appends a random number after the version ID hash string to
+unblock such limitation.
+---
+ image_manager.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/image_manager.cpp b/image_manager.cpp
+index 5b2ff49..db89a07 100644
+--- a/image_manager.cpp
++++ b/image_manager.cpp
+@@ -9,6 +9,7 @@
+ #include <stdlib.h>
+ #include <sys/stat.h>
+ #include <sys/wait.h>
++#include <time.h>	//Henbin add
+ #include <unistd.h>
+ 
+ #include <algorithm>
+@@ -129,6 +130,13 @@ int Manager::processImage(const std::string& tarFilePath)
+     // Compute id
+     auto id = Version::getId(version);
+ 
++    //Henbin add start
++    // Append a random number after the original version hash
++    // This will allow forcing image update onto the same version
++    srand(time(NULL));
++    id = id + "_" + std::to_string(rand());
++    //Henbin add end
++
+     fs::path imageDirPath = std::string{IMG_UPLOAD_DIR};
+     imageDirPath /= id;
+ 
