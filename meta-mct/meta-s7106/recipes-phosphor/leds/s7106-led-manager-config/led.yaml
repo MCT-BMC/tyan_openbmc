@@ -14,11 +14,15 @@ enclosure_fault:
     fault:
         Action: 'On'
 
-enclosure_identify:
+enclosure_identify_blink:
     identify:
         Action: 'Blink'
         DutyOn: 50
         Period: 1000
+
+enclosure_identify:
+    identify:
+        Action: 'On'
 
 # The Op Panel on the Romulus system holds a multicolor LED.
 # Both the 'fault' and 'identify' gpios are wired to the same LED.
