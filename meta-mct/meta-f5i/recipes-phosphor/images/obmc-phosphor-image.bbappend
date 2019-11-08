@@ -1,6 +1,6 @@
 FLASH_RWFS_OFFSET = "30720"
 
-OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
+OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           gpio-initial \
                                           hbled-ctrl \
                                           s7106-powerctrl \
@@ -18,7 +18,7 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s7106 = " libgpiod \
                                           id-button \
                                           pwr-button \
                                           bios-update \
-                                          s7106-config \
+                                          f5i-config \
                                           memrw-utility \
                                           system-watchdog \
                                           phosphor-u-boot-mgr \

@@ -14,12 +14,12 @@ RPROVIDES_${PN} += "virtual-obmc-inventory-data"
 DEPENDS += "python"
 
 S = "${WORKDIR}"
-SRC_URI += "file://S7106.py"
+SRC_URI += "file://f5i.py"
 
 # the following is unnecessary.
 python() {
-	machine = d.getVar('MACHINE', True).capitalize() + '.py'
-	d.setVar('_config_in_skeleton', machine)
+    machine = d.getVar('MACHINE', True) + '.py'
+    d.setVar('_config_in_skeleton', machine)
 }
 
 do_make_setup() {
