@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend_s7106 := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_f5i := "${THISDIR}/${PN}:"
 OBMC_CONSOLE_HOST_TTY = "ttyS2"
 
 SRC_URI += "file://obmc-console-ssh@.service"
