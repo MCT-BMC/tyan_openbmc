@@ -9,6 +9,12 @@ export PS1=shutdown-sh#\
 cp /oldroot/sbin/fw_setenv /sbin
 cp /oldroot/etc/fw_env.config /etc/
 
+echo 'setenv bmc_reboot into uboot env var'
+mkdir /var/lock
+/sbin/fw_setenv bmc_reboot yes
+
+rm -rf /var/lock
+
 cd /
 if [ ! -e /proc/mounts ]
 then

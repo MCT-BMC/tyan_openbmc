@@ -1,0 +1,29 @@
+From 2034b147934c30f7ecded136be2dc00931ee11b7 Mon Sep 17 00:00:00 2001
+From: "Henbin.Chang" <henbin-chang@mic.com.tw>
+Date: Tue, 12 Nov 2019 11:09:52 +0800
+Subject: [PATCH] BMC reboot sel log
+
+---
+ include/sdrutils.hpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/sdrutils.hpp b/include/sdrutils.hpp
+index f6ba289..cdc3361 100755
+--- a/include/sdrutils.hpp
++++ b/include/sdrutils.hpp
+@@ -166,6 +166,7 @@ enum class SensorTypeCodes : uint8_t
+     pwr_button = 0x14,
+     restart = 0x1d,
+     acpi = 0x22,
++    mgtsubsyshealth = 0x28,
+     versionchange = 0x2b,
+     other = 0xB,
+ };
+@@ -181,6 +182,7 @@ const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
+                  {"pwr_button", SensorTypeCodes::pwr_button},   
+                  {"restart", SensorTypeCodes::restart},  
+                  {"acpi", SensorTypeCodes::acpi},     
++                 {"mgtsubsyshealth", SensorTypeCodes::mgtsubsyshealth}, 
+                  {"versionchange", SensorTypeCodes::versionchange},     
+                  {"power", SensorTypeCodes::other}}};
+ 
