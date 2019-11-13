@@ -1,0 +1,22 @@
+From 903c6f0795a41cc84b9f45526537fbfa09a52765 Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Wed, 13 Nov 2019 17:12:08 +0800
+Subject: [PATCH] Change ipmi_sel location to persistent folder
+
+---
+ src/storagecommands.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index 890b895..b20e46e 100644
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -33,7 +33,7 @@
+ 
+ namespace intel_oem::ipmi::sel
+ {
+-static const std::filesystem::path selLogDir = "/var/log";
++static const std::filesystem::path selLogDir = "/var/lib/ipmi";
+ static const std::string selLogFilename = "ipmi_sel";
+ 
+ static int getFileTimestamp(const std::filesystem::path& file)
