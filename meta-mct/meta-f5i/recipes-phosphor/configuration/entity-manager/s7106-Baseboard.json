@@ -530,7 +530,7 @@
                     "Direction": "greater than",
                     "Name": "upper critical",
                     "Severity": 1,
-                    "Value": 50
+                    "Value": 100
                 }
             ],
             "Type": "TMP421"
