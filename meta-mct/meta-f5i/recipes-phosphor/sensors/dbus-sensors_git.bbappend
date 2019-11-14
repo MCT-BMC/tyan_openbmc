@@ -14,6 +14,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0012-version-change-sel-log.patch \
             file://0013-add-ipmi-power-status-sensor.patch \
             file://0014-Add-BMC-reboot-sel-log.patch \
+            file://0015-hidden-peci-core-temperature-sensor.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"

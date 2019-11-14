@@ -33,103 +33,51 @@
             ],
             "Type": "IpmbSensor"
         },
-		{
-            "Address": "0x0",
-            "Class": "PeciBridgeTemp",
+        {
+            "Address": "0x30",
+            "Bus": 0,
+            "CpuID": 1,
             "Name": "CPU0 Temp",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 99
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM",
+                    "Name": "upper non critical",
+                    "Severity": 0,
+                    "Value": 89
+                }
+            ],
+            "Type": "XeonCPU"
         },
-		{
-            "Address": "0x1",
-            "Class": "PeciBridgeTemp",
+        {
+            "Address": "0x31",
+            "Bus": 0,
+            "CpuID": 2,
             "Name": "CPU1 Temp",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },	
-        {
-            "Address": "0x2",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempA0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x6",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempB0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0xa",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempC0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-		},
-        {
-            "Address": "0xe",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempD0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x80",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempE0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x84",
-            "Class": "PeciBridgeTemp",
-            "Name": "P0_DIMMTempF0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },        
-        {
-            "Address": "0x12",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempA0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x16",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempB0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x1a",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempC0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x1e",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempD0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x90",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempE0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
-        },
-        {
-            "Address": "0x94",
-            "Class": "PeciBridgeTemp",
-            "Name": "P1_DIMMTempF0",
-            "PowerState": "BiosPost",
-            "Type": "IpmbSensor"
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 99
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM",
+                    "Name": "upper non critical",
+                    "Severity": 0,
+                    "Value": 89
+                }
+            ],
+            "Type": "XeonCPU"
         },        
         {
             "Index": 0,

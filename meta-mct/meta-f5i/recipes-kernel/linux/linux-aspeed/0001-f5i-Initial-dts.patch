@@ -1,19 +1,19 @@
-From 1ad818f2422258592b865ceb1755ef7ad4517afa Mon Sep 17 00:00:00 2001
+From b06f318f61cead7963840b6bf9612072dd48b4ca Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 327 +++++++++++++++++++++++++++++
- 1 file changed, 327 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 331 +++++++++++++++++++++++++++++++
+ 1 file changed, 331 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 new file mode 100755
-index 0000000..a8b1ddd
+index 0000000..cbc0e78
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,327 @@
+@@ -0,0 +1,331 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -339,5 +339,9 @@ index 0000000..a8b1ddd
 +};
 +
 +&hbled {
++    status = "okay";
++};
++
++&peci0 {
 +    status = "okay";
 +};
