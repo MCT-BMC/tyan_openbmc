@@ -239,7 +239,6 @@ GPIO_AC7=227
 output="\
  $GPIO_B5=1\
  $GPIO_C6=0\
- $GPIO_E5=1\
  $GPIO_F0=0\
  $GPIO_F1=1\
  $GPIO_F2=1\
