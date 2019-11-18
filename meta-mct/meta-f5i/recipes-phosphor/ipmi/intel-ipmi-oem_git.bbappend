@@ -11,5 +11,6 @@ SRC_URI += "file://0001-s7106-disable-Intel-OEM-command.patch \
             file://0009-support-AddSelEntry-command.patch \
             file://0010-BMC-reboot-sel-log.patch \
             file://0011-Change-ipmi_sel-location-to-persistent-folder.patch \
+            file://0012-PSU-status-sel-log.patch \
             "
 

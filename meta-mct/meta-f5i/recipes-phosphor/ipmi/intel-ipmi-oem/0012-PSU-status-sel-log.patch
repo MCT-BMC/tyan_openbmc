@@ -1,0 +1,29 @@
+From c3c138673bb43f02e97f901b0efd0f2f7d1aea6a Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 14 Nov 2019 16:46:39 +0800
+Subject: [PATCH] PSU status sel log
+
+---
+ include/sdrutils.hpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/sdrutils.hpp b/include/sdrutils.hpp
+index cdc3361..30302df 100755
+--- a/include/sdrutils.hpp
++++ b/include/sdrutils.hpp
+@@ -162,6 +162,7 @@ enum class SensorTypeCodes : uint8_t
+     current = 0x3,
+     fan = 0x4,
+     processor = 0x07,
++    power_supply = 0x08,
+     power_unit = 0x09,
+     pwr_button = 0x14,
+     restart = 0x1d,
+@@ -178,6 +179,7 @@ const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
+                  {"fan_tach", SensorTypeCodes::fan},
+                  {"fan_pwm", SensorTypeCodes::fan},
+                  {"processor", SensorTypeCodes::processor},   
++                 {"power_supply", SensorTypeCodes::power_supply},
+                  {"power_unit", SensorTypeCodes::power_unit},
+                  {"pwr_button", SensorTypeCodes::pwr_button},   
+                  {"restart", SensorTypeCodes::restart},  
