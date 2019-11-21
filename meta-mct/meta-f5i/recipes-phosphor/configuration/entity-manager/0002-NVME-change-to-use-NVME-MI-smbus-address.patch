@@ -1,0 +1,25 @@
+From 8811b32be84a909a2d8cb5ef6e06a93b834f5eb2 Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Tue, 19 Nov 2019 13:49:28 +0800
+Subject: [PATCH] NVME change to use NVME-MI smbus address
+
+---
+ configurations/NVME P4000.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 configurations/NVME P4000.json
+
+diff --git a/configurations/NVME P4000.json b/configurations/NVME P4000.json
+old mode 100644
+new mode 100755
+index da521cf..83511ae
+--- a/configurations/NVME P4000.json	
++++ b/configurations/NVME P4000.json	
+@@ -7,7 +7,7 @@
+       "Type": "EEPROM"
+     },
+     {
+-      "Address": "0x53",
++      "Address": "0x6A",
+       "Bus": "$bus",
+       "Name": "NVMe $index Temp",
+       "Thresholds": [

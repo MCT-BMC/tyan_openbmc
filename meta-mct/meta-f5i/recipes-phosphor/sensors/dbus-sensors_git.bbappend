@@ -16,6 +16,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0014-Add-BMC-reboot-sel-log.patch \
             file://0015-hidden-peci-core-temperature-sensor.patch \
             file://0016-add-psu-status-sensor.patch \
+            file://0017-Enabling-NVMe-sensor-support.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
@@ -27,3 +28,4 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.versionchangesensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.aclostsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mgtsubsyshealthsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.psufaultsensor.service"
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.nvmesensor.service"

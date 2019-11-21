@@ -244,12 +244,10 @@ output="\
  $GPIO_F2=1\
  $GPIO_F4=1\
  $GPIO_F5=1\
- $GPIO_G0=1\
+ $GPIO_G0=0\
  $GPIO_G1=0\
  $GPIO_N6=1\
  $GPIO_N7=0\
- $GPIO_Q4=0\
- $GPIO_Q5=0\
  $GPIO_AB1=0\
 "
 

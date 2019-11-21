@@ -1,19 +1,19 @@
-From b06f318f61cead7963840b6bf9612072dd48b4ca Mon Sep 17 00:00:00 2001
+From 107cf4feec3e83a7604eef06b8eba60b9b36b182 Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 331 +++++++++++++++++++++++++++++++
- 1 file changed, 331 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 421 +++++++++++++++++++++++++++++++
+ 1 file changed, 421 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 new file mode 100755
-index 0000000..cbc0e78
+index 0000000..99f3531
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,331 @@
+@@ -0,0 +1,421 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -107,6 +107,14 @@ index 0000000..cbc0e78
 +			<&adc 4>, <&adc 5>, <&adc 6>, <&adc 7>,
 +			<&adc 8>, <&adc 9>, <&adc 10>, <&adc 11>,
 +			<&adc 12>, <&adc 13>, <&adc 14>, <&adc 15>;
++	};
++
++	i2c6mux: i2cmux {
++		compatible = "i2c-mux-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		mux-gpios = <&gpio ASPEED_GPIO(Q, 4) GPIO_ACTIVE_HIGH &gpio ASPEED_GPIO(Q, 5) GPIO_ACTIVE_HIGH>;
++		i2c-parent = <&i2c6>;
 +	};
 +};
 +
@@ -237,6 +245,88 @@ index 0000000..cbc0e78
 +
 +&i2c7 {
 +	status = "okay";
++};
++
++&i2c6mux {
++	i2c@0 {
++		reg = <0>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	i2c@1 {
++		reg = <1>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	i2c@2 {
++		reg = <2>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		i2c-switch@74 {
++			compatible = "nxp,pca9548";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x74>;
++			i2c-mux-idle-disconnect;
++
++			mux1_ch0:i2c@0 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <0>;
++			};
++
++			mux1_ch1:i2c@1 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <1>;
++			};
++
++			mux1_ch2:i2c@2 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <2>;
++			};
++
++			mux1_ch3:i2c@3 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <3>;
++			};
++
++			mux1_ch4:i2c@4 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <4>;
++			};
++
++			mux1_ch5:i2c@5 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <5>;
++			};
++
++			mux1_ch6:i2c@6 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <6>;
++			};
++
++			mux1_ch7:i2c@7 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <7>;
++			};
++		};
++	};
++
++	i2c@3 {
++		reg = <3>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
 +};
 +
 +&gfx {
