@@ -522,7 +522,7 @@
         },
         {
             "Address": "0x1f",
-            "Bus": 6,
+            "Bus": 14,
             "Name": "OCP_TEMP",
             "Name1": "OCP_NIC_TEMP",
             "Thresholds": [

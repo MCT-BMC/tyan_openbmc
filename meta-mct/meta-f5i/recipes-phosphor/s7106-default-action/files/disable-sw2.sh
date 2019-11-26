@@ -19,6 +19,6 @@ sensor_value=$(busctl get-property $service $object $interface $property | awk -
 
 if [ -z "$sensor_value" ]; then
     /usr/bin/gpioset gpiochip0 49=1
-    echo 0x1f > /sys/bus/i2c/devices/i2c-6/delete_device
+    echo 0x1f > /sys/bus/i2c/devices/i2c-14/delete_device
     echo " Didn't have OCP card , disable SW2"
 fi
