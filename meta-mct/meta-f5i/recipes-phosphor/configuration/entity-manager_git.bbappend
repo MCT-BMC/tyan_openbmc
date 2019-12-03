@@ -4,6 +4,7 @@ SRC_URI += "file://0001-s7106-Support-baseboard-fru-reading.patch \
             file://s7106-Baseboard.json \
             file://0002-NVME-change-to-use-NVME-MI-smbus-address.patch \
             file://0003-support-fru-write-offset.patch \
+            file://0004-workaroud-for-fru-edit.patch \
             "
 
 SRC_URI += "file://*.json"
