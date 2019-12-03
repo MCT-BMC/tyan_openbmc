@@ -1,0 +1,28 @@
+From 17cdb0cb399d8538e4ecd2b411429404b42b9941 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 29 Nov 2019 22:38:11 +0800
+Subject: [PATCH] force mb fru to 256 bytes
+
+---
+ src/storagecommands.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index c4038eb..963aafe 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -250,6 +250,14 @@ ipmi_ret_t replaceCacheFru(uint8_t devId)
+     {
+         sdbusplus::message::message getRawResp = dbus->call(getRawFru);
+         getRawResp.read(fruCache);
++        //MiTAC, force MB fru size to 256
++        if(devId == 0)
++        {
++            if(fruCache.size() < 256)
++            {
++                fruCache.resize(256, 0xFF); 
++            }
++        }
+     }
+     catch (sdbusplus::exception_t&)
+     {
