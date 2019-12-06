@@ -1,19 +1,19 @@
-From 107cf4feec3e83a7604eef06b8eba60b9b36b182 Mon Sep 17 00:00:00 2001
+From 93a4f161745f8bb5227bf2274970153b38fb2e33 Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 421 +++++++++++++++++++++++++++++++
- 1 file changed, 421 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 437 +++++++++++++++++++++++++++++++
+ 1 file changed, 437 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 new file mode 100755
-index 0000000..99f3531
+index 0000000..bd08a11
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,421 @@
+@@ -0,0 +1,437 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -435,3 +435,20 @@ index 0000000..99f3531
 +&peci0 {
 +    status = "okay";
 +};
++
++&gpio {
++	pin_gpio_g0 {
++		gpio-hog;
++		gpios = <ASPEED_GPIO(G,0) GPIO_ACTIVE_HIGH>;
++		output-low;
++		line-name = "SW1_EN";
++	};
++
++	pin_gpio_g1 {
++		gpio-hog;
++		gpios = <ASPEED_GPIO(G,1) GPIO_ACTIVE_HIGH>;
++		output-low;
++		line-name = "SW2_EN";
++	};
++};
+\ No newline at end of file
