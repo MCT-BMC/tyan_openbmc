@@ -1,4 +1,8 @@
 SUMMARY = "Fast open source processor emulator"
+DESCRIPTION = "QEMU is a hosted virtual machine monitor: it emulates the \
+machine's processor through dynamic binary translation and provides a set \
+of different hardware and device models for the machine, enabling it to run \
+a variety of guest operating systems"
 HOMEPAGE = "http://qemu.org"
 LICENSE = "GPLv2 & LGPLv2.1"
 
@@ -23,6 +27,8 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://0008-linux-user-Fix-webkitgtk-hangs-on-32-bit-x86-target.patch \
            file://0009-Fix-webkitgtk-builds.patch \
            file://0010-configure-Add-pkg-config-handling-for-libgcrypt.patch \
+           file://CVE-2019-15890.patch \
+           file://CVE-2019-12068.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
@@ -52,7 +58,7 @@ do_install_ptest() {
 }
 
 # QEMU_TARGETS is overridable variable
-QEMU_TARGETS ?= "arm aarch64 i386 mips mipsel mips64 mips64el ppc riscv32 riscv64 sh4 x86_64"
+QEMU_TARGETS ?= "arm aarch64 i386 mips mipsel mips64 mips64el ppc ppc64 riscv32 riscv64 sh4 x86_64"
 
 EXTRA_OECONF = " \
     --prefix=${prefix} \
@@ -89,6 +95,7 @@ do_configure_prepend_class-native() {
 do_configure() {
     ${S}/configure ${EXTRA_OECONF}
 }
+do_configure[cleandirs] += "${B}"
 
 do_install () {
 	export STRIP=""

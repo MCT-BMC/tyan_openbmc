@@ -3,8 +3,8 @@ HOMEPAGE = "http://pytest.org"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=640061b8cee64b308a4d2f9f556c12f2"
 
-SRC_URI[md5sum] = "90fec5504fcebc5d1081bcd654df7cf0"
-SRC_URI[sha256sum] = "b78fe2881323bd44fd9bd76e5317173d4316577e7b1cddebae9136a4495ec865"
+SRC_URI[md5sum] = "889344299c9182aff67d6e461cb7af29"
+SRC_URI[sha256sum] = "27abc3fef618a01bebb1f0d6d303d2816a99aa87a5968ebc32fe971be91eb1e6"
 
 SRC_URI_append = " file://0001-setup.py-remove-the-setup_requires-for-setuptools-scm.patch \
                    "
@@ -21,6 +21,11 @@ RDEPENDS_${PN}_class-target += " \
     ${PYTHON_PN}-setuptools \
     ${PYTHON_PN}-six \
     ${PYTHON_PN}-atomicwrites \
+    ${PYTHON_PN}-importlib-metadata \
+    ${PYTHON_PN}-pathlib2 \
+    ${PYTHON_PN}-wcwidth \
+    ${PYTHON_PN}-more-itertools \
+    ${PYTHON_PN}-packaging \
 "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/python-pytest:"

@@ -6,7 +6,9 @@ SUMMARY = "Self-hosting"
 DESCRIPTION = "Packages required to run the build system"
 PR = "r13"
 
-inherit packagegroup  distro_features_check
+PACKAGE_ARCH = "${TUNE_PKGARCH}"
+
+inherit packagegroup  features_check
 # rdepends on libx11-dev
 REQUIRED_DISTRO_FEATURES = "x11"
 
