@@ -1,16 +1,16 @@
-From 95ed1f94a8424877731deb10c773387810023dad Mon Sep 17 00:00:00 2001
-From: "Henbin.Chang" <henbin-chang@mic.com.tw>
-Date: Mon, 22 Jul 2019 18:30:45 +0800
-Subject: [PATCH] Implement master write read command
+From f20417789661b0749fe5e1b77755bc72a549982d Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 10 Dec 2019 22:24:22 +0800
+Subject: [PATCH 1/1] Implement master write read command
 
 ---
  Makefile.am               |   1 +
- apphandler.cpp            | 169 +++++++++++++++
+ apphandler.cpp            | 169 ++++++++++++
  apphandler.hpp            |   1 +
- coreTypes.h               | 118 ++++++++++
+ coreTypes.h               | 118 +++++++++
  host-ipmid-whitelist.conf |   1 +
- i2c_helper.cpp            | 535 ++++++++++++++++++++++++++++++++++++++++++++++
- i2c_helper.h              |  69 ++++++
+ i2c_helper.cpp            | 535 ++++++++++++++++++++++++++++++++++++++
+ i2c_helper.h              |  69 +++++
  7 files changed, 894 insertions(+)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 apphandler.cpp
@@ -23,24 +23,24 @@ Subject: [PATCH] Implement master write read command
 diff --git a/Makefile.am b/Makefile.am
 old mode 100644
 new mode 100755
-index dc3e91e..0307872
+index 02583fe..517b5e9
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -88,6 +88,7 @@ libipmi20_la_SOURCES = \
+@@ -90,6 +90,7 @@ libipmi20_la_SOURCES = \
  	app/watchdog.cpp \
  	app/watchdog_service.cpp \
  	apphandler.cpp \
 +	i2c_helper.cpp \
  	sys_info_param.cpp \
  	sensorhandler.cpp \
- 	storagehandler.cpp \
+ 	entity_map_json.cpp \
 diff --git a/apphandler.cpp b/apphandler.cpp
 old mode 100644
 new mode 100755
-index 09b1c2f..4f7b57d
+index 2430e8e..48e52bc
 --- a/apphandler.cpp
 +++ b/apphandler.cpp
-@@ -37,6 +37,9 @@
+@@ -38,6 +38,9 @@
  #include <xyz/openbmc_project/Software/Activation/server.hpp>
  #include <xyz/openbmc_project/Software/Version/server.hpp>
  #include <xyz/openbmc_project/State/BMC/server.hpp>
@@ -50,7 +50,7 @@ index 09b1c2f..4f7b57d
  
  extern sd_bus* bus;
  
-@@ -475,6 +478,165 @@ typedef struct
+@@ -462,6 +465,165 @@ typedef struct
      uint16_t d[2];
  } Revision;
  
@@ -216,7 +216,7 @@ index 09b1c2f..4f7b57d
  /* Currently supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will     */
  /* return -1 if not in those formats, this routine knows how to parse       */
  /* version = v0.6-19-gf363f61-dirty                                         */
-@@ -1306,6 +1468,13 @@ void register_netfn_app_functions()
+@@ -1695,6 +1857,13 @@ void register_netfn_app_functions()
                                ipmi::Privilege::Admin, ipmiMasterWriteRead);
      }
  
@@ -233,17 +233,17 @@ index 09b1c2f..4f7b57d
 diff --git a/apphandler.hpp b/apphandler.hpp
 old mode 100644
 new mode 100755
-index d4dd8e8..cef2440
+index 4f03121..a116430
 --- a/apphandler.hpp
 +++ b/apphandler.hpp
 @@ -19,6 +19,7 @@ enum ipmi_netfn_app_cmds
      IPMI_CMD_SET_CHAN_ACCESS = 0x40,
      IPMI_CMD_GET_CHANNEL_ACCESS = 0x41,
      IPMI_CMD_GET_CHAN_INFO = 0x42,
-+	IPMI_CMD_MASTER_WRITE_READ      = 0x52,
-     IPMI_CMD_GET_CHAN_CIPHER_SUITES = 0x54,
++    IPMI_CMD_MASTER_WRITE_READ  = 0x52,
      IPMI_CMD_SET_SYSTEM_INFO = 0x58,
      IPMI_CMD_GET_SYSTEM_INFO = 0x59,
+ };
 diff --git a/coreTypes.h b/coreTypes.h
 new file mode 100755
 index 0000000..a88b204
@@ -371,11 +371,11 @@ index 0000000..a88b204
 diff --git a/host-ipmid-whitelist.conf b/host-ipmid-whitelist.conf
 old mode 100644
 new mode 100755
-index 038db34..3ede6e9
+index 5397115..42f16ca
 --- a/host-ipmid-whitelist.conf
 +++ b/host-ipmid-whitelist.conf
-@@ -28,6 +28,7 @@
- 0x06:0x42    //<App>:<Get Channel Info Command>
+@@ -29,6 +29,7 @@
+ 0x06:0x4D    //<App>:<Get User Payload Access>
  0x06:0x4E    //<App>:<Get Channel Payload Support>
  0x06:0x4F    //<App>:<Get Channel Payload Version>
 +0x06:0x52    //<App>:<Master Write Read Command>
@@ -998,3 +998,6 @@ index 0000000..2f19abd
 +extern ssize_t i2c_master_read( char *i2c_dev, u8 slave, u8 *data, size_t count );
 +extern ssize_t i2c_master_write( char *i2c_dev, u8 slave, u8 *data, size_t count );
 +extern int i2c_writeread( char *i2c_dev, u8 slave, u8 *write_data, u8 *read_data,size_t write_count, size_t read_count);
+-- 
+2.22.0
+

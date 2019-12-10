@@ -1,60 +1,56 @@
-From 79aafd6d29fa09ba3670cb30cbd5b226d5e391a0 Mon Sep 17 00:00:00 2001
-From: "ray.lue" <ray.lue@mic.com.tw>
-Date: Thu, 11 Apr 2019 15:25:55 +0800
-Subject: [PATCH] Support temp2 and share the same threshold 1. take threshold
- value from 1st sensor. 2. add temp2 support
+From 08e7b96f942a61e50862cd712903c42824db58f3 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 10 Dec 2019 19:35:27 +0800
+Subject: [PATCH 1/1] Support temp2 and share the same threshold
 
 ---
- src/HwmonTempMain.cpp | 21 +++++++++++++++++++--
- 1 file changed, 19 insertions(+), 2 deletions(-)
+ src/HwmonTempMain.cpp | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
  mode change 100644 => 100755 src/HwmonTempMain.cpp
 
 diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
 old mode 100644
 new mode 100755
-index 7eaea30..1ed9bcb
+index 767459b..5d6befc
 --- a/src/HwmonTempMain.cpp
 +++ b/src/HwmonTempMain.cpp
-@@ -184,12 +184,14 @@ void createSensors(
+@@ -203,6 +203,7 @@ void createSensors(
+                     std::cerr << "error populating thresholds for "
+                               << sensorName << "\n";
+                 }
++                std::vector<thresholds::Threshold> t = sensorThresholds;
+                 auto& sensor1 = sensors[sensorName];
+                 sensor1 = nullptr;
+                 sensor1 = std::make_unique<HwmonTempSensor>(
+@@ -215,12 +216,27 @@ void createSensors(
+                     continue;
+                 }
+                 sensorName = std::get<std::string>(findSecondName->second);
++                
++                std::vector<thresholds::Threshold> t1 = t;
+                 auto& sensor2 = sensors[sensorName];
+                 sensor2 = nullptr;
+                 sensor2 = std::make_unique<HwmonTempSensor>(
+                     directory.string() + "/temp2_input", sensorType,
+                     objectServer, dbusConnection, io, sensorName,
+-                    std::vector<thresholds::Threshold>(), *interfacePath);
++                    std::move(t), *interfacePath); 
++
++                auto findThirddName = baseConfiguration->second.find("Name2"); 
++                if (findThirddName == baseConfiguration->second.end())
++                {
++                    continue; 
++                }
++
++                sensorName = std::get<std::string>(findThirddName->second);
++                auto& sensor3 = sensors[sensorName];
++                sensor3 = std::make_unique<HwmonTempSensor>(
++                    directory.string() + "/temp3_input", sensorType, 
++                    objectServer, dbusConnection, io, sensorName, 
++                    std::move(t1), *interfacePath);
              }
-         }
-         std::vector<thresholds::Threshold> sensorThresholds;
--        if (!parseThresholdsFromConfig(*sensorData, sensorThresholds))
-+		if (!parseThresholdsFromConfig(*sensorData, sensorThresholds))
-         {
-             std::cerr << "error populating thresholds for " << sensorName
-                       << "\n";
-         }
- 
-+		std::vector<thresholds::Threshold> t = sensorThresholds; 
-+		
-         sensors[sensorName] = std::make_unique<HwmonTempSensor>(
-             directory.string() + "/temp1_input", sensorType, objectServer,
-             dbusConnection, io, sensorName, std::move(sensorThresholds),
-@@ -201,10 +203,25 @@ void createSensors(
-         }
- 
-         sensorName = std::get<std::string>(findSecondName->second);
-+
-+		std::vector<thresholds::Threshold> t1 = t; 
-         sensors[sensorName] = std::make_unique<HwmonTempSensor>(
-             directory.string() + "/temp2_input", sensorType, objectServer,
-             dbusConnection, io, sensorName,
--            std::vector<thresholds::Threshold>(), *interfacePath);
-+            std::move(t), *interfacePath);
-+
-+		auto findThirddName = baseConfiguration->second.find("Name2");
-+		if (findThirddName == baseConfiguration->second.end())
-+		{
-+			continue;
-+		}
-+	
-+		sensorName = std::get<std::string>(findThirddName->second);
-+		sensors[sensorName] = std::make_unique<HwmonTempSensor>(
-+			directory.string() + "/temp3_input", sensorType, objectServer,
-+			dbusConnection, io, sensorName,
-+			std::move(t1), *interfacePath);
-+		
-     }
- }
- 
+         }));
+     getter->getConfiguration(
+-- 
+2.22.0
+
