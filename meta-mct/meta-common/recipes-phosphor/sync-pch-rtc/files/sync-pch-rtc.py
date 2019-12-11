@@ -6,6 +6,7 @@ import obmc_system_config as System
 import time
 
 def main():
+    subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
     try:
         pch_bus = System.PCH_CONFIG.get('i2c_bus', '')
     except:
@@ -14,9 +15,7 @@ def main():
 
     print("Sync BMC time with PCH RTC on I2C bus " + pch_bus+ "...")
 
-    subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
-    time.sleep(5)
-    print("start i2c access")
+    #print("start i2c access")
     try: 
         SEC = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0x9 | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
     except: 
@@ -34,12 +33,15 @@ def main():
     MON = MON.strip()
     YEAR = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xf | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
     YEAR = YEAR.strip()
-    try: 
-        subprocess.call("/usr/bin/timedatectl set-time "+YEAR+"-"+MON+"-"+DAY, shell=True)
-    except:
-        print("set time failed")
-        return 1
-
+    
+    times = 5
+    for i in range(times):
+        res = subprocess.call("/usr/bin/timedatectl set-time "+YEAR+"-"+MON+"-"+DAY, shell=True)
+        print res
+        if res == 0 :
+            break 
+        time.sleep(2)
+ 
     subprocess.call("/usr/bin/timedatectl set-time "+HOUR+":"+MIN+":"+SEC, shell=True)
 
     print "sync time=20"+YEAR+"-"+MON+"-"+DAY+" "+HOUR+":"+MIN+":"+SEC
