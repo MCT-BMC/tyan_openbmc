@@ -1,0 +1,749 @@
+From 444e63280f6f4e75153e5dc01023e4937de47aef Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Tue, 10 Dec 2019 10:13:38 +0800
+Subject: [PATCH] f5i fan speed control
+
+---
+ Makefile.am                |   5 +-
+ conf.hpp                   |   2 +
+ dbus/dbusconfiguration.cpp | 147 ++++++++++++++++++++++++++++++++++-
+ pid/builder.cpp            |  12 +++
+ pid/buildjson.cpp          |  48 +++++++++++-
+ pid/ec/fsc.cpp             |  44 +++++++++++
+ pid/ec/fsc.hpp             |  41 ++++++++++
+ pid/fsccontroller.cpp      | 189 +++++++++++++++++++++++++++++++++++++++++++++
+ pid/fsccontroller.hpp      |  59 ++++++++++++++
+ pid/zone.cpp               |   1 +
+ 10 files changed, 541 insertions(+), 7 deletions(-)
+ mode change 100644 => 100755 Makefile.am
+ mode change 100644 => 100755 conf.hpp
+ mode change 100644 => 100755 dbus/dbusconfiguration.cpp
+ mode change 100644 => 100755 pid/builder.cpp
+ mode change 100644 => 100755 pid/buildjson.cpp
+ create mode 100755 pid/ec/fsc.cpp
+ create mode 100755 pid/ec/fsc.hpp
+ create mode 100755 pid/fsccontroller.cpp
+ create mode 100755 pid/fsccontroller.hpp
+ mode change 100644 => 100755 pid/zone.cpp
+
+diff --git a/Makefile.am b/Makefile.am
+old mode 100644
+new mode 100755
+index 45b26d4..2392da9
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -76,8 +76,7 @@ libswampd_la_CXXFLAGS = \
+ 	$(SDBUSPLUS_CFLAGS) \
+ 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+ 	$(PHOSPHOR_LOGGING_CFLAGS) \
+-	$(CODE_COVERAGE_CXXFLAGS) \
+-	-flto
++	$(CODE_COVERAGE_CXXFLAGS)
+ 
+ libswampd_la_SOURCES = \
+ 	notimpl/readonly.cpp \
+@@ -97,10 +96,12 @@ libswampd_la_SOURCES = \
+ 	sensors/manager.cpp \
+ 	pid/ec/pid.cpp \
+ 	pid/ec/stepwise.cpp \
++	pid/ec/fsc.cpp \
+ 	pid/fancontroller.cpp \
+ 	pid/thermalcontroller.cpp \
+ 	pid/pidcontroller.cpp \
+ 	pid/stepwisecontroller.cpp \
++	pid/fsccontroller.cpp \
+ 	pid/builder.cpp \
+ 	pid/buildjson.cpp \
+ 	pid/zone.cpp \
+diff --git a/conf.hpp b/conf.hpp
+old mode 100644
+new mode 100755
+index 95bdeaa..0707649
+--- a/conf.hpp
++++ b/conf.hpp
+@@ -2,6 +2,7 @@
+ 
+ #include "pid/ec/pid.hpp"
+ #include "pid/ec/stepwise.hpp"
++#include "pid/ec/fsc.hpp"
+ 
+ #include <map>
+ #include <string>
+@@ -38,6 +39,7 @@ struct ControllerInfo
+     {
+         ec::pidinfo pidInfo; // pid details
+         ec::StepwiseInfo stepwiseInfo;
++        ec::FscInfo fscInfo;
+     };
+ };
+ 
+diff --git a/dbus/dbusconfiguration.cpp b/dbus/dbusconfiguration.cpp
+old mode 100644
+new mode 100755
+index e68c852..5ab41a4
+--- a/dbus/dbusconfiguration.cpp
++++ b/dbus/dbusconfiguration.cpp
+@@ -45,6 +45,8 @@ constexpr const char* pidZoneConfigurationInterface =
+     "xyz.openbmc_project.Configuration.Pid.Zone";
+ constexpr const char* stepwiseConfigurationInterface =
+     "xyz.openbmc_project.Configuration.Stepwise";
++constexpr const char* fscConfigurationInterface =
++    "xyz.openbmc_project.Configuration.Fsc";
+ constexpr const char* thermalControlIface =
+     "xyz.openbmc_project.Control.ThermalMode";
+ constexpr const char* sensorInterface = "xyz.openbmc_project.Sensor.Value";
+@@ -265,9 +267,10 @@ void createMatches(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+     // this is a list because the matches can't be moved
+     static std::list<sdbusplus::bus::match::match> matches;
+ 
+-    const std::array<std::string, 4> interfaces = {
++    const std::array<std::string, 5> interfaces = {
+         thermalControlIface, pidConfigurationInterface,
+-        pidZoneConfigurationInterface, stepwiseConfigurationInterface};
++        pidZoneConfigurationInterface, stepwiseConfigurationInterface,
++        fscConfigurationInterface};
+ 
+     // this list only needs to be created once
+     if (!matches.empty())
+@@ -405,10 +408,11 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                             "/xyz/openbmc_project/object_mapper",
+                             "xyz.openbmc_project.ObjectMapper", "GetSubTree");
+     mapper.append("/", 0,
+-                  std::array<const char*, 6>{objectManagerInterface,
++                  std::array<const char*, 7>{objectManagerInterface,
+                                              pidConfigurationInterface,
+                                              pidZoneConfigurationInterface,
+                                              stepwiseConfigurationInterface,
++                                             fscConfigurationInterface,
+                                              sensorInterface, pwmInterface});
+     std::unordered_map<
+         std::string, std::unordered_map<std::string, std::vector<std::string>>>
+@@ -447,7 +451,8 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                 }
+                 if (interface == pidConfigurationInterface ||
+                     interface == pidZoneConfigurationInterface ||
+-                    interface == stepwiseConfigurationInterface)
++                    interface == stepwiseConfigurationInterface ||
++                    interface == fscConfigurationInterface)
+                 {
+                     owner.first = true;
+                 }
+@@ -495,6 +500,8 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                 pathPair.second.find(pidZoneConfigurationInterface) !=
+                     pathPair.second.end() ||
+                 pathPair.second.find(stepwiseConfigurationInterface) !=
++                    pathPair.second.end() ||
++                pathPair.second.find(fscConfigurationInterface) !=
+                     pathPair.second.end())
+             {
+                 configurations.emplace(pathPair);
+@@ -812,6 +819,138 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                 }
+             }
+         }
++        auto findFsc =
++            configuration.second.find(fscConfigurationInterface);
++        if (findFsc != configuration.second.end())
++        {
++            const auto& base = findFsc->second;
++            const std::vector<std::string>& zones =
++                std::get<std::vector<std::string>>(base.at("Zones"));
++            for (const std::string& zone : zones)
++            {
++                size_t index = getZoneIndex(zone, foundZones);
++                conf::PIDConf& conf = zoneConfig[index];
++
++                std::vector<std::string> inputs;
++                std::vector<std::string> sensorNames =
++                std::get<std::vector<std::string>>(base.at("Inputs"));
++
++                bool sensorFound = false;
++
++                for (const std::string& sensorName : sensorNames)
++                {
++
++                    std::string name = sensorName;
++                    // replace spaces with underscores to be legal on dbus
++                    std::replace(name.begin(), name.end(), ' ', '_');
++                    std::vector<std::pair<std::string, std::string>>
++                        sensorPathIfacefsc;
++
++                    if (!findSensors(sensors, name, sensorPathIfacefsc))
++                    {
++                        break;
++                    }
++
++                    for (const auto& sensorPathIfacePair : sensorPathIfacefsc)
++                    {
++                        size_t idx =
++                            sensorPathIfacePair.first.find_last_of("/") + 1;
++                        std::string shortName =
++                            sensorPathIfacePair.first.substr(idx);
++
++                        inputs.push_back(shortName);
++                        auto& config = sensorConfig[shortName];
++                        config.readPath = sensorPathIfacePair.first;
++                        config.type = "temp";
++                        // todo: maybe un-hardcode this if we run into slower
++                        // timeouts with sensors
++
++                        config.timeout = 0;
++                        sensorFound = true;
++                    }
++                }
++
++                if (!sensorFound)
++                {
++                    continue;
++                }
++
++                struct conf::ControllerInfo& info =
++                    conf[std::get<std::string>(base.at("Name"))];
++                info.inputs = std::move(inputs);
++
++                info.type = "fsc";
++                info.fscInfo.ts = 1.0; // currently unused
++                info.fscInfo.positiveHysteresis = 0.0;
++                info.fscInfo.negativeHysteresis = 0.0;
++
++                std::string subtype = std::get<std::string>(base.at("Class"));
++
++                //info.fscInfo.isCeiling = (subtype == "Ceiling");
++                auto findSPH = base.find("SetPointH");
++                auto findSPL = base.find("SetPointL");
++                if (findSPH != base.end())
++                {
++                    info.fscInfo.setPointH = std::visit(
++                        VariantToDoubleVisitor(), findSPH->second);
++                }
++                if (findSPL != base.end())
++                {
++                    info.fscInfo.setPointL = std::visit(
++                        VariantToDoubleVisitor(), findSPL->second);
++                }
++
++                info.fscInfo.outLimMax =
++                    std::visit(VariantToDoubleVisitor(), base.at("OutLimitMax"));
++                info.fscInfo.outLimMin =
++                    std::visit(VariantToDoubleVisitor(), base.at("OutLimitMin"));
++
++                auto findPosHyst = base.find("PositiveHysteresis");
++                auto findNegHyst = base.find("NegativeHysteresis");
++                if (findPosHyst != base.end())
++                {
++                    info.fscInfo.positiveHysteresis = std::visit(
++                        VariantToDoubleVisitor(), findPosHyst->second);
++                }
++                if (findNegHyst != base.end())
++                {
++                    info.fscInfo.negativeHysteresis = std::visit(
++                        VariantToDoubleVisitor(), findNegHyst->second);
++                }
++                std::vector<double> readings =
++                    std::get<std::vector<double>>(base.at("Reading"));
++                if (readings.size() > ec::maxFscPoints)
++                {
++                    throw std::invalid_argument("Too many fsc points.");
++                }
++                if (readings.empty())
++                {
++                    throw std::invalid_argument(
++                        "Must have one fsc point.");
++                }
++                std::copy(readings.begin(), readings.end(),
++                          info.stepwiseInfo.reading);
++                if (readings.size() < ec::maxFscPoints)
++                {
++                    info.fscInfo.reading[readings.size()] =
++                        std::numeric_limits<double>::quiet_NaN();
++                }
++                std::vector<double> outputs =
++                    std::get<std::vector<double>>(base.at("Output"));
++                if (readings.size() != outputs.size())
++                {
++                    throw std::invalid_argument(
++                        "Outputs size must match readings");
++                }
++                std::copy(outputs.begin(), outputs.end(),
++                          info.fscInfo.output);
++                if (outputs.size() < ec::maxFscPoints)
++                {
++                    info.fscInfo.output[outputs.size()] =
++                        std::numeric_limits<double>::quiet_NaN();
++                }
++            }
++        }
+     }
+     if constexpr (DEBUG)
+     {
+diff --git a/pid/builder.cpp b/pid/builder.cpp
+old mode 100644
+new mode 100755
+index 1fbfbd4..8e60192
+--- a/pid/builder.cpp
++++ b/pid/builder.cpp
+@@ -21,6 +21,7 @@
+ #include "pid/fancontroller.hpp"
+ #include "pid/stepwisecontroller.hpp"
+ #include "pid/thermalcontroller.hpp"
++#include "pid/fsccontroller.hpp"
+ 
+ #include <iostream>
+ #include <memory>
+@@ -119,6 +120,17 @@ std::unordered_map<int64_t, std::unique_ptr<PIDZone>>
+                     zone.get(), name, inputs, info->stepwiseInfo);
+                 zone->addThermalPID(std::move(stepwise));
+             }
++            else if (info->type == "fsc")
++            {
++                for (const auto& i : info->inputs)
++                {
++                    inputs.push_back(i);
++                    zone->addThermalInput(i);
++                }
++                auto fsc = FscController::createFscController(
++                    zone.get(), name, inputs, info->fscInfo);
++                zone->addThermalPID(std::move(fsc));
++            }
+ 
+             std::cerr << "inputs: ";
+             for (const auto& i : inputs)
+diff --git a/pid/buildjson.cpp b/pid/buildjson.cpp
+old mode 100644
+new mode 100755
+index 5e90c47..f6f31e4
+--- a/pid/buildjson.cpp
++++ b/pid/buildjson.cpp
+@@ -51,7 +51,7 @@ void from_json(const json& j, conf::ControllerInfo& c)
+         p.at("negativeHysteresis").get_to(negativeHysteresisValue);
+     }
+ 
+-    if (c.type != "stepwise")
++    if ((c.type != "stepwise") && (c.type != "fsc"))
+     {
+         p.at("samplePeriod").get_to(c.pidInfo.ts);
+         p.at("proportionalCoeff").get_to(c.pidInfo.proportionalCoeff);
+@@ -68,6 +68,52 @@ void from_json(const json& j, conf::ControllerInfo& c)
+         c.pidInfo.positiveHysteresis = positiveHysteresisValue;
+         c.pidInfo.negativeHysteresis = negativeHysteresisValue;
+     }
++    else if (c.type == "fsc")
++    {
++        p.at("samplePeriod").get_to(c.fscInfo.ts);
++        //p.at("isCeiling").get_to(c.stepwiseInfo.isCeiling);
++        p.at("setPointH").get_to(c.fscInfo.setPointH);
++        p.at("setPointL").get_to(c.fscInfo.setPointL);
++        p.at("outLim_min").get_to(c.fscInfo.outLimMin);
++        p.at("outLim_max").get_to(c.fscInfo.outLimMax);
++
++        for (size_t i = 0; i < ec::maxFscPoints; i++)
++        {
++            c.fscInfo.reading[i] =
++            std::numeric_limits<double>::quiet_NaN();
++            c.fscInfo.output[i] = std::numeric_limits<double>::quiet_NaN();
++        }
++
++        auto reading = p.find("reading");
++        if (reading != p.end())
++        {
++            auto r = p.at("reading");
++            for (size_t i = 0; i < ec::maxFscPoints; i++)
++            {
++                auto n = r.find(std::to_string(i));
++                if (n != r.end())
++                {
++                    r.at(std::to_string(i)).get_to(c.fscInfo.reading[i]);
++                }
++            }
++        }
++
++        auto output = p.find("output");
++        if (output != p.end())
++        {
++            auto o = p.at("output");
++            for (size_t i = 0; i < ec::maxFscPoints; i++)
++            {
++                auto n = o.find(std::to_string(i));
++                if (n != o.end())
++                {
++                    o.at(std::to_string(i)).get_to(c.fscInfo.output[i]);
++                }
++            }
++        }
++        c.stepwiseInfo.positiveHysteresis = positiveHysteresisValue;
++        c.stepwiseInfo.negativeHysteresis = negativeHysteresisValue;
++    }
+     else
+     {
+         p.at("samplePeriod").get_to(c.stepwiseInfo.ts);
+diff --git a/pid/ec/fsc.cpp b/pid/ec/fsc.cpp
+new file mode 100755
+index 0000000..345b20e
+--- /dev/null
++++ b/pid/ec/fsc.cpp
+@@ -0,0 +1,44 @@
++/*
++// Copyright (c) 2019
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++*/
++
++#include "fsc.hpp"
++
++#include <cmath>
++#include <cstddef>
++#include <limits>
++
++namespace ec
++{
++double fsc(const ec::FscInfo& info, double input)
++{
++    double value = info.output[0];
++
++    for (size_t ii = 1; ii < ec::maxFscPoints; ii++)
++    {
++        if (std::isnan(info.reading[ii]))
++        {
++            break;
++        }
++        if (info.reading[ii] > input)
++        {
++            break;
++        }
++        value = info.output[ii];
++    }
++
++    return value;
++}
++} // namespace ec
+diff --git a/pid/ec/fsc.hpp b/pid/ec/fsc.hpp
+new file mode 100755
+index 0000000..c9db312
+--- /dev/null
++++ b/pid/ec/fsc.hpp
+@@ -0,0 +1,41 @@
++/*
++// Copyright (c) 2019
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++*/
++
++#pragma once
++
++#include <cstddef>
++#include <vector>
++
++namespace ec
++{
++constexpr size_t maxFscPoints = 5;
++
++struct FscInfo
++{
++    double ts; // sample time in seconds
++    double reading[maxFscPoints];
++    double output[maxFscPoints];
++    double positiveHysteresis;
++    double negativeHysteresis;
++    double setPointH;
++    double setPointL;
++    double outLimMax;
++    double outLimMin;
++};
++
++double fsc(const ec::FscInfo& info, double value);
++
++}
+diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
+new file mode 100755
+index 0000000..e1bed58
+--- /dev/null
++++ b/pid/fsccontroller.cpp
+@@ -0,0 +1,189 @@
++/*
++// Copyright (c) 2019
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++*/
++
++#include "fsccontroller.hpp"
++
++#include "ec/fsc.hpp"
++#include "errors/exception.hpp"
++#include "util.hpp"
++#include "zone.hpp"
++
++#include <algorithm>
++#include <chrono>
++#include <cmath>
++#include <iostream>
++#include <map>
++#include <memory>
++#include <thread>
++#include <vector>
++
++void FscController::process(void)
++{
++    // Get input value
++    double input = inputProc();
++
++    ec::FscInfo info = get_fsc_info();
++
++    double output;
++
++    if (std::isnan(delayTime))
++    {
++        delayTime = 0;
++    }
++
++    if (std::isnan(lastOutput))
++    {
++        floorSenIn = input;
++        output = ec::fsc(info, input);
++        lastOutput = output;
++        floorSenOut = output;
++        delayTime = 0;
++    }
++    else
++    {
++        output = lastOutput;
++        if (std::isnan(updateDir))
++        {
++            if (input > info.setPointH)
++            {
++                updateDir = 1;
++                output = lastOutput + 2;
++            }
++            lastInput = input;
++            delayTime = 0;
++        }
++        else
++        {
++            if ((updateDir == 1) && (delayTime >= 5))
++            {
++                if (input >= lastInput)
++                {
++                    output = lastOutput + 2;
++                    if (output >= info.outLimMax)
++                    {
++                        output = info.outLimMax;
++                    }
++                    delayTime = 0;
++                    lastInput = input;
++                }
++                else if ((input < lastInput) && (input < info.setPointL))
++                {
++                    updateDir = 2;
++                    output = lastOutput - 2;
++                    delayTime = 0;
++                    lastInput = input;
++                }
++            }
++            else if ((updateDir == 2) && (delayTime >= 30))
++            {
++                if (input < lastInput)
++                {
++                    output = lastOutput - 2;
++                    if (output <= floorSenOut)
++                    {
++                        output = floorSenOut;
++                    }
++                    delayTime = 0;
++                    lastInput = input;
++                }
++                else if ((input >= lastInput) && (input >= info.setPointH))
++                {
++                    updateDir = 1;
++                    output = lastOutput + 2;
++                    delayTime = 0;
++                    lastInput = input;
++                }
++            }
++        }
++    }
++
++    if (delayTime > 100)
++    {
++        delayTime = 0;
++    }
++    else
++    {
++        delayTime += 1;
++    }
++
++    lastOutput = output;
++
++    // Output new value
++    outputProc(output);
++
++    return;
++}
++
++std::unique_ptr<Controller> FscController::createFscController(
++    ZoneInterface* owner, const std::string& id,
++    const std::vector<std::string>& inputs, const ec::FscInfo& initial)
++{
++    // FscController requires at least 1 input
++    if (inputs.empty())
++    {
++        throw ControllerBuildException("Fsc controller missing inputs");
++        return nullptr;
++    }
++
++    auto thermal = std::make_unique<FscController>(id, inputs, owner);
++
++    ec::FscInfo& info = thermal->get_fsc_info();
++
++    info = initial;
++
++    return thermal;
++}
++
++double FscController::inputProc(void)
++{
++    double value = std::numeric_limits<double>::lowest();
++    double sensorvalue[10];
++    size_t i=0;
++
++    for (const auto& in : _inputs)
++    {
++        sensorvalue[i]=_owner->getCachedValue(in);
++        i++;
++    }
++
++    if (std::isnan(floorSenIn))
++    {
++        value = sensorvalue[0];
++    }
++    else
++    {
++        if ( i > 1)
++        {
++            for (size_t j=1; j<i; j++)
++            {
++                value = std::max(value, sensorvalue[j]);
++            }
++        }
++        else
++        {
++            value = sensorvalue[0];
++        }
++    }
++
++    return value;
++}
++
++void FscController::outputProc(double value)
++{
++        _owner->addSetPoint(value);
++
++    return;
++}
+diff --git a/pid/fsccontroller.hpp b/pid/fsccontroller.hpp
+new file mode 100755
+index 0000000..143873f
+--- /dev/null
++++ b/pid/fsccontroller.hpp
+@@ -0,0 +1,59 @@
++#pragma once
++
++#include "controller.hpp"
++#include "ec/fsc.hpp"
++#include "fan.hpp"
++
++#include <limits>
++#include <memory>
++#include <vector>
++
++class ZoneInterface;
++
++class FscController : public Controller
++{
++  public:
++    static std::unique_ptr<Controller>
++        createFscController(ZoneInterface* owner, const std::string& id,
++                                 const std::vector<std::string>& inputs,
++                                 const ec::FscInfo& initial);
++
++    FscController(const std::string& id,
++                       const std::vector<std::string>& inputs,
++                       ZoneInterface* owner) :
++        Controller(),
++        _owner(owner), _id(id), _inputs(inputs)
++    {
++    }
++
++    double inputProc(void) override;
++
++    void outputProc(double value) override;
++
++    void process(void) override;
++
++    std::string getID(void) override
++    {
++        return _id;
++    }
++
++    ec::FscInfo& get_fsc_info(void)
++    {
++        return _fsc_info;
++    }
++
++  protected:
++    ZoneInterface* _owner;
++
++  private:
++    // parameters
++    ec::FscInfo _fsc_info;
++    std::string _id;
++    std::vector<std::string> _inputs;
++    double lastInput = std::numeric_limits<double>::quiet_NaN();
++    double lastOutput = std::numeric_limits<double>::quiet_NaN();
++    double floorSenIn = std::numeric_limits<double>::quiet_NaN();
++    double floorSenOut = std::numeric_limits<double>::quiet_NaN();
++    double delayTime = std::numeric_limits<double>::quiet_NaN();
++    double updateDir = std::numeric_limits<double>::quiet_NaN();
++};
+diff --git a/pid/zone.cpp b/pid/zone.cpp
+old mode 100644
+new mode 100755
+index 6a63671..f27096a
+--- a/pid/zone.cpp
++++ b/pid/zone.cpp
+@@ -23,6 +23,7 @@
+ #include "pid/fancontroller.hpp"
+ #include "pid/stepwisecontroller.hpp"
+ #include "pid/thermalcontroller.hpp"
++#include "pid/fsccontroller.hpp"
+ #include "pid/tuning.hpp"
+ 
+ #include <algorithm>
