@@ -1,0 +1,16 @@
+[    
+    {
+         "ownerId" : "0x1f",
+         "sensorNumber" : "0xed",
+         "sensorType" : "0x12",
+         "sensorName" : "END OF POST"
+    },
+    {
+         "ownerId" : "0x1f",
+         "sensorNumber" : "0xee",
+         "sensorType" : "0x12",
+         "sensorName" : "START OF POST"
+    }
+
+]
+
