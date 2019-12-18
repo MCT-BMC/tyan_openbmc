@@ -14,5 +14,6 @@ SRC_URI += "file://0001-s7106-disable-Intel-OEM-command.patch \
             file://0012-PSU-status-sel-log.patch \
             file://0013-force-mb-fru-to-256-bytes.patch \
             file://0014-implement-defined-sdr-table.patch \
+            file://0015-fix-ipmi-get-sel-issue.patch \
             "
 

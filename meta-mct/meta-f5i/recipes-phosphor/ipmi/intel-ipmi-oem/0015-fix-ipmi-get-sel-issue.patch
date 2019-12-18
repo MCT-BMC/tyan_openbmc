@@ -1,0 +1,31 @@
+From c5234efa94989ed50dfb22d332d0b8075b196b40 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 18 Dec 2019 11:16:46 +0800
+Subject: [PATCH] fix ipmi get sel issue
+
+---
+ src/sensorcommands.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/sensorcommands.cpp b/src/sensorcommands.cpp
+index f06bce7..0cf9e5e 100755
+--- a/src/sensorcommands.cpp
++++ b/src/sensorcommands.cpp
+@@ -1196,7 +1196,7 @@ static void loadSdr(uint16_t baseID)
+     tmp.header.record_length = sizeof(SensorDataEventOnlyRecord) -
+                                       sizeof(get_sdr::SensorDataRecordHeader); 
+     tmp.key.owner_lun = 0x0;
+-    tmp.body.entity_id = 0x0;
++    tmp.body.entity_id = 0x07;
+     tmp.body.entity_instance = 0x01;
+     tmp.body.event_reading_type = 0x6f;
+     
+@@ -1365,7 +1365,7 @@ ipmi::RspType<uint16_t,            // next record ID
+         record.key.owner_lun = 0x0;
+         record.key.sensor_number = sensornumber;
+ 
+-        record.body.entity_id = 0x0;
++        record.body.entity_id = 0x07;
+         record.body.entity_instance = 0x01;
+         record.body.sensor_type = getSensorTypeFromPath(path);
+         record.body.event_reading_type = 0x6f;
