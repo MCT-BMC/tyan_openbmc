@@ -5,50 +5,6 @@
                 "Address": "0x58",
                 "Bus": "$bus",
                 "Name": "PSU0",
-                "Thresholds" : [
-                    {
-                        "Direction": "greater than",
-                        "Label": "pin",
-                        "Name": "upper critical",
-                        "Severity": 1,
-                        "Value": 954.5
-                    },
-                    {
-                        "Direction": "greater than",
-                        "Label": "pin",
-                        "Name": "upper non critical",
-                        "Severity": 0,
-                        "Value": 900
-                    },
-                    {
-                        "Direction": "greater than",
-                        "Label": "iout1",
-                        "Name": "upper critical",
-                        "Severity": 1,
-                        "Value": 112
-                    },
-                    {
-                        "Direction": "greater than",
-                        "Label": "iout1",
-                        "Name": "upper non critical",
-                        "Severity": 0,
-                        "Value": 100
-                    },
-                    {
-                        "Direction": "greater than",
-                        "Label": "temp1",
-                        "Name": "upper critical",
-                        "Severity": 1,
-                        "Value": 65
-                    },
-                    {
-                        "Direction": "greater than",
-                        "Label": "temp1",
-                        "Name": "upper non critical",
-                        "Severity": 0,
-                        "Value": 62
-                    }
-                ],
                 "Type": "pmbus"
             },
             {

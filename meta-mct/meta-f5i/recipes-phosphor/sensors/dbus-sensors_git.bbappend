@@ -18,6 +18,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0016-add-psu-status-sensor.patch \
             file://0017-Enabling-NVMe-sensor-support.patch \
             file://0018-change-power-match-to-pgood-event.patch \
+            file://0019-f5i-modify-temp-and-Die-sensor-threshold-setting.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
