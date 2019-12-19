@@ -23,4 +23,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           system-watchdog \
                                           phosphor-u-boot-mgr \
                                           bmc-sel \
+                                          mct-ipmi-oem \
                                         "
