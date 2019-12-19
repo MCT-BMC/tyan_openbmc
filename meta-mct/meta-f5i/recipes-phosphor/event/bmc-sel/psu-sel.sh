@@ -70,11 +70,11 @@ while true; do
     if [ $SendLog == 0 ]; then
         if [ $Fault == 1 ]; then
             # send sel log , 01h : Power Supply Failure detected
-            busctl call $SERVICE $OBJECT $INTERFACE $METHOD ssaybq "SEL Entry" "/xyz/openbmc_project/sensors/power_supply/PSU_STATUA" 3 {0x01,0x00,0x00} yes 0x20
+            busctl call $SERVICE $OBJECT $INTERFACE $METHOD ssaybq "SEL Entry" "/xyz/openbmc_project/sensors/power_supply/PSU_STATUS" 3 {0x01,0x00,0x00} yes 0x20
             SendLog=1
         elif [ $Warning == 1 ]; then
             # send sel log , 02h : Predictive Failure
-            busctl call $SERVICE $OBJECT $INTERFACE $METHOD ssaybq "SEL Entry" "/xyz/openbmc_project/sensors/power_supply/PSU_STATUA" 3 {0x02,0x00,0x00} yes 0x20
+            busctl call $SERVICE $OBJECT $INTERFACE $METHOD ssaybq "SEL Entry" "/xyz/openbmc_project/sensors/power_supply/PSU_STATUS" 3 {0x02,0x00,0x00} yes 0x20
             SendLog=1
         fi
     else

@@ -123,7 +123,7 @@ index 0000000..9dbbad0
 +static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
 +
 +static const std::string ipmiSELAddMessage = "SEL Entry";
-+static const std::string sensorPath = "/xyz/openbmc_project/sensors/power_supply/PSU_STATUA";
++static const std::string sensorPath = "/xyz/openbmc_project/sensors/power_supply/PSU_STATUS";
 +
 +static constexpr size_t selEvtDataMaxSize = 3;
 +
