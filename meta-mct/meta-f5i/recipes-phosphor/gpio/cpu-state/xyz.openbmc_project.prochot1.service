@@ -1,0 +1,8 @@
+[Unit]
+Description=assert Prochot1 
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env prochot_update.sh assert CPU1_State 
+SyslogIdentifier=prochot1_assert
+

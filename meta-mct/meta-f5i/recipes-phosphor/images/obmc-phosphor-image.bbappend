@@ -5,7 +5,7 @@ OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           hbled-ctrl \
                                           s7106-powerctrl \
                                           s7106-default-action \
-                                          caterr-update \ 
+                                          cpu-state \ 
                                           phosphor-ipmi-ipmb \
                                           entity-manager \
                                           dbus-sensors \
