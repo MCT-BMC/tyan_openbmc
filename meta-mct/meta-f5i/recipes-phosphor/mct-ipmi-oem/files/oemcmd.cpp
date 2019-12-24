@@ -22,6 +22,12 @@
 #include <sdbusplus/timer.hpp>
 #include <gpiod.hpp>
 
+#include <ipmid/api.hpp>
+#include <ipmid/utils.hpp>
+
+namespace ipmi
+{
+
 void register_netfn_mct_oem() __attribute__((constructor));
 
 int execmd(char* cmd,char* result) {
@@ -121,7 +127,7 @@ ipmi_ret_t ipmiOpmaClearCmos(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 /* Set Fan Control Enable Command
-NetFun: 0x2E/ 0x30
+NetFun: 0x2E
 Cmd : 0x06
 Request:
         Byte 1-3 : Tyan Manufactures ID (FD 19 00)
@@ -133,57 +139,17 @@ Response:
         Byte 2-4 : Tyan Manufactures ID
         Byte (5) : Current Fan Control Status , present if FFh passed to Enable Fan Control in Request
 */
-ipmi_ret_t ipmi_tyan_ManufactureMode(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi::RspType<uint8_t> ipmi_tyan_ManufactureMode(uint8_t mode)
 {
-    ipmi_ret_t ipmi_rc = IPMI_CC_OK;
     std::fstream file;
-
     int rc=0;
     char command[100];
     char FSCStatus[100];
-    uint8_t responseData[4]={0};
     uint8_t currentStatus;
 
-    auto* requestData= reinterpret_cast<ManufactureModeRequest*>(request);
-
-    if((int)*data_len != 4) 
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    for(int i=0; i<(int)((*data_len)-1); i++)
-    {
-        responseData[i]=requestData->manufactureID[i];
-    }
-
-    file.open("/usr/sbin/fsc",std::ios::in);
-    if(!file)
-    {
-        memset(command,0,sizeof(command));
-        sprintf(command, "touch /usr/sbin/fsc");
-        system(command);
-
-        memset(command,0,sizeof(command));
-        sprintf(command, "echo 1 > /usr/sbin/fsc");
-        system(command);
-
-        currentStatus=1;
-    }
-    else
-    {
-        file.read(FSCStatus,sizeof(FSCStatus));
-
-        currentStatus = strtol(FSCStatus,NULL,16);
-        file.close();
-    }
-    file.close();
-
-    if (requestData->mode == 0)
+    if (mode == 0)
     {
         // Disable Fan Control
-        *data_len=3;
         memset(command,0,sizeof(command));
         sprintf(command, "systemctl stop phosphor-pid-control.service");
         rc = system(command);
@@ -192,10 +158,9 @@ ipmi_ret_t ipmi_tyan_ManufactureMode(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sprintf(command, "echo 0 > /usr/sbin/fsc");
         system(command);
     }
-    else if (requestData->mode == 1)
+    else if (mode == 1)
     {
         // Enable Fan Control
-        *data_len=3;
         memset(command,0,sizeof(command));
         sprintf(command, "systemctl start phosphor-pid-control.service");
         rc = system(command);
@@ -204,29 +169,45 @@ ipmi_ret_t ipmi_tyan_ManufactureMode(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sprintf(command, "echo 1 > /usr/sbin/fsc");
         system(command);
     }
-    else if (requestData->mode == 0xff)
+    else if (mode == 0xff)
     {
         // Get Current Fan Control Status
-        *data_len=4;
-        responseData[3]=currentStatus;
+        file.open("/usr/sbin/fsc",std::ios::in);
+        if(!file)
+        {
+            memset(command,0,sizeof(command));
+            sprintf(command, "touch /usr/sbin/fsc");
+            system(command);
+
+            memset(command,0,sizeof(command));
+            sprintf(command, "echo 1 > /usr/sbin/fsc");
+            system(command);
+
+            currentStatus=1;
+        }
+        else
+        {
+            file.read(FSCStatus,sizeof(FSCStatus));
+            currentStatus = strtol(FSCStatus,NULL,16);
+        }
+        file.close();
+        return ipmi::responseSuccess(currentStatus);
     }
     else
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     if (rc != 0)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    memcpy(response, responseData, sizeof(responseData));
-
-    return ipmi_rc;
+    return ipmi::responseSuccess();
 }
 
 /* Set Fan Control PWM Duty Command
-NetFun: 0x2E/ 0x30
+NetFun: 0x2E
 Cmd : 0x05
 Request:
         Byte 1-3 : Tyan Manufactures ID (FD 19 00)
@@ -239,40 +220,20 @@ Response:
         Byte 1 : Completion Code
         Byte 2-4 : Tyan Manufactures ID
         Byte (5) : Current Duty Cycle , present if 0xFE passed to Duty Cycle in Request
-            [7] : 0b : PWM work on automatic
-            [6:0] : Duty Cycle
 */
-ipmi_ret_t ipmi_tyan_FanPwmDuty(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi::RspType<uint8_t> ipmi_tyan_FanPwmDuty(uint8_t pwmId, uint8_t duty)
 {
-    ipmi_ret_t ipmi_rc = IPMI_CC_OK;
     std::fstream file;
-
     int rc=0;
     char command[100];
     char temp[50];
-    uint8_t responseData[4]={0};
+    uint8_t responseDuty;
     uint8_t pwmValue = 0;
 
-    auto* requestData= reinterpret_cast<FanPwmDutyRequest*>(request);
-
-    if((int)*data_len != 5) 
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    for(int i=0; i<(int)((*data_len)-2); i++)
-    {
-        responseData[i]=requestData->manufactureID[i];
-    }
-
-    if (requestData->duty == 0xfe)
+    if (duty == 0xfe)
     {
         // Get current duty cycle
-        *data_len=4;
-
-        switch (requestData->pwmId)
+        switch (pwmId)
         {
             case 0:
                     memset(command,0,sizeof(command));
@@ -295,7 +256,7 @@ ipmi_ret_t ipmi_tyan_FanPwmDuty(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     sprintf(command, "cat /sys/class/hwmon/hwmon0/pwm5");
                     break;
             default:
-                    return IPMI_CC_PARM_OUT_OF_RANGE;
+                    return ipmi::responseParmOutOfRange();
         }
 
         memset(temp, 0, sizeof(temp));
@@ -303,29 +264,38 @@ ipmi_ret_t ipmi_tyan_FanPwmDuty(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         if (rc != 0)
         {
-            ipmi_rc = IPMI_CC_UNSPECIFIED_ERROR;
-            return ipmi_rc;
+            return ipmi::responseUnspecifiedError();
         }
 
         pwmValue = strtol(temp,NULL,10);
-        responseData[3] = pwmValue*100/255;
+        responseDuty = pwmValue*100/255;
+        return ipmi::responseSuccess(responseDuty);
     }
-    else if (requestData->duty == 0xff)
+    else if (duty == 0xff)
     {
         // Return to automatic control
-        *data_len=3;
-
         memset(command,0,sizeof(command));
         sprintf(command, "systemctl start phosphor-pid-control.service");
         rc = system(command);
-    }
-    else if (requestData->duty <= 0x64)
-    {
-        // control duty cycle (0%-100%)
-        *data_len=3;
-        pwmValue = requestData->duty*255/100;
 
-        switch (requestData->pwmId)
+        memset(command,0,sizeof(command));
+        sprintf(command, "echo 1 > /usr/sbin/fsc");
+        system(command);
+    }
+    else if (duty <= 0x64)
+    {
+        memset(command,0,sizeof(command));
+        sprintf(command, "systemctl stop phosphor-pid-control.service");
+        rc = system(command);
+
+        memset(command,0,sizeof(command));
+        sprintf(command, "echo 0 > /usr/sbin/fsc");
+        system(command);
+
+        // control duty cycle (0%-100%)
+        pwmValue = duty*255/100;
+
+        switch (pwmId)
         {
             case 0:
                     memset(command,0,sizeof(command));
@@ -348,29 +318,27 @@ ipmi_ret_t ipmi_tyan_FanPwmDuty(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     sprintf(command, "echo %d > /sys/class/hwmon/hwmon0/pwm5", pwmValue);
                     break;
             default:
-                    return IPMI_CC_PARM_OUT_OF_RANGE;
+                    return ipmi::responseParmOutOfRange();
         }
-
         rc = system(command);
     }
     else
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
     if (rc != 0)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    memcpy(response, responseData, sizeof(responseData));
-
-    return ipmi_rc;
+    return ipmi::responseSuccess();
 }
 
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
-    ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ManufactureMode, NULL, ipmi_tyan_ManufactureMode, SYSTEM_INTERFACE);
-    ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_FanPwmDuty, NULL, ipmi_tyan_FanPwmDuty, SYSTEM_INTERFACE);
+    ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_FanPwmDuty, ipmi::Privilege::Admin, ipmi_tyan_FanPwmDuty);
+    ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_ManufactureMode, ipmi::Privilege::Admin, ipmi_tyan_ManufactureMode);
+}
 }
