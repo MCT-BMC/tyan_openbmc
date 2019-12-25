@@ -1,4 +1,4 @@
-FLASH_RWFS_OFFSET = "30720"
+FLASH_RWFS_OFFSET = "32768"
 
 OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           gpio-initial \
