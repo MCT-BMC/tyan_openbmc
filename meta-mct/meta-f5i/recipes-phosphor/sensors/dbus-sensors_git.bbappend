@@ -1,5 +1,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
+# Disable the CPU sensor Tcontrol threshold setting
+EXTRA_OECMAKE_append += " -DBMC_CPU_SENSOR_TCONTROL=OFF"
+
 SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0002-s7106-add-supported-pmbus-name-cffps1.patch \
             file://0003-s7106-add-cpu-and-dimm-sesnor-via-ME.patch \
@@ -20,6 +23,8 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0018-change-power-match-to-pgood-event.patch \
             file://0019-f5i-modify-temp-and-Die-sensor-threshold-setting.patch \
             file://0020-Add-prochot-sensor.patch \
+            file://0021-Add-Invalid-Value-property-for-power-on-sensors.patch \
+            file://0022-Add-type-sensors-to-support-the-invalid-value-proper.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
@@ -32,3 +37,4 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.aclostsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mgtsubsyshealthsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.psufaultsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.nvmesensor.service"
+

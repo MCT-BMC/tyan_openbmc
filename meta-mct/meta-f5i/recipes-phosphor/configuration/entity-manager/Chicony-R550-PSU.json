@@ -5,6 +5,41 @@
                 "Address": "0x58",
                 "Bus": "$bus",
                 "Name": "PSU0",
+                "Labels": ["pin", "pout1", "vin", "vout1", "iin", "iout1", "temp1", "fan1"],
+                "PowerStates": [
+                    {
+                        "Label": "pin",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "pout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "vin",
+                        "PowerState": "Always"
+                    },
+                    {
+                        "Label": "vout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "iin",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "iout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "temp1",
+                        "PowerState": "Always"
+                    },
+                    {
+                        "Label": "fan1",
+                        "PowerState": "On"
+                    }
+                ],
                 "Type": "pmbus"
             },
             {
@@ -15,7 +50,7 @@
             }
         ],
         "Name": "Chicony R550 PSU 1",
-		"Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': '.*R550*'})",
+        "Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': '.*R550*'})",
         "Type": "PowerSupply",
         "xyz.openbmc_project.Inventory.Decorator.Asset": {
             "Manufacturer": "$BOARD_MANUFACTURER",

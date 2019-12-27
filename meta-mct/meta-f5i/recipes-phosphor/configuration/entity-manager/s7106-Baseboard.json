@@ -1,10 +1,10 @@
 {
     "Exposes": [
-		{
+        {
             "Address": "0x8",
             "Class": "METemp",
             "Name": "PCH Temp",
-            "PowerState": "BiosPost",
+            "PowerState": "On",
             "Thresholds": [
                 {
                     "Direction": "greater than",
@@ -20,6 +20,17 @@
             "Bus": 0,
             "CpuID": 1,
             "Name": "CPU0 Temp",
+            "Labels": [
+                {
+                    "Die" : "Die_CPU1",
+                    "DIMM_A1" : "DIMM_A1 CPU1",
+                    "DIMM_B1" : "DIMM_B1 CPU1",
+                    "DIMM_C1" : "DIMM_C1 CPU1",
+                    "DIMM_D1" : "DIMM_D1 CPU1",
+                    "DIMM_E1" : "DIMM_E1 CPU1",
+                    "DIMM_F1" : "DIMM_F1 CPU1"
+                }
+            ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
@@ -43,6 +54,17 @@
             "Bus": 0,
             "CpuID": 2,
             "Name": "CPU1 Temp",
+            "Labels": [
+                {
+                    "Die" : "Die_CPU2",
+                    "DIMM_A1" : "DIMM_A1 CPU2",
+                    "DIMM_B1" : "DIMM_B1 CPU2",
+                    "DIMM_C1" : "DIMM_C1 CPU2",
+                    "DIMM_D1" : "DIMM_D1 CPU2",
+                    "DIMM_E1" : "DIMM_E1 CPU2",
+                    "DIMM_F1" : "DIMM_F1 CPU2"
+                }
+            ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
@@ -82,7 +104,7 @@
             ],
             "Type": "ADC"
         },
-	    {
+        {
             "Index": 1,
             "Name": "PVCCIO_CPU0",
             "PowerState": "On",
@@ -295,7 +317,7 @@
         {
             "Index": 11,
             "Name": "P3V3_AUX",
-            "PowerState": "On",
+            "PowerState": "Always",
             "ScaleFactor": 0.4052,
             "Thresholds": [
                 {
@@ -316,6 +338,7 @@
         {
             "Index": 12,
             "Name": "P1V8_PCH_AUX",
+            "PowerState": "Always",
             "ScaleFactor": 0.75,
             "Thresholds": [
                 {
@@ -336,6 +359,7 @@
         {
             "Index": 13,
             "Name": "PVNN_PCH_AUX",
+            "PowerState": "Always",
             "ScaleFactor": 1,
             "Thresholds": [
                 {
@@ -356,6 +380,7 @@
         {
             "Index": 14,
             "Name": "P1V05_PCH_AUX",
+            "PowerState": "Always",
             "ScaleFactor": 1,
             "Thresholds": [
                 {
@@ -376,6 +401,7 @@
         {
             "Index": 15,
             "Name": "RTC_BAT",
+            "PowerState": "Always",
             "ScaleFactor": 0.3333,
             "Thresholds": [
                 {
