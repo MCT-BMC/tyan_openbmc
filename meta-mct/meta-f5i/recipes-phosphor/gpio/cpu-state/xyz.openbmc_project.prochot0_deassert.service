@@ -3,6 +3,6 @@ Description=deassert Prochot0
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/env prochot_update.sh deassert CPU0_State
+ExecStart=/usr/bin/env prochot_thermtrip_update.sh deassert CPU0_State prochot
 SyslogIdentifier=prochot0_deassert
 

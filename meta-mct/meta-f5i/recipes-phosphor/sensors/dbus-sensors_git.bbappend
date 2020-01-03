@@ -25,6 +25,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0020-Add-prochot-sensor.patch \
             file://0021-Add-Invalid-Value-property-for-power-on-sensors.patch \
             file://0022-Add-type-sensors-to-support-the-invalid-value-proper.patch \
+            file://0023-Add-thermtrip-sensor.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"

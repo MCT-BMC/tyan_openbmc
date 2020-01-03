@@ -1,0 +1,5 @@
+DEVPATH=/dev/input/by-path/platform-gpio-keys-event
+KEY=63
+TARGET=xyz.openbmc_project.thermtrip_deassert.service
+POLARITY=0
+EXTRA_ARGS=--continue

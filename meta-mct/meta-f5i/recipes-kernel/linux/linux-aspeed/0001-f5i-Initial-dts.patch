@@ -4,8 +4,8 @@ Date: Mon, 3 Dec 2018 16:44:34 +0800
 Subject: [PATCH] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 442 +++++++++++++++++++++++++++++++
- 1 file changed, 442 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 447 +++++++++++++++++++++++++++++++
+ 1 file changed, 447 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
@@ -13,7 +13,7 @@ new file mode 100755
 index 0000000..bd08a11
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,442 @@
+@@ -0,0 +1,447 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -103,6 +103,11 @@ index 0000000..bd08a11
 +                                  label = "prochot1";
 +                                  gpios = <&gpio ASPEED_GPIO(H, 6) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(H, 6)>;
++                           };
++                           thermtrip {
++                                  label = "thermtrip";
++                                  gpios = <&gpio ASPEED_GPIO(H, 7) GPIO_ACTIVE_LOW>;
++                                  linux,code = <ASPEED_GPIO(H, 7)>;
 +                           };
 +        };
 +
