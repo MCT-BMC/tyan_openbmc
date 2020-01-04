@@ -94,13 +94,13 @@ index 0000000..bd08a11
 +                                  gpios = <&gpio ASPEED_GPIO(C, 4) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(C, 4)>;
 +                           };
-+                           prochot0 {
-+                                  label = "prochot0";
++                           prochot1 {
++                                  label = "prochot1";
 +                                  gpios = <&gpio ASPEED_GPIO(H, 5) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(H, 5)>;
 +                           };
-+                           prochot1 {
-+                                  label = "prochot1";
++                           prochot0 {
++                                  label = "prochot0";
 +                                  gpios = <&gpio ASPEED_GPIO(H, 6) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(H, 6)>;
 +                           };

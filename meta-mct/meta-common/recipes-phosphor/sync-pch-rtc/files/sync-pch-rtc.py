@@ -6,7 +6,7 @@ import obmc_system_config as System
 import time
 
 def main():
-#    subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
+    subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
     try:
         pch_bus = System.PCH_CONFIG.get('i2c_bus', '')
     except:
