@@ -1,0 +1,52 @@
+From 524e0b0627e22e73092ce72f3b5f59c2b3e55f02 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Mon, 6 Jan 2020 19:38:16 +0800
+Subject: [PATCH 1/1] Set BMC RTL8211E PHY LED
+
+---
+ drivers/net/ftgmac100.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/drivers/net/ftgmac100.c b/drivers/net/ftgmac100.c
+index 02bccfc498..e4a5fff22d 100755
+--- a/drivers/net/ftgmac100.c
++++ b/drivers/net/ftgmac100.c
+@@ -383,6 +383,24 @@ static int ftgmac100_phy_init(struct eth_device *dev)
+ 	return 1;
+ }
+ 
++static int ftgmac100_phy_led_init(struct eth_device *dev)
++{
++  struct ftgmac100_data *priv = dev->priv;
++  //RTL8211E phy
++  // Switch to LED control page
++  ftgmac100_phy_write(dev, priv->phy_addr, 0x1f, 0x0007);
++  ftgmac100_phy_write(dev, priv->phy_addr, 0x1e, 0x002c);
++
++  // Write LED settings
++  ftgmac100_phy_write(dev, priv->phy_addr, 0x1c, 0x0742);
++  ftgmac100_phy_write(dev, priv->phy_addr, 0x1a, 0x0040);
++
++  // Switch back to PHY default page
++  ftgmac100_phy_write(dev, priv->phy_addr, 0x1f, 0x0000);
++
++  return 0;
++}
++
+ static int ftgmac100_update_link_speed(struct eth_device *dev)
+ {
+ 	struct ftgmac100 *ftgmac100 = (struct ftgmac100 *)dev->iobase;
+@@ -797,6 +815,10 @@ int ftgmac100_initialize(bd_t *bd)
+ 		ftgmac100_set_mac_from_env(dev);
+ 
+ 		card_number++;
++
++                ftgmac100_phy_init(dev);
++                ftgmac100_update_link_speed(dev);
++                ftgmac100_phy_led_init(dev);
+ 	}
+ 	return card_number;
+ 
+-- 
+2.22.0
+
