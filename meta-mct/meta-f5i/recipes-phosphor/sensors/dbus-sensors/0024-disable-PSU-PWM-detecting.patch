@@ -1,0 +1,26 @@
+From cf6b152848759a54b147968ef0b3b7d7b25ae50f Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 7 Jan 2020 15:53:59 +0800
+Subject: [PATCH] disable PSU PWM detecting
+
+---
+ src/PSUSensorMain.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/PSUSensorMain.cpp b/src/PSUSensorMain.cpp
+index fb3c7e4..cd1df9d 100755
+--- a/src/PSUSensorMain.cpp
++++ b/src/PSUSensorMain.cpp
+@@ -460,10 +460,10 @@ void createSensors(boost::asio::io_service& io,
+                 std::cerr << "Sensor type=\"" << sensorNameSubStr
+                           << "\" label=\"" << labelHead << "\"\n";
+             }
+-
++#if 0
+             checkPWMSensor(sensorPath, labelHead, *interfacePath, objectServer,
+                            psuNames[0]);
+-
++#endif 
+             if (!findLabels.empty())
+             {
+                 /* Check if this labelHead is enabled in config file */
