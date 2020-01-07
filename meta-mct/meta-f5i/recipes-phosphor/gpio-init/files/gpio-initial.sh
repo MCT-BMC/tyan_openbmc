@@ -242,7 +242,6 @@ output="\
  $GPIO_F0=0\
  $GPIO_F1=1\
  $GPIO_F2=1\
- $GPIO_F4=1\
  $GPIO_F5=1\
  $GPIO_N6=1\
  $GPIO_N7=0\
