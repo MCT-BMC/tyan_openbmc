@@ -1,7 +1,6 @@
 [Unit]
 Description=Timesync with RTC in PCH
 
-After=phosphor-ipmi-host.service
 [Service]
 Restart=no
 ExecStart=/usr/sbin/sync-pch-rtc.py

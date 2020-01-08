@@ -6,7 +6,6 @@ import obmc_system_config as System
 import time
 
 def main():
-    subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
     try:
         pch_bus = System.PCH_CONFIG.get('i2c_bus', '')
     except:
@@ -34,19 +33,15 @@ def main():
     YEAR = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xf | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
     YEAR = YEAR.strip()
     
-    times = 5
-    for i in range(times):
-        res = subprocess.call("/usr/bin/timedatectl set-time "+YEAR+"-"+MON+"-"+DAY, shell=True)
-        print res
-        if res == 0 :
-            break 
-        time.sleep(2)
- 
-    subprocess.call("/usr/bin/timedatectl set-time "+HOUR+":"+MIN+":"+SEC, shell=True)
+    cmd = '/bin/date -s \"20'+YEAR+'-'+MON+'-'+DAY+' '+HOUR+':'+MIN+':'+SEC+'\"'
+    subprocess.call(cmd, shell=True)
 
     print "sync time=20"+YEAR+"-"+MON+"-"+DAY+" "+HOUR+":"+MIN+":"+SEC
     newDate = subprocess.call("/bin/date", shell=True)
-    
+
+    res = subprocess.call("/usr/bin/timedatectl set-ntp no", shell=True)
+    print res
+
     # Inform other services time sync is done. 
     os.mknod("/run/time_sync_done")
     return 0
