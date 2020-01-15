@@ -3,7 +3,7 @@
         {
             "Address": "0x8",
             "Class": "METemp",
-            "Name": "PCH Temp",
+            "Name": "PCH_Temp",
             "PowerState": "On",
             "Thresholds": [
                 {
@@ -22,19 +22,55 @@
             "Name": "CPU0 Temp",
             "Labels": [
                 {
-                    "Die" : "Die_CPU1",
-                    "DIMM_A1" : "DIMM_A1 CPU1",
-                    "DIMM_B1" : "DIMM_B1 CPU1",
-                    "DIMM_C1" : "DIMM_C1 CPU1",
-                    "DIMM_D1" : "DIMM_D1 CPU1",
-                    "DIMM_E1" : "DIMM_E1 CPU1",
-                    "DIMM_F1" : "DIMM_F1 CPU1"
+                    "Die" : "CPU0_Temp",
+                    "DIMM_A1" : "CPU0_MC0_DIMM_A",
+                    "DIMM_B1" : "CPU0_MC0_DIMM_B",
+                    "DIMM_C1" : "CPU0_MC0_DIMM_C",
+                    "DIMM_D1" : "CPU0_MC1_DIMM_D",
+                    "DIMM_E1" : "CPU0_MC1_DIMM_E",
+                    "DIMM_F1" : "CPU0_MC1_DIMM_F",
+                    "Tjmax" : "CPU0_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM",
+                    "Label": "DIMM_A1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_B1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_C1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_D1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_E1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_F1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -56,19 +92,55 @@
             "Name": "CPU1 Temp",
             "Labels": [
                 {
-                    "Die" : "Die_CPU2",
-                    "DIMM_A1" : "DIMM_A1 CPU2",
-                    "DIMM_B1" : "DIMM_B1 CPU2",
-                    "DIMM_C1" : "DIMM_C1 CPU2",
-                    "DIMM_D1" : "DIMM_D1 CPU2",
-                    "DIMM_E1" : "DIMM_E1 CPU2",
-                    "DIMM_F1" : "DIMM_F1 CPU2"
+                    "Die" : "CPU1_Temp",
+                    "DIMM_A1" : "CPU1_MC0_DIMM_A",
+                    "DIMM_B1" : "CPU1_MC0_DIMM_B",
+                    "DIMM_C1" : "CPU1_MC0_DIMM_C",
+                    "DIMM_D1" : "CPU1_MC1_DIMM_D",
+                    "DIMM_E1" : "CPU1_MC1_DIMM_E",
+                    "DIMM_F1" : "CPU1_MC1_DIMM_F",
+                    "Tjmax" : "CPU1_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM",
+                    "Label": "DIMM_A1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_B1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_C1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_D1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_E1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                },
+                {
+                    "Direction": "greater than",
+                    "Label": "DIMM_F1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -429,7 +501,7 @@
                 ]
             },
             "Index": 0,
-            "Name": "CPU0_FAN_TACH",
+            "Name": "SYS_FAN_2",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -449,7 +521,7 @@
                 ]
             },
             "Index": 1,
-            "Name": "CPU1_FAN_TACH",
+            "Name": "SYS_FAN_3",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -469,7 +541,7 @@
                 ]
             },
             "Index": 2,
-            "Name": "SYS_FAN0_TACH",
+            "Name": "SYS_FAN_1",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -489,7 +561,7 @@
                 ]
             },
             "Index": 3,
-            "Name": "SYS_FAN1_TACH",
+            "Name": "SYS_FAN_4",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -509,7 +581,7 @@
                 ]
             },
             "Index": 4,
-            "Name": "SYS_FAN2_TACH",
+            "Name": "SYS_FAN_5",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -523,9 +595,9 @@
         {
             "Address": "0x28",
             "Bus": 0,
-            "Name": "SYS_INLET_TEMP",
-            "Name1": "MB_INLET_TEMP",
-            "Name2": "SYS_OUTLET_TEMP",
+            "Name": "SYS_Air_Inlet",
+            "Name1": "MB_Air_Inlet",
+            "Name2": "SYS_Air_Outlet",
             "Thresholds": [
                 {
                     "Direction": "greater than",
@@ -555,17 +627,113 @@
             "Address": "0x1f",
             "Bus": 14,
             "Name": "OCP_TEMP",
-            "Name1": "OCP_NIC_TEMP",
+            "Name1": "NIC_Temp",
             "Thresholds": [
                 {
                     "Direction": "greater than",
-		    "Label": "temp2",
+                    "Label": "temp2",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 100
                 }
             ],
             "Type": "TMP421"
+        },
+        {
+            "Address": "0x61",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU0_MOS",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x63",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU1_MOS",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x46",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU0_DIMM_MOS_1",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x47",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU0_DIMM_MOS_2",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x66",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU1_DIMM_MOS_1",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x67",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU1_DIMM_MOS_2",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
         },
         {
             "Direction": "Input",
@@ -612,10 +780,10 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "Die CPU1"
+                "SYS_Air_Inlet",
+                "CPU0_Temp"
             ],
-            "Name": "CPU1",
+            "Name": "FSC_CPU0",
             "SetPointH": 77,
             "SetPointL": 72,
             "OutLimitMax": 100,
@@ -640,10 +808,10 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "Die CPU2"
+                "SYS_Air_Inlet",
+                "CPU1_Temp"
             ],
-            "Name": "CPU2",
+            "Name": "FSC_CPU1",
             "SetPointH": 77,
             "SetPointL": 72,
             "OutLimitMax": 100,
@@ -668,12 +836,12 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "DIMM D1 CPU1",
-                "DIMM E1 CPU1",
-                "DIMM F1 CPU1"
+                "SYS_Air_Inlet",
+                "CPU0_MC1_DIMM_D",
+                "CPU0_MC1_DIMM_E",
+                "CPU0_MC1_DIMM_F"
             ],
-            "Name": "DIMM_DEF_CPU1",
+            "Name": "FSC_DIMM_DEF_CPU0",
             "SetPointH": 72,
             "SetPointL": 64,
             "OutLimitMax": 100,
@@ -697,12 +865,12 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "DIMM A1 CPU1",
-                "DIMM B1 CPU1",
-                "DIMM C1 CPU1"
+                "SYS_Air_Inlet",
+                "CPU0_MC0_DIMM_A",
+                "CPU0_MC0_DIMM_B",
+                "CPU0_MC0_DIMM_C"
             ],
-            "Name": "DIMM_ABC_CPU1",
+            "Name": "FSC_DIMM_ABC_CPU0",
             "SetPointH": 72,
             "SetPointL": 64,
             "OutLimitMax": 100,
@@ -725,12 +893,12 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "DIMM A1 CPU2",
-                "DIMM B1 CPU2",
-                "DIMM C1 CPU2"
+                "SYS_Air_Inlet",
+                "CPU1_MC0_DIMM_A",
+                "CPU1_MC0_DIMM_B",
+                "CPU1_MC0_DIMM_C"
             ],
-            "Name": "DIMM_ABC_CPU2",
+            "Name": "FSC_DIMM_ABC_CPU1",
             "SetPointH": 72,
             "SetPointL": 64,
             "OutLimitMax": 100,
@@ -754,12 +922,12 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "DIMM D1 CPU2",
-                "DIMM E1 CPU2",
-                "DIMM F1 CPU2"
+                "SYS_Air_Inlet",
+                "CPU1_MC1_DIMM_D",
+                "CPU1_MC1_DIMM_E",
+                "CPU1_MC1_DIMM_F"
             ],
-            "Name": "DIMM_DEF_CPU2",
+            "Name": "FSC_DIMM_DEF_CPU1",
             "SetPointH": 72,
             "SetPointL": 64,
             "OutLimitMax": 100,
@@ -782,10 +950,10 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "PCH Temp"
+                "SYS_Air_Inlet",
+                "PCH_Temp"
             ],
-            "Name": "PCH",
+            "Name": "FSC_PCH",
             "SetPointH": 77,
             "SetPointL": 69,
             "OutLimitMax": 100,
@@ -809,10 +977,10 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
-                "OCP NIC TEMP"
+                "SYS_Air_Inlet",
+                "NIC_Temp"
             ],
-            "Name": "OCP_NIC",
+            "Name": "FSC_OCP_NIC",
             "SetPointH": 85,
             "SetPointL": 77,
             "OutLimitMax": 100,
@@ -836,14 +1004,14 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_INLET_TEMP",
+                "SYS_Air_Inlet",
                 "NVMe 1 Temp",
                 "NVMe 2 Temp",
                 "NVMe 3 Temp",
                 "NVMe 4 Temp",
                 "NVMe 5 Temp"
             ],
-            "Name": "NVMe",
+            "Name": "FSC_NVMe",
             "SetPointH": 65,
             "SetPointL": 62,
             "OutLimitMax": 100,
@@ -875,9 +1043,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "CPU0_FAN_TACH"
+                "SYS_FAN_2"
             ],
-            "Name": "CPU0_FAN_TACH",
+            "Name": "FSC_SYS_FAN_2",
             "OutLimitMax": 100.0,
             "OutLimitMin": 25.0,
             "Outputs": [
@@ -891,7 +1059,7 @@
                 "Pid 1"
             ]
         },
-		{
+        {
             "Class": "fan",
             "FFGainCoefficient": 1.0,
             "FFOffCoefficient": 0.0,
@@ -899,9 +1067,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "CPU1_FAN_TACH"
+                "SYS_FAN_3"
             ],
-            "Name": "CPU1_FAN_TACH",
+            "Name": "FSC_SYS_FAN_3",
             "OutLimitMax": 100.0,
             "OutLimitMin": 25.0,
             "Outputs": [
@@ -915,7 +1083,7 @@
                 "Pid 2"
             ]
         },
-		{
+        {
             "Class": "fan",
             "FFGainCoefficient": 1.0,
             "FFOffCoefficient": 0.0,
@@ -923,9 +1091,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN0_TACH"
+                "SYS_FAN_1"
             ],
-            "Name": "SYS_FAN0_TACH",
+            "Name": "FSC_SYS_FAN_1",
             "OutLimitMax": 100.0,
             "OutLimitMin": 25.0,
             "Outputs": [
@@ -939,7 +1107,7 @@
                 "Pid 3"
             ]
         },
-		{
+        {
             "Class": "fan",
             "FFGainCoefficient": 1.0,
             "FFOffCoefficient": 0.0,
@@ -947,9 +1115,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN1_TACH"
-	        ],
-            "Name": "SYS_FAN1_TACH",
+                "SYS_FAN_4"
+            ],
+            "Name": "FSC_SYS_FAN_4",
             "OutLimitMax": 100.0,
             "OutLimitMin": 25.0,
             "Outputs": [
@@ -963,7 +1131,7 @@
                 "Pid 4"
             ]
         },
-		{
+        {
             "Class": "fan",
             "FFGainCoefficient": 1.0,
             "FFOffCoefficient": 0.0,
@@ -971,9 +1139,9 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN2_TACH"
-	        ],
-            "Name": "SYS_FAN2_TACH",
+                "SYS_FAN_5"
+            ],
+            "Name": "FSC_SYS_FAN_5",
             "OutLimitMax": 100.0,
             "OutLimitMin": 25.0,
             "Outputs": [

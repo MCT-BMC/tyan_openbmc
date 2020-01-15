@@ -1,0 +1,29 @@
+From 6a0c8a70b9aa3920ebe748e9aa93d8126176be03 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 15 Jan 2020 15:18:54 +0800
+Subject: [PATCH] fix-negative-value-issue
+
+---
+ src/sensorcommands.cpp | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/sensorcommands.cpp b/src/sensorcommands.cpp
+index a5e3186..899f21f 100755
+--- a/src/sensorcommands.cpp
++++ b/src/sensorcommands.cpp
+@@ -502,7 +502,14 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
+     }
+ 
+     // no discrete as of today so optional byte is never returned
+-    return ipmi::responseSuccess(value, operation, thresholds, std::nullopt);
++    if (reading < 0)
++    {
++        return ipmi::responseSuccess(static_cast<int>(reading), operation, thresholds, std::nullopt);
++    }
++    else
++    {
++        return ipmi::responseSuccess(value, operation, thresholds, std::nullopt);
++    }
+ }
+ 
+ /** @brief implements the Set Sensor threshold command
