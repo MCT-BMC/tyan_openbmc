@@ -28,6 +28,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0023-Add-thermtrip-sensor.patch \
             file://0024-disable-PSU-PWM-detecting.patch \
             file://0025-Add-VR-MOS-Margin-sensor.patch \
+            file://0026-support-leaky-bucket-sensor.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
@@ -41,3 +42,5 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mgtsubsyshealthsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.psufaultsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.nvmesensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mostempsensor.service"
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.hostmemoryeccsensor.service"
+

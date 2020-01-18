@@ -1,0 +1,183 @@
+From fd08a601cb116e72e9e2a0ac2c01d4ea5f549a6b Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Sat, 18 Jan 2020 20:16:17 +0800
+Subject: [PATCH] support leaky bucket
+
+---
+ src/storagecommands.cpp | 133 +++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 118 insertions(+), 15 deletions(-)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index ecd4393..597bb3b 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -30,6 +30,9 @@
+ #include <stdexcept>
+ #include <storagecommands.hpp>
+ #include <string_view>
++#include <fstream>
++#include <nlohmann/json.hpp>
++
+ 
+ namespace intel_oem::ipmi::sel
+ {
+@@ -942,21 +945,114 @@ static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.
+ 
+ static const std::string ipmiSELAddMessage = "SEL Entry";
+ 
++//MCT ecc filter
++static constexpr const char* sdrFile = "/usr/share/ipmi-providers/sdr.json";
++constexpr static const uint16_t biosId = 0x3f;
++constexpr static const uint8_t sensorTypeMemory = 0xc;
++constexpr static const uint8_t eventDataMemCorrectableEcc = 0;
++
++
++
++//boost::container::flat_map<std::string, uint8_t> eccMap;
++boost::container::flat_map<uint8_t, std::string> eccMap;
++
++static void loadEccMap(void)
++{
++    static bool loaded = false;
++    uint16_t ownerId;
++    uint8_t sensorNum;
++    uint8_t sensorType;
++    std::string sensorName;
++    
++    if(loaded)
++    {
++        return; 
++    }
++    loaded = true; 
++
++    eccMap.clear();
++    std::ifstream sdrStream(sdrFile);
++    if(!sdrStream.is_open())
++    {
++        std::cerr << "NO defined SDR found\n";
++    }
++    else
++    {
++        auto data = nlohmann::json::parse(sdrStream, nullptr, false);
++        if (data.is_discarded())
++        {
++            std::cerr << "syntax error in " << sdrFile << "\n";
++        }
++        else
++        {
++            int idx = 0;
++            while (!data[idx].is_null())
++            {
++                ownerId = std::stoul((std::string)data[idx]["ownerId"], nullptr, 16);  
++                sensorNum = std::stoul((std::string)data[idx]["sensorNumber"], nullptr, 16);   
++                sensorType = std::stoul((std::string)data[idx]["sensorType"], nullptr, 16);
++                sensorName = data[idx]["sensorName"];
++                if(biosId == ownerId && sensorTypeMemory == sensorType)
++                {
++
++                    eccMap[sensorNum] = sensorName;
++                }
++                idx++;
++            }
++        }
++        sdrStream.close();
++    }
++   
++    for(auto const& pair:eccMap)
++    {
++        std::cerr << (unsigned)pair.first << ":" << pair.second << '\n';
++    }
++   
++}
++
+ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
+     uint16_t recordID, uint8_t recordType, uint32_t timestamp,
+     uint16_t generatorID, uint8_t evmRev, uint8_t sensorType, uint8_t sensorNum,
+     uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
+     uint8_t eventData3)
+ {
+-    // Per the IPMI spec, need to cancel any reservation when a SEL entry is
+-    // added
+-    cancelSELReservation();
+-
+-    // Send this request to the Redfish hooks to log it as a Redfish message
+-    // instead.  There is no need to add it to the SEL, so just return success.
+-    intel_oem::ipmi::sel::checkRedfishHooks(
+-        recordID, recordType, timestamp, generatorID, evmRev, sensorType,
+-        sensorNum, eventType, eventData1, eventData2, eventData3);
++    loadEccMap();
++    std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();  
++    uint16_t responseID = 0xFFFF;   
++    bool overflow = false;
++
++    //ecc fliter
++    if( (biosId == generatorID) && (sensorType == sensorTypeMemory) &&
++        (eventType == 0x6f) && ((eventData1 & 0x0f) == eventDataMemCorrectableEcc))
++    {
++        auto ecc = eccMap.find(sensorNum);
++        //find ecc in sdr, call leaky bucket sensor
++        if (ecc != eccMap.end())
++        {
++            //std::cerr << (unsigned)ecc->first << ":" << ecc->second << '\n'; 
++          
++            sdbusplus::message::message addEcc = bus->new_method_call(
++                "xyz.openbmc_project.leaklyBucketSensor", 
++                "/xyz/openbmc_project/sensors/leakyBucket/HOST_DIMM_ECC",
++                "xyz.openbmc_project.Sensor.Value",
++                "increaseEccToBucket");
++            addEcc.append(ecc->second);
++
++             try
++             {
++                auto ret = bus->call(addEcc);
++                ret.read(overflow);
++             }
++             catch (sdbusplus::exception_t& e)
++             {
++                std::cerr << "call increaseEccToBucket failed\n";
++             }
++        }
++        if(!overflow)
++        {
++             return ipmi::responseSuccess(responseID);
++        }
++    }
+ 
+ //mitac start: add to sel 
+     //log SEL
+@@ -970,13 +1066,11 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
+     eventData[6] = eventData1;
+     eventData[7] = eventData2;
+     eventData[8] = eventData3; 
+-
+-    std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();                   
++                 
+     sdbusplus::message::message writeSEL = bus->new_method_call(
+         ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAddOem");
+     writeSEL.append(ipmiSELAddMessage,  eventData, recordType);
+-
+-    uint16_t responseID = 0xFFFF;                
++        
+     try
+     {
+         auto ret = bus->call(writeSEL);
+@@ -986,8 +1080,17 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
+     {
+         std::cerr << "call IpmiSelAdd failed\n";
+     }   
+-//mitac end
+-        
++//mitac end 
++
++    // Per the IPMI spec, need to cancel any reservation when a SEL entry is
++    // added
++    cancelSELReservation();
++
++    // Send this request to the Redfish hooks to log it as a Redfish message
++    // instead.  There is no need to add it to the SEL, so just return success.
++    intel_oem::ipmi::sel::checkRedfishHooks(
++        recordID, recordType, timestamp, generatorID, evmRev, sensorType,
++        sensorNum, eventType, eventData1, eventData2, eventData3);
+ 
+     return ipmi::responseSuccess(responseID);
+ }
