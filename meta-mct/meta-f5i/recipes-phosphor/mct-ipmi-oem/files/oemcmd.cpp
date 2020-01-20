@@ -24,6 +24,10 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/bus.hpp>
+#include <sdbusplus/message/types.hpp>
+
 
 namespace ipmi
 {
@@ -335,10 +339,91 @@ ipmi::RspType<uint8_t> ipmi_tyan_FanPwmDuty(uint8_t pwmId, uint8_t duty)
     return ipmi::responseSuccess();
 }
 
+/* Config EccLeaky Bucket Command
+NetFun: 0x2E
+Cmd : 0x1A
+Request:
+        Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+        Byte (4) : optional, set T1 
+        Byte (5) : optional, set T2 
+
+Response:
+        Byte 1 : Completion Code
+        Byte 2-4 : Tyan Manufactures ID
+        Byte (5) : Return current T1 if request length = 3. 
+        Byte (6) : Return current T2 if request length = 3.
+*/
+ipmi::RspType<std::optional<uint8_t>, // T1 
+              std::optional<uint8_t>  // T2
+              >
+    ipmi_tyan_ConfigEccLeakyBucket(std::optional<uint8_t> T1, std::optional<uint8_t> T2)
+{
+
+    constexpr const char* leakyBucktPath =
+        "/xyz/openbmc_project/sensors/leakyBucket/HOST_DIMM_ECC";
+    constexpr const char* leakyBucktIntf =
+        "xyz.openbmc_project.Sensor.Value";
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+    uint8_t t1;
+    uint8_t t2;
+    ipmi::Value result;
+
+    auto service = ipmi::getService(*busp, leakyBucktIntf, leakyBucktPath);
+    
+    //get t1,t2
+    if(!T1) 
+    {
+        try
+        {
+            result = ipmi::getDbusProperty(
+                    *busp, service, leakyBucktPath, leakyBucktIntf, "T1");    
+            t1 = std::get<uint8_t>(result);
+
+            result = ipmi::getDbusProperty(
+                *busp, service, leakyBucktPath, leakyBucktIntf, "T2");
+            t2 = std::get<uint8_t>(result);
+        
+        }
+        catch (const std::exception& e)
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+        return ipmi::responseSuccess(t1,t2);
+    }
+
+    //t1 found 
+    try
+    {
+       ipmi::setDbusProperty(
+                *busp, service, leakyBucktPath, leakyBucktIntf, "T1", T1.value());    
+    }
+    catch (const std::exception& e)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if(T2)
+    {
+        try
+        {
+            ipmi::setDbusProperty(
+                    *busp, service, leakyBucktPath, leakyBucktIntf, "T2", T2.value());    
+        }
+        catch (const std::exception& e)
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+    }
+    return ipmi::responseSuccess();
+   
+}
+
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_FanPwmDuty, ipmi::Privilege::Admin, ipmi_tyan_FanPwmDuty);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_ManufactureMode, ipmi::Privilege::Admin, ipmi_tyan_ManufactureMode);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_ConfigEccLeakyBucket, ipmi::Privilege::Admin, ipmi_tyan_ConfigEccLeakyBucket);
 }
 }
