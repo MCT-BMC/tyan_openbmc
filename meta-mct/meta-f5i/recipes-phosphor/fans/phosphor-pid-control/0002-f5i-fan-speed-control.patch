@@ -1,20 +1,20 @@
-From 444e63280f6f4e75153e5dc01023e4937de47aef Mon Sep 17 00:00:00 2001
+From c93c9292edfef58c9471215fc4bb40dc27b1d71d Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Tue, 10 Dec 2019 10:13:38 +0800
 Subject: [PATCH] f5i fan speed control
 
 ---
  Makefile.am                |   5 +-
- conf.hpp                   |   2 +
- dbus/dbusconfiguration.cpp | 147 ++++++++++++++++++++++++++++++++++-
+ conf.hpp                   |   4 +
+ dbus/dbusconfiguration.cpp | 149 ++++++++++++++++++++++++++++-
  pid/builder.cpp            |  12 +++
- pid/buildjson.cpp          |  48 +++++++++++-
- pid/ec/fsc.cpp             |  44 +++++++++++
- pid/ec/fsc.hpp             |  41 ++++++++++
- pid/fsccontroller.cpp      | 189 +++++++++++++++++++++++++++++++++++++++++++++
- pid/fsccontroller.hpp      |  59 ++++++++++++++
+ pid/buildjson.cpp          |  48 +++++++++-
+ pid/ec/fsc.cpp             |  44 +++++++++
+ pid/ec/fsc.hpp             |  40 ++++++++
+ pid/fsccontroller.cpp      | 234 +++++++++++++++++++++++++++++++++++++++++++++
+ pid/fsccontroller.hpp      |  58 +++++++++++
  pid/zone.cpp               |   1 +
- 10 files changed, 541 insertions(+), 7 deletions(-)
+ 10 files changed, 588 insertions(+), 7 deletions(-)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 conf.hpp
  mode change 100644 => 100755 dbus/dbusconfiguration.cpp
@@ -58,7 +58,7 @@ index 45b26d4..2392da9
 diff --git a/conf.hpp b/conf.hpp
 old mode 100644
 new mode 100755
-index 95bdeaa..0707649
+index 95bdeaa..03361e0
 --- a/conf.hpp
 +++ b/conf.hpp
 @@ -2,6 +2,7 @@
@@ -77,10 +77,19 @@ index 95bdeaa..0707649
      };
  };
  
+@@ -53,6 +55,8 @@ struct ZoneConfig
+ 
+     /* If the sensors are in fail-safe mode, this is the percentage to use. */
+     double failsafePercent;
++    double commandSet;
++    double floorDuty;
+ };
+ 
+ using PIDConf = std::map<std::string, struct ControllerInfo>;
 diff --git a/dbus/dbusconfiguration.cpp b/dbus/dbusconfiguration.cpp
 old mode 100644
 new mode 100755
-index e68c852..5ab41a4
+index e68c852..b5ae8a3
 --- a/dbus/dbusconfiguration.cpp
 +++ b/dbus/dbusconfiguration.cpp
 @@ -45,6 +45,8 @@ constexpr const char* pidZoneConfigurationInterface =
@@ -137,7 +146,18 @@ index e68c852..5ab41a4
                      pathPair.second.end())
              {
                  configurations.emplace(pathPair);
-@@ -812,6 +819,138 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+@@ -576,6 +583,10 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                                                   zone.at("MinThermalOutput"));
+             details.failsafePercent = std::visit(VariantToDoubleVisitor(),
+                                                  zone.at("FailSafePercent"));
++            details.commandSet = std::visit(VariantToDoubleVisitor(),
++                                                 zone.at("CommandSet"));
++            details.floorDuty = std::visit(VariantToDoubleVisitor(),
++                                                 zone.at("FloorDuty"));
+         }
+         auto findBase = configuration.second.find(pidConfigurationInterface);
+         if (findBase != configuration.second.end())
+@@ -812,6 +823,136 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
                  }
              }
          }
@@ -224,8 +244,6 @@ index e68c852..5ab41a4
 +
 +                info.fscInfo.outLimMax =
 +                    std::visit(VariantToDoubleVisitor(), base.at("OutLimitMax"));
-+                info.fscInfo.outLimMin =
-+                    std::visit(VariantToDoubleVisitor(), base.at("OutLimitMin"));
 +
 +                auto findPosHyst = base.find("PositiveHysteresis");
 +                auto findNegHyst = base.find("NegativeHysteresis");
@@ -311,7 +329,7 @@ index 1fbfbd4..8e60192
 diff --git a/pid/buildjson.cpp b/pid/buildjson.cpp
 old mode 100644
 new mode 100755
-index 5e90c47..f6f31e4
+index 5e90c47..b392e2f
 --- a/pid/buildjson.cpp
 +++ b/pid/buildjson.cpp
 @@ -51,7 +51,7 @@ void from_json(const json& j, conf::ControllerInfo& c)
@@ -323,17 +341,15 @@ index 5e90c47..f6f31e4
      {
          p.at("samplePeriod").get_to(c.pidInfo.ts);
          p.at("proportionalCoeff").get_to(c.pidInfo.proportionalCoeff);
-@@ -68,6 +68,52 @@ void from_json(const json& j, conf::ControllerInfo& c)
+@@ -68,6 +68,50 @@ void from_json(const json& j, conf::ControllerInfo& c)
          c.pidInfo.positiveHysteresis = positiveHysteresisValue;
          c.pidInfo.negativeHysteresis = negativeHysteresisValue;
      }
 +    else if (c.type == "fsc")
 +    {
 +        p.at("samplePeriod").get_to(c.fscInfo.ts);
-+        //p.at("isCeiling").get_to(c.stepwiseInfo.isCeiling);
 +        p.at("setPointH").get_to(c.fscInfo.setPointH);
 +        p.at("setPointL").get_to(c.fscInfo.setPointL);
-+        p.at("outLim_min").get_to(c.fscInfo.outLimMin);
 +        p.at("outLim_max").get_to(c.fscInfo.outLimMax);
 +
 +        for (size_t i = 0; i < ec::maxFscPoints; i++)
@@ -376,6 +392,15 @@ index 5e90c47..f6f31e4
      else
      {
          p.at("samplePeriod").get_to(c.stepwiseInfo.ts);
+@@ -135,6 +179,8 @@ std::pair<std::map<int64_t, conf::PIDConf>,
+         id = zone["id"];
+         thisZoneConfig.minThermalOutput = zone["minThermalOutput"];
+         thisZoneConfig.failsafePercent = zone["failsafePercent"];
++        thisZoneConfig.commandSet = zone["commandSet"];
++        thisZoneConfig.floorDuty = zone["floorDuty"];
+ 
+         auto pids = zone["pids"];
+         for (const auto& pid : pids)
 diff --git a/pid/ec/fsc.cpp b/pid/ec/fsc.cpp
 new file mode 100755
 index 0000000..345b20e
@@ -428,10 +453,10 @@ index 0000000..345b20e
 +} // namespace ec
 diff --git a/pid/ec/fsc.hpp b/pid/ec/fsc.hpp
 new file mode 100755
-index 0000000..c9db312
+index 0000000..7f687b2
 --- /dev/null
 +++ b/pid/ec/fsc.hpp
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,40 @@
 +/*
 +// Copyright (c) 2019
 +//
@@ -467,7 +492,6 @@ index 0000000..c9db312
 +    double setPointH;
 +    double setPointL;
 +    double outLimMax;
-+    double outLimMin;
 +};
 +
 +double fsc(const ec::FscInfo& info, double value);
@@ -475,10 +499,10 @@ index 0000000..c9db312
 +}
 diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
 new file mode 100755
-index 0000000..e1bed58
+index 0000000..9c14a2b
 --- /dev/null
 +++ b/pid/fsccontroller.cpp
-@@ -0,0 +1,189 @@
+@@ -0,0 +1,234 @@
 +/*
 +// Copyright (c) 2019
 +//
@@ -511,6 +535,25 @@ index 0000000..e1bed58
 +#include <thread>
 +#include <vector>
 +
++#include <sdbusplus/asio/object_server.hpp>
++#define FSC_SERVICE "xyz.openbmc_project.EntityManager"
++#define PID_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/Pid_"
++#define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
++#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
++
++extern std::map<int64_t, struct conf::ZoneConfig> zoneDetailsConfig;
++
++static void setProperty(sdbusplus::bus::bus& bus, const std::string& path,
++                 const std::string& property, const double value)
++{
++    auto method = bus.new_method_call(FSC_SERVICE, path.c_str(),
++                                      PROPERTY_INTERFACE, "Set");
++    method.append(PID_INTERFACE, property, sdbusplus::message::variant<double>(value));
++    bus.call_noreply(method);
++
++    return;
++}
++
 +void FscController::process(void)
 +{
 +    // Get input value
@@ -520,21 +563,29 @@ index 0000000..e1bed58
 +
 +    double output;
 +
-+    if (std::isnan(delayTime))
-+    {
-+        delayTime = 0;
-+    }
-+
 +    if (std::isnan(lastOutput))
 +    {
-+        floorSenIn = input;
-+        output = ec::fsc(info, input);
-+        lastOutput = output;
-+        floorSenOut = output;
++        lastOutput = floorOutput;
++        output = lastOutput;
 +        delayTime = 0;
 +    }
 +    else
 +    {
++        if (zoneDetailsConfig[1].commandSet == 1)
++        {
++            if (floorOutput != zoneDetailsConfig[1].floorDuty)
++            {
++                floorOutput = zoneDetailsConfig[1].floorDuty;
++                lastOutput = floorOutput;
++            }
++        }
++        else
++        {
++            if (lastOutput <= floorOutput)
++            {
++                lastOutput = floorOutput;
++            }
++        }
 +        output = lastOutput;
 +        if (std::isnan(updateDir))
 +        {
@@ -573,14 +624,14 @@ index 0000000..e1bed58
 +                if (input < lastInput)
 +                {
 +                    output = lastOutput - 2;
-+                    if (output <= floorSenOut)
++                    if (output <= floorOutput)
 +                    {
-+                        output = floorSenOut;
++                        output = floorOutput;
 +                    }
 +                    delayTime = 0;
 +                    lastInput = input;
 +                }
-+                else if ((input >= lastInput) && (input >= info.setPointH))
++                else if ((input >= lastInput) && (input > info.setPointH))
 +                {
 +                    updateDir = 1;
 +                    output = lastOutput + 2;
@@ -633,6 +684,9 @@ index 0000000..e1bed58
 +    double value = std::numeric_limits<double>::lowest();
 +    double sensorvalue[10];
 +    size_t i=0;
++    char Object[100];
++    ec::FscInfo info = get_fsc_info();
++    auto bus = sdbusplus::bus::new_default();
 +
 +    for (const auto& in : _inputs)
 +    {
@@ -640,23 +694,38 @@ index 0000000..e1bed58
 +        i++;
 +    }
 +
-+    if (std::isnan(floorSenIn))
++    if (zoneDetailsConfig[1].commandSet == 0)
 +    {
-+        value = sensorvalue[0];
++        floorOutput = ec::fsc(info, sensorvalue[0]);
++
++        if (floorOutput != zoneDetailsConfig[1].floorDuty)
++        {
++            for(size_t z = 1; z <= 5; z++)
++            {
++                memset(Object,0,sizeof(Object));
++                snprintf(Object,sizeof(Object),"%s%d",PID_OBJECTPATH,z);
++                setProperty(bus,Object,"FloorDuty",floorOutput);
++            }
++        }
 +    }
 +    else
 +    {
-+        if ( i > 1)
++        if (std::isnan(floorOutput))
 +        {
-+            for (size_t j=1; j<i; j++)
-+            {
-+                value = std::max(value, sensorvalue[j]);
-+            }
++            floorOutput = zoneDetailsConfig[1].floorDuty;
 +        }
-+        else
++    }
++
++    if ( i > 1)
++    {
++        for (size_t j=1; j<i; j++)
 +        {
-+            value = sensorvalue[0];
++            value = std::max(value, sensorvalue[j]);
 +        }
++    }
++    else
++    {
++        value = sensorvalue[0];
 +    }
 +
 +    return value;
@@ -670,10 +739,10 @@ index 0000000..e1bed58
 +}
 diff --git a/pid/fsccontroller.hpp b/pid/fsccontroller.hpp
 new file mode 100755
-index 0000000..143873f
+index 0000000..f5aec53
 --- /dev/null
 +++ b/pid/fsccontroller.hpp
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,58 @@
 +#pragma once
 +
 +#include "controller.hpp"
@@ -728,8 +797,7 @@ index 0000000..143873f
 +    std::vector<std::string> _inputs;
 +    double lastInput = std::numeric_limits<double>::quiet_NaN();
 +    double lastOutput = std::numeric_limits<double>::quiet_NaN();
-+    double floorSenIn = std::numeric_limits<double>::quiet_NaN();
-+    double floorSenOut = std::numeric_limits<double>::quiet_NaN();
++    double floorOutput = std::numeric_limits<double>::quiet_NaN();
 +    double delayTime = std::numeric_limits<double>::quiet_NaN();
 +    double updateDir = std::numeric_limits<double>::quiet_NaN();
 +};

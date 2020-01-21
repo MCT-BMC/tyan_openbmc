@@ -28,9 +28,52 @@
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message/types.hpp>
 
+#define FSC_SERVICE "xyz.openbmc_project.EntityManager"
+#define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/Pid_"
+#define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
+#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 
 namespace ipmi
 {
+
+static int getProperty(sdbusplus::bus::bus& bus, const std::string& path,
+                 const std::string& property, double& value, const std::string service, const std::string interface)
+{
+    auto method = bus.new_method_call(service.c_str(), path.c_str(), PROPERTY_INTERFACE, "Get");
+    method.append(interface.c_str(),property);
+    auto reply=bus.call(method);
+    if (reply.is_method_error())
+    {
+        std::printf("Error looking up services, PATH=%s",interface.c_str());
+        return -1;
+    }
+
+    sdbusplus::message::variant<double> valuetmp;
+    try
+    {
+        reply.read(valuetmp);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        std::printf("Failed to get pattern string for match process");
+        return -1;
+    }
+
+    value = std::get<double>(valuetmp);
+    return 0;
+}
+
+static void setProperty(sdbusplus::bus::bus& bus, const std::string& path,
+                 const std::string& property, const double value)
+{
+    auto method = bus.new_method_call(FSC_SERVICE, path.c_str(),
+                                      PROPERTY_INTERFACE, "Set");
+    method.append(PID_INTERFACE, property, sdbusplus::message::variant<double>(value));
+	
+    bus.call_noreply(method);
+
+    return;
+}
 
 void register_netfn_mct_oem() __attribute__((constructor));
 
@@ -161,6 +204,14 @@ ipmi::RspType<uint8_t> ipmi_tyan_ManufactureMode(uint8_t mode)
         memset(command,0,sizeof(command));
         sprintf(command, "echo 0 > /usr/sbin/fsc");
         system(command);
+
+		// Set all fan to Full Duty
+		for(size_t i = 1; i <= 5; i++)
+		{
+			memset(command,0,sizeof(command));
+			sprintf(command, "echo 255 > /sys/class/hwmon/hwmon0/pwm%d",i);
+			rc = system(command);
+		}
     }
     else if (mode == 1)
     {
@@ -339,6 +390,90 @@ ipmi::RspType<uint8_t> ipmi_tyan_FanPwmDuty(uint8_t pwmId, uint8_t duty)
     return ipmi::responseSuccess();
 }
 
+/* Set Floor Duty Command
+NetFun: 0x2E
+Cmd : 0x07
+Request:
+        Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+        Byte 4 :  0h~64h - Floor Duty cycle
+                     ffh - Get Current Floor Duty Cycle
+Response:
+        Byte 1 : Completion Code
+        Byte 2-4 : Tyan Manufactures ID
+        Byte (5) : Current Floor Duty Cycle , present if FFh passed to Byte4 in Request
+        	[7] : Floor Duty Cycle control source 
+        		0b - by sensor.
+        		1b - by command.
+        	[6:0] : Floor Duty cycle.
+*/
+ipmi::RspType<uint8_t> ipmi_tyan_FloorDuty(uint8_t floorDuty)
+{
+    int rc=0;
+    char Object[100];
+	double responseData;
+    uint8_t currentFloorDuty;
+	uint8_t controlSource;
+	
+	auto bus = sdbusplus::bus::new_default();
+
+    if (floorDuty <= 0x64)
+    {
+        //Set Floor Duty Cycle
+		for(size_t i = 1; i <= 5; i++)
+		{
+			memset(Object,0,sizeof(Object));
+			snprintf(Object,sizeof(Object),"%s%d",FSC_OBJECTPATH,i);
+			setProperty(bus,Object,"CommandSet",1);
+			setProperty(bus,Object,"FloorDuty",static_cast<double>(floorDuty));
+		}
+    }
+    else if (floorDuty == 0xff)
+    {
+        // Get Floor Duty Cycle
+		memset(Object,0,sizeof(Object));
+		snprintf(Object,sizeof(Object),"%s%d",FSC_OBJECTPATH,1);
+		
+		rc = getProperty(bus,Object,"FloorDuty",responseData,FSC_SERVICE,PID_INTERFACE);
+		if(rc<0)
+		{
+			return ipmi::responseUnspecifiedError();
+		}
+
+		currentFloorDuty = static_cast<uint8_t>(responseData);
+		
+		rc = getProperty(bus,Object,"CommandSet",responseData,FSC_SERVICE,PID_INTERFACE);
+		if(rc<0)
+		{
+			return ipmi::responseUnspecifiedError();
+		}
+
+		controlSource = static_cast<uint8_t>(responseData);
+		if (controlSource == 1)
+		{
+			currentFloorDuty = currentFloorDuty + 0x80;
+		}
+		
+		return ipmi::responseSuccess(currentFloorDuty);
+
+    }
+	else if (floorDuty == 0xfe)
+	{
+		//Set Floor Duty Cycle control by sensors 
+		for(size_t i = 1; i <= 5; i++)
+		{
+			memset(Object,0,sizeof(Object));
+			snprintf(Object,sizeof(Object),"%s%d",FSC_OBJECTPATH,i);
+			setProperty(bus,Object,"CommandSet",0);
+		}
+	}
+	else
+	{
+		return ipmi::responseParmOutOfRange();
+	}
+    
+    return ipmi::responseSuccess();
+}
+
 /* Config EccLeaky Bucket Command
 NetFun: 0x2E
 Cmd : 0x1A
@@ -424,6 +559,7 @@ void register_netfn_mct_oem()
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_FanPwmDuty, ipmi::Privilege::Admin, ipmi_tyan_FanPwmDuty);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_ManufactureMode, ipmi::Privilege::Admin, ipmi_tyan_ManufactureMode);
+	ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_FloorDuty, ipmi::Privilege::Admin, ipmi_tyan_FloorDuty);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_ConfigEccLeakyBucket, ipmi::Privilege::Admin, ipmi_tyan_ConfigEccLeakyBucket);
 }
 }

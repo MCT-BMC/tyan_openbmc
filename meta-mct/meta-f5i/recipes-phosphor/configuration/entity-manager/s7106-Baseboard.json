@@ -750,30 +750,40 @@
         {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 25,
             "Name": "Pid 1",
             "Type": "Pid.Zone"
         },
         {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 25,
             "Name": "Pid 2",
             "Type": "Pid.Zone"
         },
         {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 25,
             "Name": "Pid 3",
             "Type": "Pid.Zone"
         },
         {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 25,
             "Name": "Pid 4",
             "Type": "Pid.Zone"
         },
         {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 25,
             "Name": "Pid 5",
             "Type": "Pid.Zone"
         },
@@ -784,10 +794,9 @@
                 "CPU0_Temp"
             ],
             "Name": "FSC_CPU0",
-            "SetPointH": 77,
-            "SetPointL": 72,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "SetPointH": 87,
+            "SetPointL": 82,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -812,10 +821,9 @@
                 "CPU1_Temp"
             ],
             "Name": "FSC_CPU1",
-            "SetPointH": 77,
-            "SetPointL": 72,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "SetPointH": 87,
+            "SetPointL": 82,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -844,8 +852,7 @@
             "Name": "FSC_DIMM_DEF_CPU0",
             "SetPointH": 72,
             "SetPointL": 64,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -873,8 +880,7 @@
             "Name": "FSC_DIMM_ABC_CPU0",
             "SetPointH": 72,
             "SetPointL": 64,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -901,8 +907,7 @@
             "Name": "FSC_DIMM_ABC_CPU1",
             "SetPointH": 72,
             "SetPointL": 64,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -930,8 +935,7 @@
             "Name": "FSC_DIMM_DEF_CPU1",
             "SetPointH": 72,
             "SetPointL": 64,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -956,8 +960,7 @@
             "Name": "FSC_PCH",
             "SetPointH": 77,
             "SetPointL": 69,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -983,8 +986,7 @@
             "Name": "FSC_OCP_NIC",
             "SetPointH": 85,
             "SetPointL": 77,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
@@ -1014,8 +1016,7 @@
             "Name": "FSC_NVMe",
             "SetPointH": 65,
             "SetPointL": 62,
-            "OutLimitMax": 100,
-            "OutLimitMin": 25,
+            "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
                 25.0,
