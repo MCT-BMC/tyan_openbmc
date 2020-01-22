@@ -1,0 +1,185 @@
+From 5f2bc9cf4631ed3f38eaf44cae1a63f54de576ca Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 22 Jan 2020 15:30:08 +0800
+Subject: [PATCH] add event sensor
+
+---
+ CMakeLists.txt                                |   8 ++
+ .../xyz.openbmc_project.eventsensor.service   |  12 ++
+ src/eventSensor.cpp                           | 124 ++++++++++++++++++
+ 3 files changed, 144 insertions(+)
+ create mode 100644 service_files/xyz.openbmc_project.eventsensor.service
+ create mode 100755 src/eventSensor.cpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 652c382..bb9f5c1 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -253,6 +253,10 @@ add_executable (hostmemoryeccsensor src/HostMemoryEccSenosr.cpp)
+ add_dependencies (hostmemoryeccsensor sdbusplus-project)
+ target_link_libraries (hostmemoryeccsensor ${SENSOR_LINK_LIBS})
+ 
++add_executable (eventsensor src/eventSensor.cpp)
++add_dependencies (eventsensor sdbusplus-project)
++target_link_libraries (eventsensor ${SENSOR_LINK_LIBS})
++
+ if (NOT DISABLE_NVME)
+     add_executable (nvmesensor src/NVMeSensor.cpp ${NVME_SRC_FILES})
+     add_dependencies (nvmesensor sdbusplus-project)
+@@ -448,4 +452,8 @@ if (NOT DISABLE_HOST_MEM_ECC)
+     )
+ endif ()
+ 
++install (TARGETS eventsensor DESTINATION bin)
++install (FILES ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.eventsensor.service
++          DESTINATION ${SERVICE_FILE_INSTALL_DIR}
++)
+ 
+diff --git a/service_files/xyz.openbmc_project.eventsensor.service b/service_files/xyz.openbmc_project.eventsensor.service
+new file mode 100644
+index 0000000..d62a5a8
+--- /dev/null
++++ b/service_files/xyz.openbmc_project.eventsensor.service
+@@ -0,0 +1,12 @@
++[Unit]
++Description=IPMI Event-only Sensor
++StopWhenUnneeded=false
++After=xyz.openbmc_project.EntityManager.service
++
++[Service]
++Restart=always
++RestartSec=5
++ExecStart=/usr/bin/eventsensor
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+new file mode 100755
+index 0000000..6674c30
+--- /dev/null
++++ b/src/eventSensor.cpp
+@@ -0,0 +1,124 @@
++/*
++// Copyright (c) 2018 Intel Corporation
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++*/
++
++#include <Utils.hpp>
++#include <boost/algorithm/string/predicate.hpp>
++#include <boost/asio.hpp>
++#include <chrono>
++#include <ctime>
++#include <iostream>
++#include <sdbusplus/asio/connection.hpp>
++#include <sdbusplus/asio/object_server.hpp>
++#include <sdbusplus/asio/sd_event.hpp>
++#include <sdbusplus/bus.hpp>
++#include <sdbusplus/exception.hpp>
++#include <sdbusplus/server.hpp>
++#include <sdbusplus/timer.hpp>
++#include <sensor.hpp>
++#include <systemd/sd-journal.h>
++
++static constexpr bool DEBUG = false;
++
++//{sensor name, sensor type}
++const static boost::container::flat_map<std::string, std::string>eventsensors
++    {
++        {"IPMI_Power_Diag","fru_state"}
++    };
++
++struct eventSensor 
++{
++    eventSensor(
++                sdbusplus::asio::object_server& objectServer,
++                std::shared_ptr<sdbusplus::asio::connection>& conn,
++                boost::asio::io_service& io, const std::string& sensorName, const std::string& sensorType):
++                objectServer(objectServer), dbusConnection(conn)
++    {
++        std::string sensorPath = "/xyz/openbmc_project/sensors/"+sensorType+"/"+sensorName;
++        if (DEBUG)
++        {
++            std::cerr << sensorPath << "\n";
++        }
++        if (!conn)
++        {
++            std::cerr << "Connection not created\n";
++            return;
++        }
++        
++        intf = objectServer.add_interface(sensorPath,sensorValueInterface);
++        intf->register_property("Value", value);
++        if (!intf->initialize())    
++        {
++            std::cerr << "error initializing value interface\n";    
++        }
++    }
++    ~eventSensor()
++    {
++         objectServer.remove_interface(intf);
++    }
++    void init(void);
++
++  private:
++    sdbusplus::asio::object_server& objectServer;
++    std::shared_ptr<sdbusplus::asio::connection> dbusConnection;
++    std::shared_ptr<sdbusplus::asio::dbus_interface> intf;
++    double value = 0;
++};
++
++void eventSensor::init(void)
++{
++   //do nothing for now;
++}
++
++void createSensors(
++    boost::asio::io_service& io, sdbusplus::asio::object_server& objectServer,
++    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection, 
++    boost::container::flat_map<std::string, std::unique_ptr<eventSensor>>& sensors)
++{
++    for(auto const& it:eventsensors)
++    {
++        std::cerr << it.first << ":" << it.second << '\n';
++        sensors[it.first] = std::make_unique<eventSensor>(
++            objectServer, dbusConnection, io, it.first, it.second );
++
++        sensors[it.first]->init();
++    }        
++}
++
++int main()
++{
++    // setup connection to dbus
++    boost::asio::io_service io;
++    auto systemBus = std::make_shared<sdbusplus::asio::connection>(io);
++    auto objServer = sdbusplus::asio::object_server(systemBus);
++    boost::container::flat_map<std::string, std::unique_ptr<eventSensor>> sensors;
++
++    // setup object server, define interface
++    systemBus->request_name("xyz.openbmc_project.eventSensor");
++
++    if (DEBUG)
++    {
++        for(auto const& pair:eventsensors)
++            std::cerr << pair.first << ":" << pair.second << '\n';
++    }
++
++    io.post([&]() {
++        createSensors(io, objServer, systemBus,sensors);
++    });
++
++    //auto work = std::make_shared<boost::asio::io_service::work>(io);
++    io.run();
++    return 0;
++}
