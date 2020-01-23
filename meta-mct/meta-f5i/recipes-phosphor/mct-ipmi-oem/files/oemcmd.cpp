@@ -172,7 +172,7 @@ ipmi_ret_t ipmiOpmaClearCmos(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmi_rc;
 
 }
-
+//===============================================================
 /* Set Fan Control Enable Command
 NetFun: 0x2E
 Cmd : 0x06
@@ -260,6 +260,7 @@ ipmi::RspType<uint8_t> ipmi_tyan_ManufactureMode(uint8_t mode)
 
     return ipmi::responseSuccess();
 }
+//===============================================================
 
 /* Set Fan Control PWM Duty Command
 NetFun: 0x2E
@@ -389,7 +390,7 @@ ipmi::RspType<uint8_t> ipmi_tyan_FanPwmDuty(uint8_t pwmId, uint8_t duty)
 
     return ipmi::responseSuccess();
 }
-
+//===============================================================
 /* Set Floor Duty Command
 NetFun: 0x2E
 Cmd : 0x07
@@ -473,7 +474,7 @@ ipmi::RspType<uint8_t> ipmi_tyan_FloorDuty(uint8_t floorDuty)
     
     return ipmi::responseSuccess();
 }
-
+//===============================================================
 /* Config EccLeaky Bucket Command
 NetFun: 0x2E
 Cmd : 0x1A
@@ -553,13 +554,54 @@ ipmi::RspType<std::optional<uint8_t>, // T1
    
 }
 
+//===============================================================
+/* get gpio status Command (for manufacturing) 
+NetFun: 0x2E
+Cmd : 0x41
+Request:
+        Byte 1-3 : Tyan IANA ID (FD 19 00)
+        Byte 4 : gpio number 
+Response:
+        Byte 1 : Completion Code
+        Byte 2-4 : Tyan IANA
+        Byte 5 : gpio direction 
+        Byte 6 : gpio data
+*/
+ipmi::RspType<uint8_t,
+              uint8_t>
+    ipmi_tyan_getGpio(uint8_t gpioNo)
+{
+    auto chip = gpiod::chip("gpiochip0");
+    auto line = chip.get_line(gpioNo);
+    
+    if (!line)
+    {
+        std::cerr << "Error requesting gpio\n";
+        return ipmi::responseUnspecifiedError();
+    }
+    auto dir = line.direction();
 
+    bool resp;
+    try
+    {
+        line.request({"ipmid", gpiod::line_request::DIRECTION_INPUT,0});
+        resp = line.get_value();
+    }
+    catch (std::system_error&)
+    {
+        std::cerr << "Error reading gpio: " << (unsigned)gpioNo << "\n";
+        return ipmi::responseUnspecifiedError();
+    }
+  
+    line.release();
+    return ipmi::responseSuccess((uint8_t)dir, (uint8_t)resp);
+}
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_FanPwmDuty, ipmi::Privilege::Admin, ipmi_tyan_FanPwmDuty);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_ManufactureMode, ipmi::Privilege::Admin, ipmi_tyan_ManufactureMode);
 	ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_FloorDuty, ipmi::Privilege::Admin, ipmi_tyan_FloorDuty);
-    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_ConfigEccLeakyBucket, ipmi::Privilege::Admin, ipmi_tyan_ConfigEccLeakyBucket);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_gpioStatus, ipmi::Privilege::Admin, ipmi_tyan_getGpio);
 }
 }
