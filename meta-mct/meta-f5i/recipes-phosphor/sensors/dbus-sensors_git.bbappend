@@ -30,6 +30,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0025-Add-VR-MOS-Margin-sensor.patch \
             file://0026-support-leaky-bucket-sensor.patch \
             file://0027-add-event-sensor.patch \
+            file://0028-Support-FruStateSensor.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"
@@ -45,4 +46,5 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.nvmesensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mostempsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.hostmemoryeccsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.eventsensor.service"
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.frustatesensor.service"
 
