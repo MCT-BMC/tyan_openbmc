@@ -17,6 +17,13 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_ConfigEccLeakyBucket = 0x1A,
     IPMI_CMD_ClearCmos = 0x3A,
     IPMI_CMD_gpioStatus = 0x41,
+    IPMI_CMD_PnmGetReading = 0xE2,
 };
 
+struct PnmGetReadingRequest
+{
+    uint8_t type;
+    uint8_t reserved1;
+    uint8_t reserved2;
+};
 

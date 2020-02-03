@@ -596,9 +596,74 @@ ipmi::RspType<uint8_t,
     line.release();
     return ipmi::responseSuccess((uint8_t)dir, (uint8_t)resp);
 }
+
+//===============================================================
+/* Power Node Manager Oem Get Reading
+NetFun: 0x30
+Cmd : 0xE2
+Request:
+        Byte 1 : [0:3] Domain ID / [4:7] Reading Type
+        Byte 2 : Optional Parameter.
+        Byte 3 : Reserved. Write as 00h.
+
+Response:
+        Byte 1 : Completion Code
+        Byte 2 : [0:3] Domain ID / [4:7] Reading Type
+        Byte 3-4 : Reading value 16-bit encoding 2s-complement signed integer.
+*/
+
+#define PIN_OBJECT "/xyz/openbmc_project/sensors/power/PSU0_Input_Power"
+#define PIN_SERVICE "xyz.openbmc_project.PSUSensor"
+#define PIN_INTERFACE "xyz.openbmc_project.Sensor.Value"
+
+ipmi_ret_t ipmi_Pnm_GetReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
+                              ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t ipmi_rc = IPMI_CC_OK;
+    uint8_t domainID;
+    uint8_t readingType;
+    uint8_t highByte;
+    uint8_t lowByte;
+    int rc=0;
+    double readingValue;
+    uint8_t responseData[3]={0};
+
+    auto bus = sdbusplus::bus::new_default();
+    auto* requestData= reinterpret_cast<PnmGetReadingRequest*>(request);
+
+    if((int)*data_len != 3)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    domainID = requestData->type & 0x0F;
+    readingType = requestData->type >> 4;
+    if (readingType == 0x00 || readingType == 0x06)
+    {
+        // get PSU PIN sensor reading value
+        rc = getProperty(bus,PIN_OBJECT,"Value",readingValue,PIN_SERVICE,PIN_INTERFACE);
+        if(rc<0)
+        {
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+
+        highByte = static_cast<uint16_t>(readingValue) >> 8;
+        lowByte = static_cast<uint16_t>(readingValue) & 0x00FF;
+        responseData[1]=lowByte;
+        responseData[2]=highByte;
+    }
+
+    responseData[0]=requestData->type;
+    memcpy(response, responseData, sizeof(responseData));
+
+    return ipmi_rc;
+}
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
+    ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_PnmGetReading, NULL, ipmi_Pnm_GetReading, PRIVILEGE_ADMIN);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_FanPwmDuty, ipmi::Privilege::Admin, ipmi_tyan_FanPwmDuty);
     ipmi::registerOemHandler(ipmi::prioMax, 0x0019fd, IPMI_CMD_ManufactureMode, ipmi::Privilege::Admin, ipmi_tyan_ManufactureMode);
 	ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_FloorDuty, ipmi::Privilege::Admin, ipmi_tyan_FloorDuty);
