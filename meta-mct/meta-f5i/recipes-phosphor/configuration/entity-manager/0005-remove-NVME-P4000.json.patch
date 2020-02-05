@@ -1,0 +1,70 @@
+From cb789353d8ed7f978c461177234377206b5698a8 Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Wed, 5 Feb 2020 12:03:11 +0800
+Subject: [PATCH] remove NVME P4000.json
+
+Move NVME config to baseboard.json for static mapping.
+---
+ configurations/NVME P4000.json | 52 ------------------------------------------
+ 1 file changed, 52 deletions(-)
+ delete mode 100644 configurations/NVME P4000.json
+
+diff --git a/configurations/NVME P4000.json b/configurations/NVME P4000.json
+deleted file mode 100644
+index 46ea3f5..0000000
+--- a/configurations/NVME P4000.json	
++++ /dev/null
+@@ -1,52 +0,0 @@
+-{
+-    "Bus": "$bus",
+-    "Exposes": [
+-        {
+-            "Address": "$address",
+-            "Bus": "$bus",
+-            "Name": "NVMe $index FRU",
+-            "Type": "EEPROM"
+-        },
+-        {
+-            "Address": "0x53",
+-            "Bus": "$bus",
+-            "Name": "NVMe $index Temp",
+-            "Thresholds": [
+-                {
+-                    "Direction": "greater than",
+-                    "Name": "upper critical",
+-                    "Severity": 1,
+-                    "Value": 115
+-                },
+-                {
+-                    "Direction": "greater than",
+-                    "Name": "upper non critical",
+-                    "Severity": 0,
+-                    "Value": 110
+-                },
+-                {
+-                    "Direction": "less than",
+-                    "Name": "lower non critical",
+-                    "Severity": 0,
+-                    "Value": 5
+-                },
+-                {
+-                    "Direction": "less than",
+-                    "Name": "lower critical",
+-                    "Severity": 1,
+-                    "Value": 0
+-                }
+-            ],
+-            "Type": "NVME1000"
+-        }
+-    ],
+-    "Name": "NVMe $index",
+-    "Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': 'P\\d{4}\\w?'})",
+-    "Type": "NVMe",
+-    "xyz.openbmc_project.Inventory.Decorator.Asset": {
+-        "Manufacturer": "$PRODUCT_MANUFACTURER",
+-        "Model": "$PRODUCT_PRODUCT_NAME",
+-        "PartNumber": "$PRODUCT_PART_NUMBER",
+-        "SerialNumber": "$PRODUCT_SERIAL_NUMBER"
+-    }
+-}
+\ No newline at end of file

@@ -736,6 +736,86 @@
             "Type": "MOSTempSensor"
         },
         {
+            "Address": "0x53",
+            "Bus": "22",
+            "Name": "NVMe 1 FRU",
+            "Type": "EEPROM"
+        },
+        {
+            "Address": "0x6A",
+            "Bus": "22",
+            "Name": "NVMe 1 Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 70
+                }
+            ],
+            "Type": "NVME1000"
+        },
+        {
+            "Address": "0x53",
+            "Bus": "25",
+            "Name": "NVMe 2 FRU",
+            "Type": "EEPROM"
+        },
+        {
+            "Address": "0x6A",
+            "Bus": "25",
+            "Name": "NVMe 2 Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 70
+                }
+            ],
+            "Type": "NVME1000"
+        },
+        {
+            "Address": "0x53",
+            "Bus": "23",
+            "Name": "NVMe 3 FRU",
+            "Type": "EEPROM"
+        },
+        {
+            "Address": "0x6A",
+            "Bus": "23",
+            "Name": "NVMe 3 Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 70
+                }
+            ],
+            "Type": "NVME1000"
+        },
+        {
+            "Address": "0x6A",
+            "Bus": "20",
+            "Name": "NVMe 4 Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 70
+                }
+            ],
+            "Type": "NVME1000"
+        },
+        {
+            "Address": "0x53",
+            "Bus": "20",
+            "Name": "NVMe 4 FRU",
+            "Type": "EEPROM"
+        },
+        {
             "Direction": "Input",
             "Index": 496,
             "Name": "CATERR",
