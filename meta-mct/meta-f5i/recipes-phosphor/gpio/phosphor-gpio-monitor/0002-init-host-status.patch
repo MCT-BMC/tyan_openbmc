@@ -1,0 +1,85 @@
+From 78b75dadb82fae65df0332d4973d909818d8175a Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 5 Feb 2020 17:09:15 +0800
+Subject: [PATCH] init host status
+
+---
+ gpioMonMain.cpp | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
+ mode change 100644 => 100755 gpioMonMain.cpp
+
+diff --git a/gpioMonMain.cpp b/gpioMonMain.cpp
+old mode 100644
+new mode 100755
+index 251e0d5..8252550
+--- a/gpioMonMain.cpp
++++ b/gpioMonMain.cpp
+@@ -23,6 +23,7 @@
+ #include <phosphor-logging/log.hpp>
+ #include <iostream>
+ 
++
+ using namespace phosphor::logging;
+ 
+ namespace phosphor
+@@ -41,6 +42,49 @@ std::map<std::string, int> polarityMap = {
+ }
+ } // namespace phosphor
+ 
++static constexpr char const* PgService = "org.openbmc.control.Power";
++static constexpr char const* PgObj = "/org/openbmc/control/power0";
++static constexpr char const* PgIntf = "org.openbmc.control.Power";
++
++static constexpr char const* HostService = "xyz.openbmc_project.State.Host";
++static constexpr char const* HostObj = "/xyz/openbmc_project/state/host0";
++static constexpr char const* HostIntf = "xyz.openbmc_project.State.Host";
++static constexpr char const* HostOn = "xyz.openbmc_project.State.Host.HostState.Running";
++static constexpr char const* HostOff = "xyz.openbmc_project.State.Host.HostState.Off";
++
++#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
++
++void pgoodhook(gpiod_line* line)
++{
++
++    if (gpiod_line_request_input(line, "gpio_monitor") < 0)
++    {
++         std::cerr << "Error request pgood\n";
++         return;
++    }
++
++    int resp = gpiod_line_get_value(line);
++
++    gpiod_line_release(line); 
++    auto bus = sdbusplus::bus::new_default();
++    std::cerr << "pgood:" << resp <<"\n";
++    auto method = bus.new_method_call(PgService, PgObj, PROPERTY_INTERFACE, "Set");
++    method.append(PgIntf, "pgood", sdbusplus::message::variant<int>((int)resp));
++    bus.call_noreply(method);
++    std::cerr << "pgood inited\n";
++
++    std::string HostState = (resp == 1) ? HostOn:HostOff;
++
++    method = bus.new_method_call(HostService, HostObj, PROPERTY_INTERFACE, "Set");
++    method.append(HostIntf, "CurrentHostState", sdbusplus::message::variant<std::string>(HostState));
++    bus.call_noreply(method);
++    std::cerr << "host state inited\n";
++    
++
++}
++
++
++
+ int main(int argc, char** argv)
+ {
+ 
+@@ -133,6 +177,10 @@ int main(int argc, char** argv)
+             std::string lineName = obj["LineName"];
+             lineMsg += lineName;
+             line = gpiod_line_find(lineName.c_str());
++             if(lineName.compare("PS_PWROK") == 0)
++             {
++                pgoodhook(line);
++             }
+         }
+ 
+         if (line == NULL)

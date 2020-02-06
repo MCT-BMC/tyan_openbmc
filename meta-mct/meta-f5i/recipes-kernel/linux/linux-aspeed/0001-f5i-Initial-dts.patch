@@ -1,19 +1,19 @@
-From 58a6ce29362b2edc6d7f6b76ff465e2d6e6a104a Mon Sep 17 00:00:00 2001
-From: "Henbin.Chang" <henbin-chang@mic.com.tw>
-Date: Mon, 3 Dec 2018 16:44:34 +0800
-Subject: [PATCH] [F5i] Initial dts
+From 548eff83735d4ce6121b1a5daf2b6af2ec966c3e Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 4 Feb 2020 20:33:28 +0800
+Subject: [PATCH 1/1] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 451 +++++++++++++++++++++++
- 1 file changed, 451 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 485 +++++++++++++++++++++++
+ 1 file changed, 485 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 new file mode 100755
-index 000000000000..3efd90d904d9
+index 000000000000..b9d3c3930cac
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,451 @@
+@@ -0,0 +1,485 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -465,3 +465,41 @@ index 000000000000..3efd90d904d9
 +		line-name = "SW2_EN";
 +	};
 +};
++
++&gpio {
++    status = "okay";
++    gpio-line-names =
++    /*A0-A7*/   "","","","","","","","",
++    /*B0-B7*/   "","","","","","","","",
++    /*C0-C7*/   "","","","","","","","",
++    /*D0-D7*/   "","","PS_PWROK","","","","","",
++    /*E0-E7*/   "","","","","","","","",
++    /*F0-F7*/   "","","","","","","","",
++    /*G0-G7*/   "","","","","","","","",
++    /*H0-H7*/   "","","","","","","","",
++    /*I0-I7*/   "","","","","","","","",
++    /*J0-J7*/   "","","","","","","","",
++    /*K0-K7*/   "","","","","","","","",
++    /*L0-L7*/   "","","","","","","","",
++    /*M0-M7*/   "","","","","","","","",
++    /*N0-N7*/   "","","","","","","","",
++    /*O0-O7*/   "","","","","","","","",
++    /*P0-P7*/   "","","","","","","","",
++    /*Q0-Q7*/   "","","","","","","","",
++    /*R0-R7*/   "","","","","","","","",
++    /*S0-S7*/   "","","","","","","","",
++    /*T0-T7*/   "","","","","","","","",
++    /*U0-U7*/   "","","","","","","","",
++    /*V0-V7*/   "","","","","","","","",
++    /*W0-W7*/   "","","","","","","","",
++    /*X0-X7*/   "","","","","","","","",
++    /*Y0-Y7*/   "","","","","","","","",
++    /*Z0-Z7*/   "","","","","","","","",
++    /*AA0-AA7*/ "","","","","","","","",
++    /*AB0-AB7*/ "","","","","","","","",
++    /*AC0-AC7*/ "","","","","","","","";
++};
+\ No newline at end of file
+-- 
+2.22.0
+
