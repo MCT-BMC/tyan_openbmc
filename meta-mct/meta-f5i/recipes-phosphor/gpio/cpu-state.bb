@@ -75,15 +75,13 @@ SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0_deassert.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1_deassert.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.thermtrip.service"
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.thermtrip_deassert.service"
+
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'CATERR_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'CATERR_DEASSERT_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT0_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT0_DEASSERT_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT1_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT1_DEASSERT_SERVICE')}"
-SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'THERMTRIP_SERVICE')}"
-SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'THERMTRIP_DEASSERT_SERVICE')}"
 
 
 

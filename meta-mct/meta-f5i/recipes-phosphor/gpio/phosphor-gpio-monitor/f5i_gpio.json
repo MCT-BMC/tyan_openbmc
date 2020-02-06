@@ -13,6 +13,18 @@
                 "SetPowerGoodPropertyOn.service"
             ]
         }
+    },
+    {
+        "Name": "ThermalTrip",
+        "LineName": "THERMTRIP",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.thermtrip.service"
+            ]
+        }
     }
  ]
 

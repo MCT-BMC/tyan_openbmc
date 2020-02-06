@@ -1,19 +1,19 @@
-From 548eff83735d4ce6121b1a5daf2b6af2ec966c3e Mon Sep 17 00:00:00 2001
+From bb790ee6917a449e3e32132fb3723fa67eb9c3bd Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Tue, 4 Feb 2020 20:33:28 +0800
+Date: Thu, 6 Feb 2020 21:11:09 +0800
 Subject: [PATCH 1/1] [F5i] Initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 485 +++++++++++++++++++++++
- 1 file changed, 485 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts | 480 +++++++++++++++++++++++
+ 1 file changed, 480 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
 new file mode 100755
-index 000000000000..b9d3c3930cac
+index 000000000000..a14f7a3143cc
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,485 @@
+@@ -0,0 +1,480 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -107,11 +107,6 @@ index 000000000000..b9d3c3930cac
 +                                  label = "prochot0";
 +                                  gpios = <&gpio ASPEED_GPIO(H, 6) GPIO_ACTIVE_LOW>;
 +                                  linux,code = <ASPEED_GPIO(H, 6)>;
-+                           };
-+                           thermtrip {
-+                                  label = "thermtrip";
-+                                  gpios = <&gpio ASPEED_GPIO(H, 7) GPIO_ACTIVE_LOW>;
-+                                  linux,code = <ASPEED_GPIO(H, 7)>;
 +                           };
 +        };
 +
@@ -476,7 +471,7 @@ index 000000000000..b9d3c3930cac
 +    /*E0-E7*/   "","","","","","","","",
 +    /*F0-F7*/   "","","","","","","","",
 +    /*G0-G7*/   "","","","","","","","",
-+    /*H0-H7*/   "","","","","","","","",
++    /*H0-H7*/   "","","","","","","","THERMTRIP",
 +    /*I0-I7*/   "","","","","","","","",
 +    /*J0-J7*/   "","","","","","","","",
 +    /*K0-K7*/   "","","","","","","","",
@@ -499,7 +494,6 @@ index 000000000000..b9d3c3930cac
 +    /*AB0-AB7*/ "","","","","","","","",
 +    /*AC0-AC7*/ "","","","","","","","";
 +};
-\ No newline at end of file
 -- 
 2.22.0
 
