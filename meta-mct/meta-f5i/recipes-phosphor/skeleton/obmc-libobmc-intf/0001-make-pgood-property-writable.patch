@@ -1,14 +1,14 @@
-From 9738356a4dd1d46826809a3187effdec80a3c249 Mon Sep 17 00:00:00 2001
+From 1428f5bfd43beac4807b1498995da72c30189ced Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Tue, 4 Feb 2020 18:24:08 +0800
-Subject: [PATCH] make pgood property writable
+Date: Fri, 7 Feb 2020 14:20:16 +0800
+Subject: [PATCH 1/1] make pgood property writable
 
 ---
- libopenbmc_intf/openbmc_intf.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ libopenbmc_intf/openbmc_intf.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/openbmc_intf.c b/openbmc_intf.c
-index 32efdd8..30ff139 100644
+index 32efdd8..c5625d5 100644
 --- a/openbmc_intf.c
 +++ b/openbmc_intf.c
 @@ -16273,7 +16273,7 @@ static const _ExtendedGDBusPropertyInfo _control_power_property_info_pgood =
@@ -16,7 +16,19 @@ index 32efdd8..30ff139 100644
      (gchar *) "pgood",
      (gchar *) "i",
 -    G_DBUS_PROPERTY_INFO_FLAGS_READABLE,
-+    G_DBUS_PROPERTY_INFO_FLAGS_READABLE |G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE,
++    G_DBUS_PROPERTY_INFO_FLAGS_READABLE | G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE,
      NULL
    },
    "pgood",
+@@ -16286,7 +16286,7 @@ static const _ExtendedGDBusPropertyInfo _control_power_property_info_state =
+     -1,
+     (gchar *) "state",
+     (gchar *) "i",
+-    G_DBUS_PROPERTY_INFO_FLAGS_READABLE,
++    G_DBUS_PROPERTY_INFO_FLAGS_READABLE | G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE,
+     NULL
+   },
+   "state",
+-- 
+2.22.0
+
