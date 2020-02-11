@@ -193,6 +193,8 @@ ipmi::RspType<uint8_t> ipmi_tyan_ManufactureMode(uint8_t mode)
     char command[100];
     char FSCStatus[100];
     uint8_t currentStatus;
+    char Object[100];
+    auto bus = sdbusplus::bus::new_default();
 
     if (mode == 0)
     {
@@ -223,6 +225,14 @@ ipmi::RspType<uint8_t> ipmi_tyan_ManufactureMode(uint8_t mode)
         memset(command,0,sizeof(command));
         sprintf(command, "echo 1 > /usr/sbin/fsc");
         system(command);
+
+        //Set Floor Duty Cycle control by sensors
+        for(size_t i = 1; i <= 5; i++)
+        {
+            memset(Object,0,sizeof(Object));
+            snprintf(Object,sizeof(Object),"%s%d",FSC_OBJECTPATH,i);
+            setProperty(bus,Object,"CommandSet",0);
+        }
     }
     else if (mode == 0xff)
     {

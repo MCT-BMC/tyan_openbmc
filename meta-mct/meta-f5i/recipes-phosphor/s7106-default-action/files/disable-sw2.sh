@@ -12,7 +12,7 @@ while [ $BMC_state != "Ready" ]; do
 done
 
 service="xyz.openbmc_project.HwmonTempSensor"
-object="/xyz/openbmc_project/sensors/temperature/OCP_NIC_TEMP"
+object="/xyz/openbmc_project/sensors/temperature/NIC_Temp"
 interface="xyz.openbmc_project.Sensor.Value"
 property="Value"
 sensor_value=$(busctl get-property $service $object $interface $property | awk -F' ' '{print $2}')

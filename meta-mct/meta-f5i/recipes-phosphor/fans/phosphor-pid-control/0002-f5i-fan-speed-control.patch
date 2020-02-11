@@ -1,4 +1,4 @@
-From c93c9292edfef58c9471215fc4bb40dc27b1d71d Mon Sep 17 00:00:00 2001
+From fbfd9e96bd8e84d86785bbb639b2489ae878503d Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Tue, 10 Dec 2019 10:13:38 +0800
 Subject: [PATCH] f5i fan speed control
@@ -7,14 +7,15 @@ Subject: [PATCH] f5i fan speed control
  Makefile.am                |   5 +-
  conf.hpp                   |   4 +
  dbus/dbusconfiguration.cpp | 149 ++++++++++++++++++++++++++++-
+ dbus/dbuspassive.cpp       |   4 +-
  pid/builder.cpp            |  12 +++
  pid/buildjson.cpp          |  48 +++++++++-
  pid/ec/fsc.cpp             |  44 +++++++++
  pid/ec/fsc.hpp             |  40 ++++++++
- pid/fsccontroller.cpp      | 234 +++++++++++++++++++++++++++++++++++++++++++++
+ pid/fsccontroller.cpp      | 233 +++++++++++++++++++++++++++++++++++++++++++++
  pid/fsccontroller.hpp      |  58 +++++++++++
  pid/zone.cpp               |   1 +
- 10 files changed, 588 insertions(+), 7 deletions(-)
+ 11 files changed, 589 insertions(+), 9 deletions(-)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 conf.hpp
  mode change 100644 => 100755 dbus/dbusconfiguration.cpp
@@ -294,6 +295,27 @@ index e68c852..b5ae8a3
      }
      if constexpr (DEBUG)
      {
+diff --git a/dbus/dbuspassive.cpp b/dbus/dbuspassive.cpp
+index 4a77ccf..9693694 100755
+--- a/dbus/dbuspassive.cpp
++++ b/dbus/dbuspassive.cpp
+@@ -173,14 +173,14 @@ int handleSensorValue(sdbusplus::message::message& msg, DbusPassive* owner)
+         bool asserted = false;
+         if (criticalAlarmLow != msgData.end())
+         {
+-            asserted = std::get<bool>(criticalAlarmLow->second);
++            //asserted = std::get<bool>(criticalAlarmLow->second);
+         }
+ 
+         // checking both as in theory you could de-assert one threshold and
+         // assert the other at the same moment
+         if (!asserted && criticalAlarmHigh != msgData.end())
+         {
+-            asserted = std::get<bool>(criticalAlarmHigh->second);
++            //asserted = std::get<bool>(criticalAlarmHigh->second);
+         }
+         owner->setFailed(asserted);
+     }
 diff --git a/pid/builder.cpp b/pid/builder.cpp
 old mode 100644
 new mode 100755
@@ -499,10 +521,10 @@ index 0000000..7f687b2
 +}
 diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
 new file mode 100755
-index 0000000..9c14a2b
+index 0000000..2f0be5c
 --- /dev/null
 +++ b/pid/fsccontroller.cpp
-@@ -0,0 +1,234 @@
+@@ -0,0 +1,233 @@
 +/*
 +// Copyright (c) 2019
 +//
@@ -536,23 +558,8 @@ index 0000000..9c14a2b
 +#include <vector>
 +
 +#include <sdbusplus/asio/object_server.hpp>
-+#define FSC_SERVICE "xyz.openbmc_project.EntityManager"
-+#define PID_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/Pid_"
-+#define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
-+#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 +
 +extern std::map<int64_t, struct conf::ZoneConfig> zoneDetailsConfig;
-+
-+static void setProperty(sdbusplus::bus::bus& bus, const std::string& path,
-+                 const std::string& property, const double value)
-+{
-+    auto method = bus.new_method_call(FSC_SERVICE, path.c_str(),
-+                                      PROPERTY_INTERFACE, "Set");
-+    method.append(PID_INTERFACE, property, sdbusplus::message::variant<double>(value));
-+    bus.call_noreply(method);
-+
-+    return;
-+}
 +
 +void FscController::process(void)
 +{
@@ -586,13 +593,14 @@ index 0000000..9c14a2b
 +                lastOutput = floorOutput;
 +            }
 +        }
++
 +        output = lastOutput;
 +        if (std::isnan(updateDir))
 +        {
 +            if (input > info.setPointH)
 +            {
 +                updateDir = 1;
-+                output = lastOutput + 2;
++                output = lastOutput + (input - info.setPointH)*2;
 +            }
 +            lastInput = input;
 +            delayTime = 0;
@@ -601,43 +609,41 @@ index 0000000..9c14a2b
 +        {
 +            if ((updateDir == 1) && (delayTime >= 5))
 +            {
-+                if (input >= lastInput)
++                if (input > info.setPointH)
 +                {
-+                    output = lastOutput + 2;
++                    output = lastOutput + (input - info.setPointH)*2;
 +                    if (output >= info.outLimMax)
 +                    {
 +                        output = info.outLimMax;
 +                    }
 +                    delayTime = 0;
-+                    lastInput = input;
 +                }
-+                else if ((input < lastInput) && (input < info.setPointL))
++                else if (input < info.setPointL)
 +                {
 +                    updateDir = 2;
-+                    output = lastOutput - 2;
++                    output = lastOutput - (info.setPointL - input)*2;
 +                    delayTime = 0;
-+                    lastInput = input;
 +                }
++                lastInput = input;
 +            }
 +            else if ((updateDir == 2) && (delayTime >= 30))
 +            {
-+                if (input < lastInput)
++                if (input < info.setPointL)
 +                {
-+                    output = lastOutput - 2;
++                    output = lastOutput - (info.setPointL - input)*2;
 +                    if (output <= floorOutput)
 +                    {
 +                        output = floorOutput;
 +                    }
 +                    delayTime = 0;
-+                    lastInput = input;
 +                }
-+                else if ((input >= lastInput) && (input > info.setPointH))
++                else if (input > info.setPointH)
 +                {
 +                    updateDir = 1;
-+                    output = lastOutput + 2;
++                    output = lastOutput + (input - info.setPointH)*2;
 +                    delayTime = 0;
-+                    lastInput = input;
 +                }
++                lastInput = input;
 +            }
 +        }
 +    }
@@ -684,7 +690,7 @@ index 0000000..9c14a2b
 +    double value = std::numeric_limits<double>::lowest();
 +    double sensorvalue[10];
 +    size_t i=0;
-+    char Object[100];
++    double sFloorDuty;
 +    ec::FscInfo info = get_fsc_info();
 +    auto bus = sdbusplus::bus::new_default();
 +
@@ -696,15 +702,30 @@ index 0000000..9c14a2b
 +
 +    if (zoneDetailsConfig[1].commandSet == 0)
 +    {
-+        floorOutput = ec::fsc(info, sensorvalue[0]);
++        sFloorDuty = ec::fsc(info, sensorvalue[0]);
 +
-+        if (floorOutput != zoneDetailsConfig[1].floorDuty)
++        if (std::isnan(floorOutput))
 +        {
-+            for(size_t z = 1; z <= 5; z++)
++            floorOutput = sFloorDuty;
++            lastOutput = sFloorDuty;
++        }
++        else
++        {
++            if ((floorOutput-sFloorDuty) < 0)
 +            {
-+                memset(Object,0,sizeof(Object));
-+                snprintf(Object,sizeof(Object),"%s%d",PID_OBJECTPATH,z);
-+                setProperty(bus,Object,"FloorDuty",floorOutput);
++                if (lastOutput <= sFloorDuty)
++                {
++                    lastOutput = sFloorDuty;
++                }
++                floorOutput = sFloorDuty;
++            }
++            else if ((floorOutput-sFloorDuty) > 0)
++            {
++                if (lastOutput <= floorOutput)
++                {
++                    lastOutput = sFloorDuty;
++                }
++                floorOutput = sFloorDuty;
 +            }
 +        }
 +    }

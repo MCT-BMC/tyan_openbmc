@@ -80,7 +80,7 @@
                     "Label": "Die",
                     "Name": "upper critical",
                     "Severity": 1,
-                    "Value": 90
+                    "Value": 99
                 }
             ],
             "Type": "XeonCPU"
@@ -150,7 +150,7 @@
                     "Label": "Die",
                     "Name": "upper critical",
                     "Severity": 1,
-                    "Value": 90
+                    "Value": 99
                 }
             ],
             "Type": "XeonCPU"
@@ -831,7 +831,7 @@
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,
-            "FloorDuty": 25,
+            "FloorDuty": 0,
             "Name": "Pid 1",
             "Type": "Pid.Zone"
         },
@@ -839,7 +839,7 @@
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,
-            "FloorDuty": 25,
+            "FloorDuty": 0,
             "Name": "Pid 2",
             "Type": "Pid.Zone"
         },
@@ -847,7 +847,7 @@
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,
-            "FloorDuty": 25,
+            "FloorDuty": 0,
             "Name": "Pid 3",
             "Type": "Pid.Zone"
         },
@@ -855,7 +855,7 @@
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,
-            "FloorDuty": 25,
+            "FloorDuty": 0,
             "Name": "Pid 4",
             "Type": "Pid.Zone"
         },
@@ -863,7 +863,7 @@
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,
-            "FloorDuty": 25,
+            "FloorDuty": 0,
             "Name": "Pid 5",
             "Type": "Pid.Zone"
         },
@@ -884,8 +884,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -911,8 +911,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -940,8 +940,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -968,8 +968,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -995,8 +995,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -1023,8 +1023,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -1048,8 +1048,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -1074,8 +1074,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
@@ -1104,8 +1104,8 @@
             ],
             "PositiveHysteresis": 0,
             "Reading": [
-                30.0,
-                35.0
+                29.0,
+                30.0
             ],
             "Type": "Fsc",
             "Zones": [
