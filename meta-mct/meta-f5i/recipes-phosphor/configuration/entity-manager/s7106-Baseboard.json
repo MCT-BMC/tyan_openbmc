@@ -23,54 +23,54 @@
             "Labels": [
                 {
                     "Die" : "CPU0_Temp",
-                    "DIMM_A1" : "CPU0_MC0_DIMM_A",
-                    "DIMM_B1" : "CPU0_MC0_DIMM_B",
-                    "DIMM_C1" : "CPU0_MC0_DIMM_C",
-                    "DIMM_D1" : "CPU0_MC1_DIMM_D",
-                    "DIMM_E1" : "CPU0_MC1_DIMM_E",
-                    "DIMM_F1" : "CPU0_MC1_DIMM_F",
+                    "DIMM_A0" : "CPU0_MC0_DIMM_A",
+                    "DIMM_B0" : "CPU0_MC0_DIMM_B",
+                    "DIMM_C0" : "CPU0_MC0_DIMM_C",
+                    "DIMM_D0" : "CPU0_MC1_DIMM_D",
+                    "DIMM_E0" : "CPU0_MC1_DIMM_E",
+                    "DIMM_F0" : "CPU0_MC1_DIMM_F",
                     "Tjmax" : "CPU0_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_A1",
+                    "Label": "DIMM_A0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_B1",
+                    "Label": "DIMM_B0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_C1",
+                    "Label": "DIMM_C0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_D1",
+                    "Label": "DIMM_D0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_E1",
+                    "Label": "DIMM_E0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_F1",
+                    "Label": "DIMM_F0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -93,54 +93,54 @@
             "Labels": [
                 {
                     "Die" : "CPU1_Temp",
-                    "DIMM_A1" : "CPU1_MC0_DIMM_A",
-                    "DIMM_B1" : "CPU1_MC0_DIMM_B",
-                    "DIMM_C1" : "CPU1_MC0_DIMM_C",
-                    "DIMM_D1" : "CPU1_MC1_DIMM_D",
-                    "DIMM_E1" : "CPU1_MC1_DIMM_E",
-                    "DIMM_F1" : "CPU1_MC1_DIMM_F",
+                    "DIMM_A0" : "CPU1_MC0_DIMM_A",
+                    "DIMM_B0" : "CPU1_MC0_DIMM_B",
+                    "DIMM_C0" : "CPU1_MC0_DIMM_C",
+                    "DIMM_D0" : "CPU1_MC1_DIMM_D",
+                    "DIMM_E0" : "CPU1_MC1_DIMM_E",
+                    "DIMM_F0" : "CPU1_MC1_DIMM_F",
                     "Tjmax" : "CPU1_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_A1",
+                    "Label": "DIMM_A0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_B1",
+                    "Label": "DIMM_B0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_C1",
+                    "Label": "DIMM_C0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_D1",
+                    "Label": "DIMM_D0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_E1",
+                    "Label": "DIMM_E0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_F1",
+                    "Label": "DIMM_F0",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85

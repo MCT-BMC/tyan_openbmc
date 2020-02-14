@@ -32,6 +32,7 @@ SRC_URI += "file://0001-Support-temp2-and-share-the-same-threshold.patch \
             file://0027-add-event-sensor.patch \
             file://0028-Support-FruStateSensor.patch \
             file://0029-set-sensor-reading-unavailable-bit-if-nvme-is-not-pr.patch \
+            file://0030-add-sensor-reading-unavailable-bit-for-VR-sensor.patch \
             "
 
 #SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.gpiosensor.service"

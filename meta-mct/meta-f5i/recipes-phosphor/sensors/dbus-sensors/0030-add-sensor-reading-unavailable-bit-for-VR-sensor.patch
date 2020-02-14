@@ -1,0 +1,89 @@
+From 4d9e8c17a6c4ad6d94aaba28eb19e4832f9c1b6e Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Fri, 14 Feb 2020 15:55:36 +0800
+Subject: [PATCH] add-sensor-reading-unavailable-bit-for-VR-sensor
+
+---
+ service_files/xyz.openbmc_project.mostempsensor.service |  2 ++
+ src/CPUSensor.cpp                                       |  2 +-
+ src/MOSTempSensor.cpp                                   | 13 ++++++++++---
+ src/NVMeSensor.cpp                                      |  5 ++++-
+ 4 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/service_files/xyz.openbmc_project.mostempsensor.service b/service_files/xyz.openbmc_project.mostempsensor.service
+index c839a71..f65f165 100755
+--- a/service_files/xyz.openbmc_project.mostempsensor.service
++++ b/service_files/xyz.openbmc_project.mostempsensor.service
+@@ -1,6 +1,8 @@
+ [Unit]
+ Description=MOS Temp Sensor
+ StopWhenUnneeded=false
++Requires=xyz.openbmc_project.EntityManager.service
++After=xyz.openbmc_project.EntityManager.service
+ 
+ [Service]
+ Restart=always
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 28621fd..814959c 100755
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -169,7 +169,7 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+             auto findCpu = path.find("peci-cputemp");
+             auto findDie = path.find("temp1");
+-            auto findMargin = path.find("temp4");
++            auto findMargin = path.find("temp5");
+             if ((findCpu != std::string::npos) && (findDie != std::string::npos))
+             {
+                 CPUSensor::DieTemp = nvalue;
+diff --git a/src/MOSTempSensor.cpp b/src/MOSTempSensor.cpp
+index dcfccaf..87939bc 100755
+--- a/src/MOSTempSensor.cpp
++++ b/src/MOSTempSensor.cpp
+@@ -126,8 +126,10 @@ int MOSTempSensor::getMOSRegsInfoWord(uint8_t regs, int16_t* pu16data)
+ 
+     if (*pu16data < 0)
+     {
+-        std::cerr << " read word data failed at " << static_cast<int>(regs)
+-                  << "\n";
++        if constexpr (debug)
++        {
++            std::cerr << " read word data failed at " << static_cast<int>(regs) << "\n";
++        }
+         return -1;
+     }
+ 
+@@ -160,11 +162,16 @@ void MOSTempSensor::read(void)
+                 std::cerr << "Value update to " << (double)v << "raw reading "
+                           << static_cast<int>(temp) << "\n";
+             }
++            updateValueInvalid(false);
+             updateValue(v);
+         }
+         else
+         {
+-            std::cerr << "Invalid read getMOSRegsInfoWord\n";
++            if constexpr (debug)
++            {
++                std::cerr << "Invalid read getMOSRegsInfoWord\n";
++            }
++            updateValueInvalid(true);
+             updateValue(-1);
+         }
+         read();
+diff --git a/src/NVMeSensor.cpp b/src/NVMeSensor.cpp
+index 918b308..20d3571 100755
+--- a/src/NVMeSensor.cpp
++++ b/src/NVMeSensor.cpp
+@@ -243,7 +243,10 @@ int NVMeSensor::getNVMeTemp(uint8_t* pu8data)
+     }
+     else if (*pu8data == 0x80)
+     {
+-        std::cerr << "No temperature data or temperature data is more than 5 seconds old\n";
++        if constexpr (debug)
++        {
++            std::cerr << "No temperature data or temperature data is more than 5 seconds old\n";
++        }
+         return -1;
+     }
+     else if (*pu8data == 0x81)
