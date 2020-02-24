@@ -106,7 +106,25 @@
          "sensorNumber" : "0x74",
          "sensorType" : "0x0C",
          "sensorName" : "CPU1_MC0_DIMM_F0"
-    }
+    },
+    {
+        "ownerId" : "0x2c",
+        "sensorNumber" : "0x08",
+        "sensorType" : "0x01",
+        "sensorName" : "PCH_temperature"
+    },
+    {
+         "ownerId" : "0x2c",
+         "sensorNumber" : "0x17",
+         "sensorType" : "0xDC",
+         "sensorName" : "ME_FW_Health"
+     },
+     {
+         "ownerId" : "0x2c",
+         "sensorNumber" : "0x80",
+         "sensorType" : "0x21",
+         "sensorName" : "USB_Status"
+     }
 
 ]
 
