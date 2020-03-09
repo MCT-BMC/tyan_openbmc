@@ -2,4 +2,3 @@ build*/*
 customrc
 *.sw?
 .repo/
-vscode-bitbake-build/
