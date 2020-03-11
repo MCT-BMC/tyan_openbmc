@@ -33,6 +33,9 @@
 #define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
 #define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 
+#include<filesystem>
+namespace fs = std::filesystem;
+
 namespace ipmi
 {
 
@@ -670,6 +673,283 @@ ipmi_ret_t ipmi_Pnm_GetReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmi_rc;
 }
 
+//===============================================================
+/* Set FRU Field Command
+NetFun: 0x2E
+Cmd : 0x0B
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+    Byte 4 :  FRU ID
+    Byte 5 :  Item
+        [7:4] : Area (1-Chassis Info , 2-Board Info , 3-Product Info)
+        [3:0] : Field
+    Byte 6-N : Data
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+*/
+ipmi::RspType<> ipmi_setFruField(uint8_t fruId, uint4_t field, uint4_t area, std::vector<uint8_t> dataInfo)
+
+{
+    std::string s;
+    size_t pos;
+    char command[100];
+    char cmd[100];
+    char string[100];
+
+    if(fruId != 0)
+    {
+        // Currently, only support FRU ID 0
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    for(int i=0; i<dataInfo.size(); i++)
+    {
+        s += (char)dataInfo[i];
+    }
+
+    strcpy(string,s.c_str());
+    memset(command,0,sizeof(command));
+
+    switch ((uint8_t)area)
+    {
+        case 0:
+            // flag
+            snprintf(command,sizeof(command),"echo %d > /usr/sbin/fruFlag",dataInfo[0]);
+
+            if(dataInfo[0] == 2)
+            {
+                memset(cmd,0,sizeof(cmd));
+                snprintf(cmd,sizeof(cmd),"/usr/sbin/writeFRU.sh &",dataInfo[0]);
+                system(cmd);
+            }
+            break;
+        case 1:
+            // chassis information are
+            snprintf(command,sizeof(command),"echo c %d %s >> /usr/sbin/fruWrite",(int)field,string);
+            break;
+        case 2:
+            // board information area
+            snprintf(command,sizeof(command),"echo b %d %s >> /usr/sbin/fruWrite",(int)field,string);
+            break;
+        case 3:
+            // product information area
+            snprintf(command,sizeof(command),"echo p %d %s >> /usr/sbin/fruWrite",(int)field,string);
+            break;
+        default:
+            return ipmi::responseParmOutOfRange();
+    }
+
+    system(command);
+    return ipmi::responseSuccess();
+}
+
+std::string getFruData()
+{
+    std::string str;
+    char command[100];
+
+    if(fs::exists("/usr/sbin/fruData"))
+    {
+        std::ifstream file("/usr/sbin/fruData", std::ios::in);
+
+        auto data = std::vector<uint8_t>(std::istreambuf_iterator<char>(file),
+                                     std::istreambuf_iterator<char>());
+        if (file.fail())
+        {
+            std::cout << "read FRU Data fail" << std::endl;
+        }
+        file.close();
+
+        for(int i=0; i<data.size(); i++)
+        {
+            str += (char)data[i];
+        }
+    }
+    else
+    {
+        memset(command,0,sizeof(command));
+        sprintf(command, "ipmitool fru print 0 > /usr/sbin/fruData &");
+        system(command);
+    }
+    return str;
+}
+
+std::string areaData(std::string str, std::string str1, std::string str2)
+{
+    std::string string;
+    std::string::size_type pos,pos1;
+    std::string STR;
+
+    pos = str.find(str1);
+    if(pos != std::string::npos)
+    {
+        string = str.substr(pos);
+        pos = string.find(":");
+        pos1 = string.find(str2);
+        if(pos1 != std::string::npos)
+        {
+            STR = string.substr(pos+2,(pos1-pos-3));
+        }
+        else
+        {
+            STR = string.substr (pos+2);
+        }
+    }
+    return STR;
+}
+
+//===============================================================
+/* Get FRU Field Command
+NetFun: 0x2E
+Cmd : 0x0C
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+    Byte 4 :  FRU ID
+    Byte 5 :  Item
+        [7:4] : Area (1-Chassis Info , 2-Board Info , 3-Product Info)
+        [3:0] : Field
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+    Byte 5-N : Data
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t field, uint4_t area)
+{
+
+    int rc=0;
+    char command[100],temp[50];
+    char string[100];
+    size_t pos;
+    std::string str,str1,str2;
+    uint8_t f;
+
+    if(fruId != 0)
+    {
+        // Currently, only support FRU ID 0
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    if(area > 0x3)
+    {
+        //fail Area
+        return ipmi::responseInvalidFieldRequest();
+    }
+    else if(area == 0x0)
+    {
+        //flag
+        if(fs::exists("/usr/sbin/fruFlag"))
+        {
+            memset(command,0,sizeof(command));
+            memset(temp, 0, sizeof(temp));
+            sprintf(command, "cat /usr/sbin/fruFlag");
+            rc = execmd((char *)command, temp);
+            if (rc != 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            f = strtol(temp,NULL,10);
+            std::vector<uint8_t> flag = {f};
+            return ipmi::responseSuccess(flag);
+        }
+        else
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+    }
+    else
+    {
+        str=getFruData();
+
+        switch ((uint8_t)area)
+        {
+            case 1:
+                // chassis information are
+                switch((uint8_t)field)
+                {
+                    case 0:
+                        // chassis type
+                        str2 = areaData(str,"Chassis Type","Chassis Part");
+                        break;
+                    case 1:
+                        // chassis part number
+                        str2 = areaData(str,"Chassis Part","Chassis Serial");
+                        break;
+                    case 2:
+                        // chassis serial umber
+                        str2 = areaData(str,"Chassis Serial","Board Mfg Date");
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 2:
+                // board information area
+                pos = str.find("Board Mfg Date");
+                str1 = str.substr(pos+14);
+                switch((uint8_t)field)
+                {
+                    case 0:
+                        // board manufacturer
+                        str2 = areaData(str1,"Board Mfg","Board Product");
+                        break;
+                    case 1:
+                        // board product name
+                        str2 = areaData(str1,"Board Product","Board Serial");
+                        break;
+                    case 2:
+                        // board serial number
+                        str2 = areaData(str1,"Board Serial","Board Part");
+                        break;
+                    case 3:
+                        // board part number
+                        str2 = areaData(str1,"Board Part","Product Manufacturer");
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 3:
+                // product information area
+                switch((uint8_t)field)
+                {
+                    case 0:
+                        // product manufacturer
+                        str2 = areaData(str,"Product Manufacturer","Product Name");
+                        break;
+                    case 1:
+                        // product name
+                        str2 = areaData(str,"Product Name","Product Part");
+                        break;
+                    case 2:
+                        // product part / model number
+                        str2 = areaData(str,"Product Part","Product Version");
+                        break;
+                    case 3:
+                        // product version
+                        str2 = areaData(str,"Product Version","Product Serial");
+                        break;
+                    case 4:
+                        // product serial number
+                        str2 = areaData(str,"Product Serial","Product Asset");
+                        break;
+                    default:
+                        break;
+                }
+                break;
+        }
+    }
+
+    if((char)str2[str2.length()-1] == 0xa)
+    {
+        str2.pop_back();
+    }
+
+    std::vector<uint8_t> DATA(str2.begin(), str2.end());
+    return ipmi::responseSuccess(DATA);
+}
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
@@ -679,5 +959,7 @@ void register_netfn_mct_oem()
 	ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_FloorDuty, ipmi::Privilege::Admin, ipmi_tyan_FloorDuty);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_ConfigEccLeakyBucket, ipmi::Privilege::Admin, ipmi_tyan_ConfigEccLeakyBucket);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_gpioStatus, ipmi::Privilege::Admin, ipmi_tyan_getGpio);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetFruField, ipmi::Privilege::Admin, ipmi_setFruField);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
 }
 }

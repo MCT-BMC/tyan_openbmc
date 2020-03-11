@@ -11,18 +11,24 @@ S = "${WORKDIR}/"
 SRC_URI = "file://default-pwm.sh \
            file://default-pwm.service \
            file://disable-sw2.service \
-           file://disable-sw2.sh"
+           file://disable-sw2.sh \
+           file://initFruFlag.service \
+           file://initFruFlag.sh \
+           file://writeFRU.sh"
 
 DEPENDS = "systemd"
 RDEPENDS_${PN} = "bash"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE_${PN} = "default-pwm.service \
-                         disable-sw2.service"
+                         disable-sw2.service \
+                         initFruFlag.service"
 
 
 do_install() {
     install -d ${D}/usr/sbin
     install -m 0755 ${S}default-pwm.sh ${D}/${sbindir}/
     install -m 0755 ${S}disable-sw2.sh ${D}/${sbindir}/
+    install -m 0755 ${S}initFruFlag.sh ${D}/${sbindir}/
+    install -m 0755 ${S}writeFRU.sh ${D}/${sbindir}/
 }
