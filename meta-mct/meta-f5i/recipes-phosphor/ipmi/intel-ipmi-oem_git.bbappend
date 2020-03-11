@@ -19,5 +19,6 @@ SRC_URI += "file://0001-s7106-disable-Intel-OEM-command.patch \
             file://0017-fix-negative-value-issue.patch \
             file://0018-support-leaky-bucket.patch \
             file://0019-FRU-state-sensor.patch \
+            file://0020-support-fru-sync-to-smbios.patch \
             "
 

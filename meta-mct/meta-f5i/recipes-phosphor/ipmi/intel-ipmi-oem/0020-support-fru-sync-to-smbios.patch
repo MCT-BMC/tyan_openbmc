@@ -1,0 +1,38 @@
+From 8da51635bd497a27b78f0126c52f8e832f92cf5c Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 11 Mar 2020 09:35:58 +0800
+Subject: [PATCH] support fru sync to smbios
+
+---
+ src/storagecommands.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index 597bb3b..afa6c05 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -336,6 +336,7 @@ ipmi_ret_t ipmiStorageWriteFRUData(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                    ipmi_data_len_t dataLen,
+                                    ipmi_context_t context)
+ {
++
+     if (*dataLen < 4 ||
+         *dataLen >=
+             0xFF + 3) // count written return is one byte, so limit to one byte
+@@ -414,6 +415,16 @@ ipmi_ret_t ipmiStorageWriteFRUData(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+ 
+     *dataLen = 1;
+ 
++    //Mitac fru sync
++    char command[100];
++    memset(command,0,sizeof(command));
++    sprintf(command, "echo 1 > /usr/sbin/fruFlag");
++    system(command);
++
++    memset(command,0,sizeof(command));
++    sprintf(command, "ipmitool fru print 0 > /usr/sbin/fruData &");
++    system(command);
++
+     return IPMI_CC_OK;
+ }
+ 
