@@ -1,44 +1,40 @@
-From 9ab4698c0f796001afb42f97efe011e7b78ea6c0 Mon Sep 17 00:00:00 2001
+From 986804831c2a2cf2d0bc734a688fa88c5c790b1a Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Thu, 5 Sep 2019 20:35:05 +0800
-Subject: [PATCH] [s7106]add ipmi ACPI sensor
+Date: Thu, 12 Mar 2020 10:46:57 +0800
+Subject: [PATCH 1/1] support ipmi ACPI sensor
 
 ---
- CMakeLists.txt                                |  16 ++-
+ CMakeLists.txt                                |  14 ++
  .../xyz.openbmc_project.acpisensor.service    |  12 ++
  src/AcpiSensorMain.cpp                        | 133 ++++++++++++++++++
- 3 files changed, 160 insertions(+), 1 deletion(-)
+ 3 files changed, 159 insertions(+)
  create mode 100644 service_files/xyz.openbmc_project.acpisensor.service
  create mode 100755 src/AcpiSensorMain.cpp
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c0cabdb..ee4e215 100755
+index 399faf1..b0f44de 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -47,6 +47,7 @@ option (DISABLE_IPMB "Disable installing IPMB sensor" OFF)
- option (DISABLE_MCUTEMP "Disable installing MCU temperature sensor" OFF)
- option (DISABLE_PSU "Disable installing PSU sensor" OFF)
+@@ -48,6 +48,7 @@ option (DISABLE_PSU "Disable installing PSU sensor" OFF)
+ option (DISABLE_NVME "Disable installing NVME sensor" ON)
+ 
  option (DISABLE_PROCESSOR "Disable installing processor sensor" OFF)
 +option (DISABLE_ACPI "Disable installing acpi sensor" OFF)
  
  include ("cmake/HunterGate.cmake")
  
-@@ -199,9 +200,13 @@ add_dependencies (psusensor sdbusplus-project)
- target_link_libraries (psusensor ${SENSOR_LINK_LIBS})
- 
- add_executable (processorsensor src/ProcessorSensorMain.cpp)
--add_dependencies (psusensor sdbusplus-project)
-+add_dependencies (processorsensor sdbusplus-project)
+@@ -202,6 +203,10 @@ add_executable (processorsensor src/ProcessorSensorMain.cpp)
+ add_dependencies (processorsensor sdbusplus-project)
  target_link_libraries (processorsensor ${SENSOR_LINK_LIBS})
  
 +add_executable (acpisensor src/AcpiSensorMain.cpp)
 +add_dependencies (acpisensor sdbusplus-project)
 +target_link_libraries (acpisensor ${SENSOR_LINK_LIBS})
 +
- if (NOT YOCTO)
-     add_dependencies (adcsensor ${EXTERNAL_PACKAGES})
-     add_dependencies (cpusensor ${EXTERNAL_PACKAGES})
-@@ -214,6 +219,7 @@ if (NOT YOCTO)
+ if (NOT DISABLE_NVME)
+     add_executable (nvmesensor ${NVME_SRC_FILES})
+     add_dependencies (nvmesensor sdbusplus-project)
+@@ -219,6 +224,7 @@ if (NOT YOCTO)
      add_dependencies (mcutempsensor ${EXTERNAL_PACKAGES})
      add_dependencies (psusensor ${EXTERNAL_PACKAGES})
      add_dependencies (processorsensor ${EXTERNAL_PACKAGES})
@@ -46,11 +42,10 @@ index c0cabdb..ee4e215 100755
  endif ()
  
  set (SERVICE_FILE_SRC_DIR ${PROJECT_SOURCE_DIR}/service_files)
-@@ -304,3 +310,11 @@ if (NOT DISABLE_PROCESSOR)
-                  ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.processorsensor.service
+@@ -307,3 +313,11 @@ if (NOT DISABLE_PROCESSOR)
                   DESTINATION ${SERVICE_FILE_INSTALL_DIR})
  endif ()
-+
+ 
 +if (NOT DISABLE_ACPI)
 +    install (TARGETS acpisensor DESTINATION bin)
 +    install (FILES
@@ -58,9 +53,10 @@ index c0cabdb..ee4e215 100755
 +                 DESTINATION ${SERVICE_FILE_INSTALL_DIR})
 +endif ()
 +
++
 diff --git a/service_files/xyz.openbmc_project.acpisensor.service b/service_files/xyz.openbmc_project.acpisensor.service
 new file mode 100644
-index 0000000..d03213c
+index 0000000..f3e83c6
 --- /dev/null
 +++ b/service_files/xyz.openbmc_project.acpisensor.service
 @@ -0,0 +1,12 @@
@@ -215,3 +211,6 @@ index 0000000..6cd8285
 +
 +    return 0;
 +}
+-- 
+2.22.0
+

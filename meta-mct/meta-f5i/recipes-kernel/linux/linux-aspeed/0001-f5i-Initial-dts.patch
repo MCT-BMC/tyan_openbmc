@@ -214,11 +214,11 @@ index 000000000000..a14f7a3143cc
 +&i2c1 {
 +    multi-master =<1>;
 +	status = "okay";
-+    spsfw1@10 {
-+        compatible = "slave-mqueue";
++    ipmb@10 {
++        compatible = "ipmb-dev";
 +        reg = <0x10>;
-+        message-size = <256>;
-+        queue-size = <32>;
++        i2c-protocol;
++
 +    };
 +};
 +

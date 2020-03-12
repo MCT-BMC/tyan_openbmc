@@ -1,20 +1,19 @@
-From cb789353d8ed7f978c461177234377206b5698a8 Mon Sep 17 00:00:00 2001
-From: Mirage Su <mirage.su@mic.com.tw>
-Date: Wed, 5 Feb 2020 12:03:11 +0800
-Subject: [PATCH] remove NVME P4000.json
+From 9afca6cc3c8eb86b72140cbbaf91beb90043eeda Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 11 Mar 2020 14:56:50 +0800
+Subject: [PATCH 1/1] remove NVME P4000.json
 
-Move NVME config to baseboard.json for static mapping.
 ---
- configurations/NVME P4000.json | 52 ------------------------------------------
- 1 file changed, 52 deletions(-)
+ configurations/NVME P4000.json | 53 ----------------------------------
+ 1 file changed, 53 deletions(-)
  delete mode 100644 configurations/NVME P4000.json
 
 diff --git a/configurations/NVME P4000.json b/configurations/NVME P4000.json
 deleted file mode 100644
-index 46ea3f5..0000000
+index da8dacc..0000000
 --- a/configurations/NVME P4000.json	
 +++ /dev/null
-@@ -1,52 +0,0 @@
+@@ -1,53 +0,0 @@
 -{
 -    "Bus": "$bus",
 -    "Exposes": [
@@ -65,6 +64,10 @@ index 46ea3f5..0000000
 -        "Model": "$PRODUCT_PRODUCT_NAME",
 -        "PartNumber": "$PRODUCT_PART_NUMBER",
 -        "SerialNumber": "$PRODUCT_SERIAL_NUMBER"
--    }
+-    },
+-    "xyz.openbmc_project.Inventory.Item.Chassis": {}
 -}
 \ No newline at end of file
+-- 
+2.22.0
+
