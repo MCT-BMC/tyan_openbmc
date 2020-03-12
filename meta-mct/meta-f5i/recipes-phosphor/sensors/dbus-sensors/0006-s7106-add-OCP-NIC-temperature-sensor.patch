@@ -1,0 +1,27 @@
+From 4fa8fd690002132103bf212dbfd8c20a6b355d1b Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 12 Mar 2020 13:57:46 +0800
+Subject: [PATCH 1/1] s7106 add OCP NIC temperature sensor
+
+---
+ src/HwmonTempMain.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 55d4508..4238b7b 100644
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -231,6 +231,10 @@ void createSensors(
+ 
+                     std::string sensorName =
+                         std::get<std::string>(findKey->second);
++                    if (deviceName == "14-001f")
++                    {
++                        continue;
++                    }
+                     auto& sensor = sensors[sensorName];
+                     sensor = nullptr;
+                     sensor = std::make_unique<HwmonTempSensor>(
+-- 
+2.22.0
+

@@ -1,39 +1,14 @@
-From c0cea64c23b91b8f0e3623c0aad263b329571e4d Mon Sep 17 00:00:00 2001
-From: "terry.chang" <terry.chang@mic.com.tw>
-Date: Fri, 4 Jan 2019 11:46:04 +0800
-Subject: [PATCH] Detect host status by pgood
- after BMC reset.
+From 2be12fa2d6f6907251fe2edb7a831a261c4c4e30 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 11 Mar 2020 18:56:40 +0800
+Subject: [PATCH 1/1] Detect host status by pgood
 
-- Origin author: Brade
-  The original host_check_main.cpp will send IPMI Heartbeat command to CPU,
-  and check the result to determine if CPU is running.
-  But x86 CPU doesn't suooprt this kind of IPMI Heartbeat command.
-  So, host_check_main_mct.cpp will get the pgood status by D-Bus.
-  If pgood is activate, it assume the host cpu is running.
-
-  Add host_check_main_mct.cpp for MCT OEM to prevent any modification of OpenPower source code.
-
-- Modify by : terry
-  fixed sync code fail. (2019/1/4)
 ---
- Makefile.am             |   2 +-
- host_check_main_mct.cpp | 104 ++++++++++++++++++++++++++++++++++++++++++++++++
+ host_check_main_mct.cpp | 104 ++++++++++++++++++++++++++++++++++++++++
+ meson.build             |   2 +-
  2 files changed, 105 insertions(+), 1 deletion(-)
  create mode 100644 host_check_main_mct.cpp
 
-diff --git a/Makefile.am b/Makefile.am
-index dfbd2cf..f43eea3 100644
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -25,7 +25,7 @@ phosphor_discover_system_state_SOURCES = \
- 	settings.cpp
- 
- phosphor_host_check_SOURCES = \
--	host_check_main.cpp
-+	host_check_main_mct.cpp
- 
- generic_cxxflags = \
- 	$(SYSTEMD_CFLAGS) \
 diff --git a/host_check_main_mct.cpp b/host_check_main_mct.cpp
 new file mode 100644
 index 0000000..1638733
@@ -144,3 +119,19 @@ index 0000000..1638733
 +
 +    return 0;
 +}
+diff --git a/meson.build b/meson.build
+index f4eb4bb..2f83960 100644
+--- a/meson.build
++++ b/meson.build
+@@ -90,7 +90,7 @@ executable('phosphor-discover-system-state',
+ )
+ 
+ executable('phosphor-host-check',
+-            'host_check_main.cpp',
++            'host_check_main_mct.cpp',
+             dependencies: [
+             sdbusplus, phosphorlogging
+             ],
+-- 
+2.22.0
+

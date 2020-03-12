@@ -1,13 +1,13 @@
-From 7ecf5e313638cafa856056fbce150f1c2cf7972a Mon Sep 17 00:00:00 2001
+From 69f338bd2e77f3e1303059ea9710df551187ee1c Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Thu, 5 Sep 2019 10:49:14 +0800
-Subject: [PATCH] [s7106]new processor sensor to replace gpio sensor
+Date: Wed, 11 Mar 2020 22:10:52 +0800
+Subject: [PATCH 1/1] [s7106]new processor sensor to replace gpio sensor
 
 ---
- CMakeLists.txt                                |  16 +-
+ CMakeLists.txt                                |  15 ++
  ...yz.openbmc_project.processorsensor.service |  12 ++
  src/ProcessorSensorMain.cpp                   | 156 ++++++++++++++++++
- 3 files changed, 183 insertions(+), 1 deletion(-)
+ 3 files changed, 183 insertions(+)
  mode change 100644 => 100755 CMakeLists.txt
  create mode 100644 service_files/xyz.openbmc_project.processorsensor.service
  create mode 100755 src/ProcessorSensorMain.cpp
@@ -15,34 +15,30 @@ Subject: [PATCH] [s7106]new processor sensor to replace gpio sensor
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 old mode 100644
 new mode 100755
-index 2cbd069..c0cabdb
+index f9d6d31..399faf1
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -42,10 +42,11 @@ option (DISABLE_EXIT_AIR "Disable installing Exit Air Temp sensor" OFF)
- option (DISABLE_FAN "Disable installing fan sensor" OFF)
- option (DISABLE_HWMON_TEMP "Disable installing hwmon temp sensor" OFF)
- option (DISABLE_INTRUSION "Disable installing intrusion sensor" OFF)
--option (DISABLE_GPIO "Disable installing gpio sensor" OFF)
-+option (DISABLE_GPIO "Disable installing gpio sensor" ON)
- option (DISABLE_IPMB "Disable installing IPMB sensor" OFF)
- option (DISABLE_MCUTEMP "Disable installing MCU temperature sensor" OFF)
+@@ -47,6 +47,8 @@ option (DISABLE_MCUTEMP "Disable installing MCU temperature sensor" OFF)
  option (DISABLE_PSU "Disable installing PSU sensor" OFF)
-+option (DISABLE_PROCESSOR "Disable installing processor sensor" OFF)
+ option (DISABLE_NVME "Disable installing NVME sensor" ON)
  
++option (DISABLE_PROCESSOR "Disable installing processor sensor" OFF)
++
  include ("cmake/HunterGate.cmake")
  
-@@ -197,6 +198,10 @@ add_executable (psusensor src/PSUSensorMain.cpp ${PSU_SRC_FILES})
+ huntergate (URL "https://github.com/ruslo/hunter/archive/v0.18.64.tar.gz" SHA1
+@@ -196,6 +198,10 @@ add_executable (psusensor src/PSUSensorMain.cpp ${PSU_SRC_FILES})
  add_dependencies (psusensor sdbusplus-project)
  target_link_libraries (psusensor ${SENSOR_LINK_LIBS})
  
 +add_executable (processorsensor src/ProcessorSensorMain.cpp)
-+add_dependencies (psusensor sdbusplus-project)
++add_dependencies (processorsensor sdbusplus-project)
 +target_link_libraries (processorsensor ${SENSOR_LINK_LIBS})
 +
- if (NOT YOCTO)
-     add_dependencies (adcsensor ${EXTERNAL_PACKAGES})
-     add_dependencies (cpusensor ${EXTERNAL_PACKAGES})
-@@ -208,6 +213,7 @@ if (NOT YOCTO)
+ if (NOT DISABLE_NVME)
+     add_executable (nvmesensor ${NVME_SRC_FILES})
+     add_dependencies (nvmesensor sdbusplus-project)
+@@ -212,6 +218,7 @@ if (NOT YOCTO)
      add_dependencies (ipmbsensor ${EXTERNAL_PACKAGES})
      add_dependencies (mcutempsensor ${EXTERNAL_PACKAGES})
      add_dependencies (psusensor ${EXTERNAL_PACKAGES})
@@ -50,11 +46,10 @@ index 2cbd069..c0cabdb
  endif ()
  
  set (SERVICE_FILE_SRC_DIR ${PROJECT_SOURCE_DIR}/service_files)
-@@ -290,3 +296,11 @@ if (NOT DISABLE_PSU)
-                  ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.psusensor.service
+@@ -292,3 +299,11 @@ if (NOT DISABLE_NVME)
+                  ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.nvmesensor.service
                   DESTINATION ${SERVICE_FILE_INSTALL_DIR})
  endif ()
-+
 +
 +if (NOT DISABLE_PROCESSOR)
 +    install (TARGETS processorsensor DESTINATION bin)
@@ -62,6 +57,7 @@ index 2cbd069..c0cabdb
 +                 ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.processorsensor.service
 +                 DESTINATION ${SERVICE_FILE_INSTALL_DIR})
 +endif ()
++
 diff --git a/service_files/xyz.openbmc_project.processorsensor.service b/service_files/xyz.openbmc_project.processorsensor.service
 new file mode 100644
 index 0000000..eb6e063
@@ -242,3 +238,6 @@ index 0000000..8e9986a
 +
 +    return 0;
 +}
+-- 
+2.22.0
+
