@@ -13,7 +13,7 @@ SRC_URI = "file://CMakeLists.txt\
 	       file://oemcmd.hpp "
 
 DEPENDS = "boost phosphor-ipmi-host phosphor-logging systemd intel-dbus-interfaces"
-DEPENDS += "libgpiod"
+DEPENDS += "libgpiod libpeci"
 
 inherit cmake obmc-phosphor-ipmiprovider-symlink
 EXTRA_OECMAKE="-DYOCTO=1"
@@ -25,4 +25,11 @@ FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/host-ipmid/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/net-ipmid/lib*${SOLIBS}"
 FILES_${PN}-dev_append = " ${libdir}/ipmid-providers/lib*${SOLIBSDEV}"
+
+#linux-libc-headers guides this way to include custom uapi headers
+CFLAGS_append = " -I ${STAGING_KERNEL_DIR}/include/uapi"
+CFLAGS_append = " -I ${STAGING_KERNEL_DIR}/include"
+CXXFLAGS_append = " -I ${STAGING_KERNEL_DIR}/include/uapi"
+CXXFLAGS_append = " -I ${STAGING_KERNEL_DIR}/include"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
 

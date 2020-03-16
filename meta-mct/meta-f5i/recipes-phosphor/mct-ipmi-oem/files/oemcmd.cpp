@@ -25,8 +25,10 @@
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message/types.hpp>
+#include <peci.h>
 
 #define FSC_SERVICE "xyz.openbmc_project.EntityManager"
 #define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/Pid_"
@@ -34,6 +36,10 @@
 #define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 
 #include<filesystem>
+
+using phosphor::logging::level;
+using phosphor::logging::log;
+
 namespace fs = std::filesystem;
 
 namespace ipmi
@@ -950,6 +956,29 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t fiel
     return ipmi::responseSuccess(DATA);
 }
 
+//===============================================================
+
+ipmi::RspType<std::vector<uint8_t>>
+    ipmi_sendRawPeci(uint8_t clientAddr, uint8_t writeLength, uint8_t readLength,
+                        std::vector<uint8_t> writeData)
+{
+    if (readLength > PECI_BUFFER_SIZE)
+    {
+        log<level::ERR>("sendRawPeci command: Read length exceeds limit");
+        return ipmi::responseParmOutOfRange();
+    }
+    std::vector<uint8_t> rawResp(readLength);
+    if (peci_raw(clientAddr, readLength, writeData.data(), writeData.size(),
+                             rawResp.data(), rawResp.size()) != PECI_CC_SUCCESS)
+    {
+        log<level::ERR>("sendRawPeci command: PECI command failed");
+        return ipmi::responseResponseError();
+    }
+
+    return ipmi::responseSuccess(rawResp);
+
+}
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
@@ -961,5 +990,6 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_gpioStatus, ipmi::Privilege::Admin, ipmi_tyan_getGpio);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetFruField, ipmi::Privilege::Admin, ipmi_setFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
+    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SendRawPeci, ipmi::Privilege::Admin, ipmi_sendRawPeci);
 }
 }
