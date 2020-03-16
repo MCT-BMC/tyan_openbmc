@@ -53,5 +53,6 @@ target_link_libraries (mctoemcmds -luserlayer)
 target_link_libraries (mctoemcmds -lchannellayer)
 target_link_libraries (mctoemcmds gpiodcxx)
 target_link_libraries (mctoemcmds ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries (mctoemcmds peci)
 
 install (TARGETS mctoemcmds DESTINATION lib/ipmid-providers)

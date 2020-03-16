@@ -20,6 +20,7 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_ClearCmos = 0x3A,
     IPMI_CMD_gpioStatus = 0x41,
     IPMI_CMD_PnmGetReading = 0xE2,
+    IPMI_CMD_SendRawPeci = 0xE6, //Intel RAW PECI NetFn=0x30, cmd = 0xE6
 };
 
 struct PnmGetReadingRequest
