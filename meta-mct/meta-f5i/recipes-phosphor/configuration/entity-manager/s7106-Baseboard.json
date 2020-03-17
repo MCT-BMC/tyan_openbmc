@@ -23,54 +23,54 @@
             "Labels": [
                 {
                     "Die" : "CPU0_Temp",
-                    "DIMM_A0" : "CPU0_MC0_DIMM_A",
-                    "DIMM_B0" : "CPU0_MC0_DIMM_B",
-                    "DIMM_C0" : "CPU0_MC0_DIMM_C",
-                    "DIMM_D0" : "CPU0_MC1_DIMM_D",
-                    "DIMM_E0" : "CPU0_MC1_DIMM_E",
-                    "DIMM_F0" : "CPU0_MC1_DIMM_F",
+                    "DIMM_A1" : "CPU0_MC0_DIMM_A",
+                    "DIMM_B1" : "CPU0_MC0_DIMM_B",
+                    "DIMM_C1" : "CPU0_MC0_DIMM_C",
+                    "DIMM_D1" : "CPU0_MC1_DIMM_D",
+                    "DIMM_E1" : "CPU0_MC1_DIMM_E",
+                    "DIMM_F1" : "CPU0_MC1_DIMM_F",
                     "Tjmax" : "CPU0_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_A0",
+                    "Label": "DIMM_A1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_B0",
+                    "Label": "DIMM_B1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_C0",
+                    "Label": "DIMM_C1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_D0",
+                    "Label": "DIMM_D1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_E0",
+                    "Label": "DIMM_E1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_F0",
+                    "Label": "DIMM_F1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -93,54 +93,54 @@
             "Labels": [
                 {
                     "Die" : "CPU1_Temp",
-                    "DIMM_A0" : "CPU1_MC0_DIMM_A",
-                    "DIMM_B0" : "CPU1_MC0_DIMM_B",
-                    "DIMM_C0" : "CPU1_MC0_DIMM_C",
-                    "DIMM_D0" : "CPU1_MC1_DIMM_D",
-                    "DIMM_E0" : "CPU1_MC1_DIMM_E",
-                    "DIMM_F0" : "CPU1_MC1_DIMM_F",
+                    "DIMM_A1" : "CPU1_MC0_DIMM_A",
+                    "DIMM_B1" : "CPU1_MC0_DIMM_B",
+                    "DIMM_C1" : "CPU1_MC0_DIMM_C",
+                    "DIMM_D1" : "CPU1_MC1_DIMM_D",
+                    "DIMM_E1" : "CPU1_MC1_DIMM_E",
+                    "DIMM_F1" : "CPU1_MC1_DIMM_F",
                     "Tjmax" : "CPU1_DTS_Margin"
                 }
             ],
             "Thresholds": [
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_A0",
+                    "Label": "DIMM_A1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_B0",
+                    "Label": "DIMM_B1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_C0",
+                    "Label": "DIMM_C1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_D0",
+                    "Label": "DIMM_D1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_E0",
+                    "Label": "DIMM_E1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_F0",
+                    "Label": "DIMM_F1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -738,12 +738,32 @@
         {
             "Address": "0x53",
             "Bus": "22",
-            "Name": "NVMe 1 FRU",
+            "Name": "NVMe 0 FRU",
             "Type": "EEPROM"
         },
         {
             "Address": "0x6A",
             "Bus": "22",
+            "Name": "NVMe 0 Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 70
+                }
+            ],
+            "Type": "NVME1000"
+        },
+        {
+            "Address": "0x53",
+            "Bus": "25",
+            "Name": "NVMe 1 FRU",
+            "Type": "EEPROM"
+        },
+        {
+            "Address": "0x6A",
+            "Bus": "25",
             "Name": "NVMe 1 Temp",
             "Thresholds": [
                 {
@@ -757,13 +777,13 @@
         },
         {
             "Address": "0x53",
-            "Bus": "25",
+            "Bus": "23",
             "Name": "NVMe 2 FRU",
             "Type": "EEPROM"
         },
         {
             "Address": "0x6A",
-            "Bus": "25",
+            "Bus": "23",
             "Name": "NVMe 2 Temp",
             "Thresholds": [
                 {
@@ -776,14 +796,8 @@
             "Type": "NVME1000"
         },
         {
-            "Address": "0x53",
-            "Bus": "23",
-            "Name": "NVMe 3 FRU",
-            "Type": "EEPROM"
-        },
-        {
             "Address": "0x6A",
-            "Bus": "23",
+            "Bus": "20",
             "Name": "NVMe 3 Temp",
             "Thresholds": [
                 {
@@ -796,23 +810,9 @@
             "Type": "NVME1000"
         },
         {
-            "Address": "0x6A",
-            "Bus": "20",
-            "Name": "NVMe 4 Temp",
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 70
-                }
-            ],
-            "Type": "NVME1000"
-        },
-        {
             "Address": "0x53",
             "Bus": "20",
-            "Name": "NVMe 4 FRU",
+            "Name": "NVMe 3 FRU",
             "Type": "EEPROM"
         },
         {
@@ -1087,11 +1087,10 @@
             "Class": "temp",
             "Inputs": [
                 "SYS_Air_Inlet",
+                "NVMe 0 Temp",
                 "NVMe 1 Temp",
                 "NVMe 2 Temp",
-                "NVMe 3 Temp",
-                "NVMe 4 Temp",
-                "NVMe 5 Temp"
+                "NVMe 3 Temp"
             ],
             "Name": "FSC_NVMe",
             "SetPointH": 65,
