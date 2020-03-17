@@ -1,27 +1,70 @@
-From 4fa8fd690002132103bf212dbfd8c20a6b355d1b Mon Sep 17 00:00:00 2001
+From 4db820b75b19a91ba7638a60fb5ff6e233da1bf4 Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
 Date: Thu, 12 Mar 2020 13:57:46 +0800
-Subject: [PATCH 1/1] s7106 add OCP NIC temperature sensor
+Subject: [PATCH] s7106 add OCP NIC temperature sensor
 
 ---
- src/HwmonTempMain.cpp | 4 ++++
- 1 file changed, 4 insertions(+)
+ src/HwmonTempMain.cpp | 27 +++++++++++++++++++--------
+ 1 file changed, 19 insertions(+), 8 deletions(-)
+ mode change 100644 => 100755 src/HwmonTempMain.cpp
 
 diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
-index 55d4508..4238b7b 100644
+old mode 100644
+new mode 100755
+index 55d4508..1472b4e
 --- a/src/HwmonTempMain.cpp
 +++ b/src/HwmonTempMain.cpp
-@@ -231,6 +231,10 @@ void createSensors(
+@@ -196,7 +196,8 @@ void createSensors(
+                     }
+                 }
+                 std::vector<thresholds::Threshold> sensorThresholds;
+-                if (!parseThresholdsFromConfig(*sensorData, sensorThresholds))
++                std::string label = "temp1";
++                if (!parseThresholdsFromConfig(*sensorData, sensorThresholds, &label))
+                 {
+                     std::cerr << "error populating thresholds for "
+                               << sensorName << "\n";
+@@ -209,12 +210,15 @@ void createSensors(
+                         VariantToStringVisitor(), findPowerOn->second);
+                     setReadState(powerState, readState);
+                 }
+-                auto& sensor = sensors[sensorName];
+-                sensor = nullptr;
+-                sensor = std::make_unique<HwmonTempSensor>(
+-                    directory.string() + "/temp1_input", sensorType,
+-                    objectServer, dbusConnection, io, sensorName,
+-                    std::move(sensorThresholds), *interfacePath, readState);
++
++                if (deviceName != "14-001f"){
++                    auto& sensor = sensors[sensorName];
++                    sensor = nullptr;
++                    sensor = std::make_unique<HwmonTempSensor>(
++                            directory.string() + "/temp1_input", sensorType,
++                            objectServer, dbusConnection, io, sensorName,
++                            std::move(sensorThresholds), *interfacePath, readState);
++                }
+ 
+                 // Looking for keys like "Name1" for temp2_input,
+                 // "Name2" for temp3_input, etc.
+@@ -231,13 +235,20 @@ void createSensors(
  
                      std::string sensorName =
                          std::get<std::string>(findKey->second);
-+                    if (deviceName == "14-001f")
++                    std::vector<thresholds::Threshold> sensorThresholds;
++                    label = "temp" + std::string(1, '1' + i);
++                    if (!parseThresholdsFromConfig(*sensorData, sensorThresholds, &label))
 +                    {
-+                        continue;
++                        std::cerr << "error populating thresholds for " << sensorName << "\n";
 +                    }
++
                      auto& sensor = sensors[sensorName];
                      sensor = nullptr;
                      sensor = std::make_unique<HwmonTempSensor>(
--- 
-2.22.0
-
+                         directory.string() + "/temp" + std::string(1, '1' + i) +
+                             "_input",
+                         sensorType, objectServer, dbusConnection, io,
+-                        sensorName, std::vector<thresholds::Threshold>(),
++                        sensorName, std::move(sensorThresholds),
+                         *interfacePath, readState);
+                 }
+             }
