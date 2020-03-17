@@ -37,6 +37,11 @@
             "name": "ID_BUTTON",
             "pin": "C4",
             "direction": "both"
+        },
+        {
+            "name": "BUTTON_LOCK_PIN",
+            "pin": "F2",
+            "direction": "out"
         }
     ]
 }

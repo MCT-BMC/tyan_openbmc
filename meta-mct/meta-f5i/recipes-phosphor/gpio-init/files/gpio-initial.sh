@@ -241,7 +241,7 @@ output="\
  $GPIO_C6=0\
  $GPIO_F0=0\
  $GPIO_F1=1\
- $GPIO_F2=1\
+ $GPIO_F2=0\
  $GPIO_F5=1\
  $GPIO_N6=1\
  $GPIO_N7=0\
@@ -262,5 +262,11 @@ gpioget gpiochip0 $input
 # TODO: Those GPIOs should be used as interrupt, but libgpiod has no tool to set it.
 # Leave it as input
 gpioget gpiochip0 $int
+
+# TO set pin using sysfs
+GPIO_EXPORT_PATH="/sys/class/gpio/export"
+GPIO_BASE=`cat /sys/bus/platform/devices/1e780000.gpio/gpio/*/base`
+
+echo $[$GPIO_BASE+$GPIO_F2] > $GPIO_EXPORT_PATH
 
 exit 0
