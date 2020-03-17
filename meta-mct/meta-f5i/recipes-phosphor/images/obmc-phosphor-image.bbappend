@@ -25,4 +25,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           bmc-sel \
                                           mct-ipmi-oem \
                                           crashdump-bin \
+                                          button-monitor \
                                         "
