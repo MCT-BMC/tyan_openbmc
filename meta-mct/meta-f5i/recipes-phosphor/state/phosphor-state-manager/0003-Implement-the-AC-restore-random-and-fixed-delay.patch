@@ -1,0 +1,105 @@
+From 6a656b0b53c0bab9b763a18836f399d453e13446 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 23 Mar 2020 10:18:35 +0800
+Subject: [PATCH] Implement the AC restore random and fixed delay
+
+---
+ discover_system_state.cpp | 72 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 72 insertions(+)
+ mode change 100644 => 100755 discover_system_state.cpp
+
+diff --git a/discover_system_state.cpp b/discover_system_state.cpp
+old mode 100644
+new mode 100755
+index 836011a..c634606
+--- a/discover_system_state.cpp
++++ b/discover_system_state.cpp
+@@ -2,6 +2,8 @@
+ #include <iostream>
+ #include <map>
+ #include <string>
++#include <chrono>
++#include <random>
+ #include "config.h"
+ #include <systemd/sd-bus.h>
+ #include <sdbusplus/exception.hpp>
+@@ -179,6 +181,76 @@ int main(int argc, char** argv)
+         RestorePolicy::convertPolicyFromString(powerPolicy))
+     {
+         log<level::INFO>("power_policy=ALWAYS_POWER_ON, powering host on");
++
++        auto method = bus.new_method_call(
++            settings.service(settings.powerRestorePolicy, powerRestoreIntf).c_str(),
++            settings.powerRestorePolicy.c_str(), "org.freedesktop.DBus.Properties",
++            "Get");
++        method.append(powerRestoreIntf, "PowerRestoreAlwaysOnPolicy");
++
++        sdbusplus::message::variant<std::string> result;
++        try
++        {
++            auto reply = bus.call(method);
++            reply.read(result);
++        }
++        catch (const SdBusError& e)
++        {
++            log<level::ERR>("Error in PowerRestoreAlwaysOnPolicy Get",
++                            entry("ERROR=%s", e.what()));
++            elog<InternalFailure>();
++        }
++
++        auto powerAlwaysOnPolicy = sdbusplus::message::variant_ns::get<std::string>(result);
++
++        if (RestorePolicy::AlwaysOnPolicy::Random ==
++            RestorePolicy::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy) ||
++            RestorePolicy::AlwaysOnPolicy::Fixed ==
++            RestorePolicy::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy))
++        {
++            auto method = bus.new_method_call(
++                settings.service(settings.powerRestorePolicy, powerRestoreIntf).c_str(),
++                settings.powerRestorePolicy.c_str(), "org.freedesktop.DBus.Properties",
++                "Get");
++            method.append(powerRestoreIntf, "PowerRestoreDelay");
++
++            sdbusplus::message::variant<uint32_t> result;
++            try
++            {
++                auto reply = bus.call(method);
++                reply.read(result);
++            }
++            catch (const SdBusError& e)
++            {
++                log<level::ERR>("Error in PowerRestoreDelay Get",
++                                entry("ERROR=%s", e.what()));
++                elog<InternalFailure>();
++            }
++
++            auto powerRestoreDelay = sdbusplus::message::variant_ns::get<uint32_t>(result);
++
++            if (RestorePolicy::AlwaysOnPolicy::Random ==
++                RestorePolicy::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy))
++            {
++                std::random_device rd;
++                std::default_random_engine gen = std::default_random_engine(rd());
++                std::uniform_int_distribution<int> dis(0,powerRestoreDelay);
++                powerRestoreDelay = dis(gen);
++            }
++
++            log<level::INFO>("Checking power always on policy and setting delay",
++                entry("POWER_ALWAYS_ON_POLICY=%s", powerAlwaysOnPolicy.c_str()),
++                entry("POWER_RESTORE_DELAY=%d", powerRestoreDelay));
++
++            std::this_thread::sleep_for (std::chrono::seconds(powerRestoreDelay));
++        }
++        else{
++            log<level::INFO>("Checking power always on policy",
++                entry("POWER_ALWAYS_ON_POLICY=%s", powerAlwaysOnPolicy.c_str()));
++        }
++
++        log<level::INFO>("power_policy=ALWAYS_POWER_ON, Starting power on");
++
+         setProperty(bus, hostPath, HOST_BUSNAME, "RequestedHostTransition",
+                     convertForMessage(server::Host::Transition::On));
+     }
+-- 
+2.7.4
+
