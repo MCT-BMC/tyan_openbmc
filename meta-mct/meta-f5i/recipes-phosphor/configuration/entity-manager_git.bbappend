@@ -4,6 +4,7 @@ SRC_URI += "file://0001-s7106-Support-baseboard-fru-reading.patch \
             file://s7106-Baseboard.json \
             file://0004-fix-fsc-to-settable-interface.patch \
             file://0005-remove-NVME-P4000.json.patch \
+            file://0006-Set-the-EntityManager-service-booting-after-FruDevic.patch \
             "
 
 SRC_URI += "file://*.json"
