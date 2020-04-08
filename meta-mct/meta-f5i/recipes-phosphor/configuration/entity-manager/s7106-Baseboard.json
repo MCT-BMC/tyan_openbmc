@@ -816,18 +816,6 @@
             "Type": "EEPROM"
         },
         {
-            "Direction": "Input",
-            "Index": 496,
-            "Name": "CATERR",
-            "Polarity": "Low",
-            "Type": "Gpio",
-            "Interface": "xyz.openbmc_project.Control.Processor",
-            "Property" : "ProcessorStatus",
-            "StateActive" : "xyz.openbmc_project.Control.Processor.State.CATERR",
-            "StateNormal": "xyz.openbmc_project.Control.Processor.State.NORMAL",
-            "SensorNumber": "0x86"
-        },
-        {
             "FailSafePercent": 100,
             "MinThermalOutput": 25,
             "CommandSet": 0,

@@ -1,8 +1,0 @@
-[Unit]
-Description=deassert Thermtrip 
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/env prochot_thermtrip_update.sh deassert CPU_State thermtrip
-SyslogIdentifier=thermtrip_deassert
-

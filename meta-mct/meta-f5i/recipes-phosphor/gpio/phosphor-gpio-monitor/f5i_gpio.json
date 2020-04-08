@@ -25,6 +25,18 @@
                 "xyz.openbmc_project.thermtrip.service"
             ]
         }
+    },
+    {
+        "Name": "CATERR",
+        "LineName": "CATERR",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.caterr.service"
+            ]
+        }
     }
  ]
 
