@@ -13,7 +13,7 @@ new file mode 100755
 index 000000000000..a14f7a3143cc
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-f5i.dts
-@@ -0,0 +1,480 @@
+@@ -0,0 +1,475 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -88,11 +88,6 @@ index 000000000000..a14f7a3143cc
 +      gpio-keys {
 +                   compatible = "gpio-keys";
 +
-+                           caterr {
-+                                  label = "caterr";
-+                                  gpios = <&gpio ASPEED_GPIO(AB, 0) GPIO_ACTIVE_LOW>;
-+                                  linux,code = <ASPEED_GPIO(AB, 0)>;
-+                     };
 +                             id-button {
 +                                  label = "id-button";
 +                                  gpios = <&gpio ASPEED_GPIO(C, 4) GPIO_ACTIVE_LOW>;
@@ -491,7 +486,7 @@ index 000000000000..a14f7a3143cc
 +    /*Y0-Y7*/   "","","","","","","","",
 +    /*Z0-Z7*/   "","","","","","","","",
 +    /*AA0-AA7*/ "","","","","","","","",
-+    /*AB0-AB7*/ "","","","","","","","",
++    /*AB0-AB7*/ "CATERR","","","","","","","",
 +    /*AC0-AC7*/ "","","","","","","","";
 +};
 -- 
