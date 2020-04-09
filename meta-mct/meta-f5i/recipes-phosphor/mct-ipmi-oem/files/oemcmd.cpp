@@ -1082,7 +1082,90 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t> ipmi_tyan_RamdomDelayACRestorePowerON(u
     return ipmi::responseSuccess(opCodeResponse,delayTimeLSBResponse,delayTimeMSBResponse);
 }
 
+//===============================================================
+/* Set specified service enable or disable
+NetFun: 0x30
+Cmd : 0x0D
+Request:
+    Byte 1 : Set service status
+        [7-1] : reserved
+        [0] :
+            0h-Disable web service
+            1h-Enable web service
+Response:
+    Byte 1 : Completion Code
+*/
+ipmi::RspType<> ipmi_SetService(uint8_t serviceSetting)
+{
+    constexpr auto service = "xyz.openbmc_project.Settings";
+    constexpr auto path = "/xyz/openbmc_project/oem/ServiceStatus";
+    constexpr auto serviceStatusInterface = "xyz.openbmc_project.OEM.ServiceStatus";
+    constexpr auto webService = "WebService";
 
+    auto bus = sdbusplus::bus::new_default();
+
+    //Set web service status
+    try
+    {
+        auto method = bus.new_method_call(service, path, PROPERTY_INTERFACE,"Set");
+        method.append(serviceStatusInterface, webService, sdbusplus::message::variant<bool>(serviceSetting & 0x01));
+        bus.call_noreply(method);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Error in RamdomDelayACRestorePowerON Set",entry("ERROR=%s", e.what()));
+        return ipmi::responseParmOutOfRange();
+    }
+
+    return ipmi::responseSuccess();
+}
+
+//===============================================================
+/* Get specified service enable or disable status
+NetFun: 0x30
+Cmd : 0x0E
+Request:
+
+Response:
+    Byte 1 : Completion Code
+    Byte 2 : Set service status
+        [7-1] : reserved
+        [0] :
+            0h-Web service is disable
+            1h-Web service is enable
+*/
+ipmi::RspType<uint8_t> ipmi_GetService()
+{
+    uint8_t serviceResponse = 0;
+
+    constexpr auto service = "xyz.openbmc_project.Settings";
+    constexpr auto path = "/xyz/openbmc_project/oem/ServiceStatus";
+    constexpr auto serviceStatusInterface = "xyz.openbmc_project.OEM.ServiceStatus";
+    constexpr auto webService = "WebService";
+
+    auto bus = sdbusplus::bus::new_default();
+
+    //Get web service status
+    auto method = bus.new_method_call(service, path, PROPERTY_INTERFACE, "Get");
+    method.append(serviceStatusInterface, webService);
+
+    sdbusplus::message::variant<bool> result;
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(result);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Error in PowerRestoreDelay Get",entry("ERROR=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+    auto webServiceStatus = sdbusplus::message::variant_ns::get<bool>(result);
+
+    serviceResponse = (uint8_t)(webServiceStatus);
+
+    return ipmi::responseSuccess(serviceResponse);
+}
 
 void register_netfn_mct_oem()
 {
@@ -1097,5 +1180,7 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SendRawPeci, ipmi::Privilege::Admin, ipmi_sendRawPeci);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
+    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
+    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
 }
 }

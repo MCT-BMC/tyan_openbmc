@@ -16,6 +16,8 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_FloorDuty = 0x07,
     IPMI_CMD_SetFruField = 0x0B,
     IPMI_CMD_GetFruField = 0x0C,
+    IPMI_CMD_SetService = 0x0D,
+    IPMI_CMD_GetService = 0x0E,
     IPMI_CMD_ConfigEccLeakyBucket = 0x1A,
     IPMI_CMD_ClearCmos = 0x3A,
     IPMI_CMD_gpioStatus = 0x41,
