@@ -24,6 +24,7 @@ SRC_URI += " \
             file://0030-add-sensor-reading-unavailable-bit-for-VR-sensor.patch \
             file://0031-Fix-the-cpu-sensor-display.patch \
             file://0032-mct-NVMe-sensor.patch \
+            file://0033-Modify-MNVMe-sensor-debug-message-with-using-debug-f.patch  \
         \
            "
 

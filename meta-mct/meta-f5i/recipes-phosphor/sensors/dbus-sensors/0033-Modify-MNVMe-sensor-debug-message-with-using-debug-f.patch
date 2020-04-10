@@ -1,0 +1,28 @@
+From 86b3c8e66f6f3d65aac3058d8400e0a7f44a0fa8 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 10 Apr 2020 10:29:22 +0800
+Subject: [PATCH] Modify MNVMe sensor debug message with using debug flag
+
+---
+ src/MNVMeSensor.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/MNVMeSensor.cpp b/src/MNVMeSensor.cpp
+index 2cccd93..b9e4196 100755
+--- a/src/MNVMeSensor.cpp
++++ b/src/MNVMeSensor.cpp
+@@ -211,7 +211,10 @@ int NVMeSensor::getNVMeTemp(uint8_t* pu8data)
+ 
+     if (res < 0)
+     {
+-        std::cerr << "Error: block write read failed\n";
++        if constexpr (debug)
++        {
++            std::cerr << "Error: block write read failed\n";
++        }
+ 		close(fd);
+ 		return -1;
+     }
+-- 
+2.7.4
+
