@@ -640,6 +640,21 @@
             "Type": "TMP421"
         },
         {
+            "Address": "0x1f",
+            "Bus": 17,
+            "Name": "NIC1_Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "temp1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "TMP75"
+        },
+        {
             "Address": "0x61",
             "Bus": 4,
             "Reg": "0x8d",
