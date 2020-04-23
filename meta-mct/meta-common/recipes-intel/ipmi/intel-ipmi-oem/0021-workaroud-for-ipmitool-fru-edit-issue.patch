@@ -1,0 +1,70 @@
+From 9c485dc0308578793a9e35fd2c32d01b8da120d1 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 23 Apr 2020 17:29:10 +0800
+Subject: [PATCH 1/1] workaroud for ipmitool fru edit issue
+
+---
+ src/storagecommands.cpp | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index afa6c05..b70c05e 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -118,6 +118,36 @@ void registerStorageFunctions() __attribute__((constructor));
+ 
+ bool writeFru()
+ {
++  
++    for(int i=0; i < fruCache.size(); i++)
++    {
++       if((i % 8) == 0){
++              //std::cerr <<"\n";
++       }
++       // std::cerr << (unsigned)fruCache.at(i) << ' ';
++       // std::cerr <<" "<< std::hex << std::setw(2) << std::setfill('0')<<(unsigned)fruCache.at(i)<< ' ';
++    }
++
++    //correct FRU field offset : ipmitool 1.8.18 issue
++    for(int i=2; i<7; i++)
++    {
++        if((fruCache[i]*8) > 512)
++        {
++            //std::cerr << "fru " << i << "=" << std::hex << fruCache[i] <<"\n";
++            fruCache[i]=0;
++        }
++    }
++
++    size_t sum = 0;
++    for (int jj = 0; jj < 7; jj++)
++    {
++        sum += fruCache[jj];
++    }
++    sum = (256 - sum) & 0xFF;
++    fruCache[7] = sum;
++    //correct FRU field end
++    
++    
+     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
+     sdbusplus::message::message writeFru = dbus->new_method_call(
+         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
+@@ -350,6 +380,8 @@ ipmi_ret_t ipmiStorageWriteFRUData(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+     size_t writeLen = *dataLen - 3;
+     *dataLen = 0; // default to 0 in case of an error
+ 
++    std::cerr << "ipmiStorageWriteFRUData\n";
++
+     ipmi_ret_t status = replaceCacheFru(req->fruDeviceID);
+     if (status != IPMI_CC_OK)
+     {
+@@ -364,6 +396,7 @@ ipmi_ret_t ipmiStorageWriteFRUData(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+     std::copy(req->data, req->data + writeLen,
+               fruCache.begin() + req->fruInventoryOffset);
+ 
++  
+     bool atEnd = false;
+ 
+     if (fruCache.size() >= sizeof(FRUHeader))
+-- 
+2.22.0
+
