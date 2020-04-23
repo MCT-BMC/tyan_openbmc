@@ -47,7 +47,7 @@ index 4fd97df..f06bce7 100755
 +    tmp.header.record_length = sizeof(SensorDataEventOnlyRecord) -
 +                                      sizeof(get_sdr::SensorDataRecordHeader); 
 +    tmp.key.owner_lun = 0x0;
-+    tmp.body.entity_id = 0x0;
++    tmp.body.entity_id = 0x07;
 +    tmp.body.entity_instance = 0x01;
 +    tmp.body.event_reading_type = 0x6f;
 +    
