@@ -3,7 +3,7 @@
     - Interface: xyz.openbmc_project.Control.Power.RestorePolicy
       Properties:
           PowerRestorePolicy:
-              Default: RestorePolicy::Policy::AlwaysOff
+              Default: RestorePolicy::Policy::AlwaysOn
           PowerRestoreDelay:
               Default: 0
           PowerRestoreAlwaysOnPolicy:
