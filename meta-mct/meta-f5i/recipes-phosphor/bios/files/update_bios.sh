@@ -11,6 +11,7 @@ if [ -f $tarPath ]
 then 
 	echo "bios image found" |systemd-cat
 	tar xvzf $tarPath -C $biosPath
+	rm -f $tarPath
 else 
 	echo "no bios image found"|systemd-cat
 	exit 1
@@ -29,7 +30,7 @@ done
 if test -n "$doflash"; then
     echo "Updating Bios"
     flashcp -v $biosImage /dev/mtd6
-    rm -rf biosPath
+    rm -rf $biosPath
 fi
 
 exit 0

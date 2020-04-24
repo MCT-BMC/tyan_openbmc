@@ -17,7 +17,8 @@ S = "${WORKDIR}/"
 SRC_URI = "file://bios_update.py \
            file://update_bios.sh \
            file://org.openbmc.control.BiosFlash.conf \
-           file://setup.py"
+           file://setup.py \
+           file://bios-update "
 
 DEPENDS = "systemd"
 
@@ -39,6 +40,7 @@ do_install() {
     install -d ${D}/usr/sbin
     install -m 0755 ${S}bios_update.py ${D}/${sbindir}/
     install -m 0755 ${S}update_bios.sh ${D}/${sbindir}/
+    install -m 0755 ${S}bios-update ${D}/${sbindir}/
     install -d ${D}/etc/dbus-1/system.d/
     install ${s}org.openbmc.control.BiosFlash.conf ${D}/etc/dbus-1/system.d/
 }
