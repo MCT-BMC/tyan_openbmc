@@ -1,0 +1,50 @@
+From 2183d8fc4eb346f29f17806776b252e0f5ca4e85 Mon Sep 17 00:00:00 2001
+From: Varun Sampat <vsampat@twitter.com>
+Date: Thu, 23 Apr 2020 15:58:04 -0400
+Subject: [PATCH] IPMB support for NM commands
+
+---
+ src/bridgingcommands.cpp | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/src/bridgingcommands.cpp b/src/bridgingcommands.cpp
+index 9cc8879..2939f72 100644
+--- a/src/bridgingcommands.cpp
++++ b/src/bridgingcommands.cpp
+@@ -251,7 +251,7 @@ ipmi_return_codes Bridging::handleIpmbChannel(sSendMessageReq *sendMsgReq,
+     std::tie(status, netFn, lun, cmd, cc, dataReceived) = ipmbResponse;
+ 
+     auto respReceived =
+-        IpmbResponse(ipmbRequest.rqSA, netFn, lun, ipmbRequest.address,
++        IpmbResponse(ipmbRequest.rqSA, netFn, ipmbRequest.rqLun, ipmbRequest.address,
+                      ipmbRequest.seq, lun, cmd, cc, dataReceived);
+ 
+     // check IPMB layer status
+@@ -379,14 +379,15 @@ ipmi_return_codes Bridging::getMessageHandler(ipmi_request_t request,
+     }
+ 
+     // set message fields
+-    getMsgRes->privilegeLvlSet(SYSTEM_INTERFACE);
+-    getMsgRes->channelNumSet(targetChannelSystemInterface);
++    getMsgRes->channelData &= 0x0F;
++    getMsgRes->channelNumSet(targetChannelOtherLan);
+ 
+     // construct response
+     respQueueItem->ipmbToi2cConstruct(getMsgResData, dataLen);
+     responseQueue.erase(respQueueItem);
+ 
+-    *dataLen = *dataLen + sizeof(sGetMessageRes);
++    std::memmove(getMsgResData, getMsgResData+1, (*dataLen - 1));
++    *dataLen = (*dataLen - 1) + sizeof(sGetMessageRes);
+     return IPMI_CC_OK;
+ }
+ 
+@@ -405,7 +406,7 @@ ipmi_return_codes Bridging::getMessageFlagsHandler(ipmi_request_t request,
+     std::memset(getMsgFlagsRes, 0, sizeof(sGetMessageFlagsResp));
+ 
+     // preserve current (legacy) behaviour
+-    getMsgFlagsRes->eventMessageBitSet(1);
++    getMsgFlagsRes->eventMessageBitSet(0);
+ 
+     // set message fields
+     if (responseQueue.size() > 0)
