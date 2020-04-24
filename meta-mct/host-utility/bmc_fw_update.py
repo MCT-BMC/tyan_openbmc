@@ -141,7 +141,7 @@ def main():
     args = vars(args)
     if args['tarball'] is None or args['bmc'] is None:
         parser.print_help()
-        exit(1)
+        sys.exit(1)
     global DestUrl
     DestUrl = "https://"+args["usr"]+":"+args["pw"]+"@"+args["bmc"]
     print (DestUrl)
@@ -155,7 +155,7 @@ def main():
         print 'BMC is alive'
     else:
         print 'BMC is down, check it first'
-        exit(1)
+        sys.exit(1)
 
     update(args['tarball'])
 
