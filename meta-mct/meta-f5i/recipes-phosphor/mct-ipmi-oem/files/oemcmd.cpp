@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 #include <linux/types.h>
 #include <sdbusplus/bus.hpp>
@@ -962,6 +963,40 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t fiel
 }
 
 //===============================================================
+/* Get Firmware String Command
+NetFun: 0x2E
+Cmd : 0x10
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+    Byte 5-N : Firmware String
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmi_getFirmwareString()
+{
+    std::vector<uint8_t>firmwareString(3,0);
+    std::string osReleasePath = "/etc/os-release";
+    std::string searchFirmwareString = "OPENBMC_TARGET_MACHINE";
+    std::string readText;
+    std::ifstream readFile(osReleasePath);
+
+    while(getline(readFile, readText)) {
+        std::size_t found = readText.find(searchFirmwareString);
+        if (found!=std::string::npos){
+            std::vector<std::string> readTextSplite;
+            boost::split(readTextSplite, readText, boost::is_any_of( "\"" ) );
+            firmwareString.assign(readTextSplite[1].length()+1, 0);
+            std::copy(readTextSplite[1].begin(), readTextSplite[1].end(), firmwareString.begin());
+        }
+    }
+
+    readFile.close();
+
+    return ipmi::responseSuccess(firmwareString);
+}
+
+//===============================================================
 
 ipmi::RspType<std::vector<uint8_t>>
     ipmi_sendRawPeci(uint8_t clientAddr, uint8_t writeLength, uint8_t readLength,
@@ -1178,6 +1213,7 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_gpioStatus, ipmi::Privilege::Admin, ipmi_tyan_getGpio);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetFruField, ipmi::Privilege::Admin, ipmi_setFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFirmwareString, ipmi::Privilege::Admin, ipmi_getFirmwareString);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SendRawPeci, ipmi::Privilege::Admin, ipmi_sendRawPeci);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
