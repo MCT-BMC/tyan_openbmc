@@ -41,7 +41,7 @@ index d634e5e..918e4be 100755
          constexpr auto oneTimePath =
              "/xyz/openbmc_project/control/host0/boot/one_time";
  
-+        uefiboot = reqptr->data[0] && 0x20 ? true:false;
++        uefiboot = reqptr->data[0] & 0x20 ? true:false;
 +
          try
          {
