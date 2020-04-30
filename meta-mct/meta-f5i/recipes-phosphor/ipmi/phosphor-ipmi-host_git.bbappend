@@ -6,6 +6,7 @@ SRC_URI += "\
             file://0006-add-power-diag-log.patch \
             file://0007-fix-set-static-ip-fail-issue.patch \
             file://0008-F5i-add-ARP-control-status.patch \
+            file://0009-change-ipmit-power-reset-from-dc-cycle-to-reset.patch \
             "
 EXTRA_OECONF += "--disable-i2c-whitelist-check"
 

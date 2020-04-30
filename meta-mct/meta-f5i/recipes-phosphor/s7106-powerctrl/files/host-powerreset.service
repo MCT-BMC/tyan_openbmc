@@ -10,4 +10,4 @@ ExecStart=/usr/bin/env powerreset.sh
 SyslogIdentifier=powerreset.sh
 
 [Install]
-WantedBy=obmc-chassis-reset@0.target
+WantedBy=obmc-host-force-warm-reboot@0.target
