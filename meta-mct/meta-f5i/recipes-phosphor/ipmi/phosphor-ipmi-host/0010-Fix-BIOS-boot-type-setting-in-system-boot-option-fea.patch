@@ -1,0 +1,48 @@
+From 738a3b28b158ea743596a71effd5974c9985e17e Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 30 Apr 2020 13:55:23 +0800
+Subject: [PATCH] Fix BIOS boot type setting in system boot option feature
+
+It's a workaround for this feature
+---
+ chassishandler.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+index d634e5e..918e4be 100755
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -1518,6 +1518,7 @@ static ipmi_ret_t setBootMode(const Mode::Modes& mode)
+     return IPMI_CC_OK;
+ }
+ 
++static bool uefiboot = true;
+ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                              ipmi_request_t request,
+                                              ipmi_response_t response,
+@@ -1608,6 +1609,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ? SET_PARM_BOOT_FLAGS_VALID_ONE_TIME
+                                 : SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
+ 
++            if(uefiboot) resp->data[0]|=0x20;
++
+             rc = IPMI_CC_OK;
+         }
+         catch (InternalFailure& e)
+@@ -1658,6 +1661,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+     return rc;
+ }
+ 
++
+ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                              ipmi_request_t request,
+                                              ipmi_response_t response,
+@@ -1689,6 +1693,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+         constexpr auto oneTimePath =
+             "/xyz/openbmc_project/control/host0/boot/one_time";
+ 
++        uefiboot = reqptr->data[0] && 0x20 ? true:false;
++
+         try
+         {
+             bool permanent =
