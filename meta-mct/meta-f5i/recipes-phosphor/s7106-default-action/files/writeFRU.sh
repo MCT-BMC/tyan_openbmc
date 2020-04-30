@@ -15,3 +15,6 @@ done < /usr/sbin/fruWrite
 
 `rm -rf /usr/sbin/fruWrite`
 
+echo " writeFRU : finish update fru data , clear flag to 0 "
+`echo 0 > /usr/sbin/fruFlag`
+
