@@ -1,24 +1,28 @@
-From fbfd9e96bd8e84d86785bbb639b2489ae878503d Mon Sep 17 00:00:00 2001
+From 3a6a8e1250084369c7e28718ac2816430dc3077c Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Tue, 10 Dec 2019 10:13:38 +0800
 Subject: [PATCH] f5i fan speed control
 
 ---
- Makefile.am                |   5 +-
- conf.hpp                   |   4 +
- dbus/dbusconfiguration.cpp | 149 ++++++++++++++++++++++++++++-
- dbus/dbuspassive.cpp       |   4 +-
- pid/builder.cpp            |  12 +++
- pid/buildjson.cpp          |  48 +++++++++-
- pid/ec/fsc.cpp             |  44 +++++++++
- pid/ec/fsc.hpp             |  40 ++++++++
- pid/fsccontroller.cpp      | 233 +++++++++++++++++++++++++++++++++++++++++++++
- pid/fsccontroller.hpp      |  58 +++++++++++
- pid/zone.cpp               |   1 +
- 11 files changed, 589 insertions(+), 9 deletions(-)
+ Makefile.am                     |   5 +-
+ conf.hpp                        |   4 +
+ dbus/dbusconfiguration.cpp      | 149 ++++++++++++++++++++++++-
+ dbus/dbuspassive.cpp            |   4 +-
+ dbus/dbuswrite.cpp              |  33 +++++-
+ phosphor-pid-control.service.in |   1 +
+ pid/builder.cpp                 |  12 +++
+ pid/buildjson.cpp               |  48 ++++++++-
+ pid/ec/fsc.cpp                  |  44 ++++++++
+ pid/ec/fsc.hpp                  |  40 +++++++
+ pid/fsccontroller.cpp           | 233 ++++++++++++++++++++++++++++++++++++++++
+ pid/fsccontroller.hpp           |  58 ++++++++++
+ pid/zone.cpp                    |   1 +
+ 13 files changed, 622 insertions(+), 10 deletions(-)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 conf.hpp
  mode change 100644 => 100755 dbus/dbusconfiguration.cpp
+ mode change 100644 => 100755 dbus/dbuswrite.cpp
+ mode change 100644 => 100755 phosphor-pid-control.service.in
  mode change 100644 => 100755 pid/builder.cpp
  mode change 100644 => 100755 pid/buildjson.cpp
  create mode 100755 pid/ec/fsc.cpp
@@ -316,6 +320,72 @@ index 4a77ccf..9693694 100755
          }
          owner->setFailed(asserted);
      }
+diff --git a/dbus/dbuswrite.cpp b/dbus/dbuswrite.cpp
+old mode 100644
+new mode 100755
+index 502b988..cde391b
+--- a/dbus/dbuswrite.cpp
++++ b/dbus/dbuswrite.cpp
+@@ -55,6 +55,10 @@ void DbusWritePercent::write(double value)
+     double offset = range * value;
+     double ovalue = offset + minimum;
+ 
++    double Value;
++    std::string::size_type pos;
++    std::string id, object;
++
+     if (oldValue == static_cast<int64_t>(ovalue))
+     {
+         return;
+@@ -76,7 +80,34 @@ void DbusWritePercent::write(double value)
+                         entry("WHAT=%s", ex.what()));
+     }
+ 
+-    oldValue = static_cast<int64_t>(ovalue);
++    // check fan sensor value
++    pos = path.find("Pwm_");
++    id = path.substr(pos+4);
++    object = "/xyz/openbmc_project/sensors/fan_pwm/Pwm_" + id;
++    const char *Object = object.c_str();
++
++    auto bus = sdbusplus::bus::new_default();
++    auto method = bus.new_method_call("xyz.openbmc_project.FanSensor", Object,
++                                            "org.freedesktop.DBus.Properties", "Get");
++    method.append("xyz.openbmc_project.Sensor.Value", "Value");
++    sdbusplus::message::variant<double> valuetmp;
++
++    try
++    {
++        auto reply = bus.call(method);
++        reply.read(valuetmp);
++    }
++    catch (const sdbusplus::exception::SdBusError& e)
++    {
++        std::cout << "fail to read " << object << " value " << std::endl;
++    }
++
++    Value = std::get<double>(valuetmp);
++
++    if (((int)(Value+0.5)) == (value * 100))
++    {
++        oldValue = static_cast<int64_t>(ovalue);
++    }
+     return;
+ }
+ 
+diff --git a/phosphor-pid-control.service.in b/phosphor-pid-control.service.in
+old mode 100644
+new mode 100755
+index aa29377..d0244fe
+--- a/phosphor-pid-control.service.in
++++ b/phosphor-pid-control.service.in
+@@ -1,5 +1,6 @@
+ [Unit]
+ Description=Phosphor-Pid-Control Margin-based Fan Control Daemon
++After=xyz.openbmc_project.fansensor.service
+ 
+ [Service]
+ Restart=always
 diff --git a/pid/builder.cpp b/pid/builder.cpp
 old mode 100644
 new mode 100755
