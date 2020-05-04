@@ -2,8 +2,8 @@
 # These file add version 
 
 python() {
-        d.setVar('VERSION', "v0.0d-00-s7106")
-        d.setVar('VERSION_ID', "v0.0d-00-s7106")
+        d.setVar('VERSION', "v0.0e-00-s7106")
+        d.setVar('VERSION_ID', "v0.0e-00-s7106")
 }
 
 # Ensure the git commands run every time bitbake is invoked.
