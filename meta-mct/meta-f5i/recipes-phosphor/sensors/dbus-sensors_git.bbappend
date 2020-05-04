@@ -25,7 +25,7 @@ SRC_URI += " \
             file://0031-Fix-the-cpu-sensor-display.patch \
             file://0032-mct-NVMe-sensor.patch \
             file://0033-Modify-MNVMe-sensor-debug-message-with-using-debug-f.patch  \
-        \
+            file://0034-Fix-cpu-senor-data-update-error-after-code-base-upda.patch \
            "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"
