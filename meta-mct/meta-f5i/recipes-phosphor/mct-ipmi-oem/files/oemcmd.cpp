@@ -953,6 +953,11 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t fiel
         }
     }
 
+    if(str2.length()== 0)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     if((char)str2[str2.length()-1] == 0xa)
     {
         str2.pop_back();
