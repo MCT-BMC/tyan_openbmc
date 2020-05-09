@@ -13,5 +13,6 @@ SRC_URI += "file://0001-s7106-disable-Intel-OEM-command.patch \
             file://0020-support-fru-sync-to-smbios.patch \
             file://0021-workaroud-for-ipmitool-fru-edit-issue.patch \
             file://0022-IPMB-support-for-NM-commands.patch \
+            file://0023-f5i-ignore-return-check-when-updating-hash-list.patch \
             "
 

@@ -1,0 +1,44 @@
+From f93d63cb7b6c677e878207721aa0e938397c383a Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 8 May 2020 18:56:07 +0800
+Subject: [PATCH 1/1] [f5i]ignore return check when updating hash list
+ workaround to make "ipmitool sdr" command don't get messed up when baseboard
+ fru is not present
+
+---
+ src/storagecommands.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index ff66a52..1157d09 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -493,10 +493,12 @@ ipmi::RspType<uint16_t, // inventorySize
+ ipmi_ret_t getFruSdrCount(size_t& count)
+ {
+     ipmi_ret_t ret = replaceCacheFru(0);
++#if 0
+     if (ret != IPMI_CC_OK)
+     {
+         return ret;
+     }
++#endif     
+     count = deviceHashes.size();
+     return IPMI_CC_OK;
+ }
+@@ -504,10 +506,12 @@ ipmi_ret_t getFruSdrCount(size_t& count)
+ ipmi_ret_t getFruSdrs(size_t index, get_sdr::SensorDataFruRecord& resp)
+ {
+     ipmi_ret_t ret = replaceCacheFru(0); // this will update the hash list
++#if 0
+     if (ret != IPMI_CC_OK)
+     {
+         return ret;
+     }
++#endif     
+     if (deviceHashes.size() < index)
+     {
+         return IPMI_CC_INVALID_FIELD_REQUEST;
+-- 
+2.22.0
+
