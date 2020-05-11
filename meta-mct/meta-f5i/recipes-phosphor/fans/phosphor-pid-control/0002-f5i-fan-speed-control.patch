@@ -1,4 +1,4 @@
-From 3a6a8e1250084369c7e28718ac2816430dc3077c Mon Sep 17 00:00:00 2001
+From ae93ffaed97b797fce2f9e92c3a99765cb9c9882 Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Tue, 10 Dec 2019 10:13:38 +0800
 Subject: [PATCH] f5i fan speed control
@@ -14,10 +14,11 @@ Subject: [PATCH] f5i fan speed control
  pid/buildjson.cpp               |  48 ++++++++-
  pid/ec/fsc.cpp                  |  44 ++++++++
  pid/ec/fsc.hpp                  |  40 +++++++
+ pid/fancontroller.cpp           |   2 +
  pid/fsccontroller.cpp           | 233 ++++++++++++++++++++++++++++++++++++++++
  pid/fsccontroller.hpp           |  58 ++++++++++
  pid/zone.cpp                    |   1 +
- 13 files changed, 622 insertions(+), 10 deletions(-)
+ 14 files changed, 624 insertions(+), 10 deletions(-)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 conf.hpp
  mode change 100644 => 100755 dbus/dbusconfiguration.cpp
@@ -589,6 +590,26 @@ index 0000000..7f687b2
 +double fsc(const ec::FscInfo& info, double value);
 +
 +}
+diff --git a/pid/fancontroller.cpp b/pid/fancontroller.cpp
+index dd26d16..d43d753 100644
+--- a/pid/fancontroller.cpp
++++ b/pid/fancontroller.cpp
+@@ -116,6 +116,7 @@ void FanController::outputProc(double value)
+     double percent = value;
+ 
+     /* If doing tuning, don't go into failsafe mode. */
++#if 0
+     if (!tuningEnabled)
+     {
+         if (_owner->getFailSafeMode())
+@@ -127,6 +128,7 @@ void FanController::outputProc(double value)
+             }
+         }
+     }
++#endif
+ 
+     // value and kFanFailSafeDutyCycle are 10 for 10% so let's fix that.
+     percent /= 100;
 diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
 new file mode 100755
 index 0000000..2f0be5c
