@@ -1,52 +1,26 @@
-From 5115f56c65183a6c64feb051b383f1992441235f Mon Sep 17 00:00:00 2001
+From 4f3c781ee8568a0997e9ab8f4b12f9e994553c05 Mon Sep 17 00:00:00 2001
 From: Ray Lue <ray.lue@mic.com.tw>
-Date: Fri, 14 Feb 2020 22:03:41 +0800
-Subject: [PATCH 1/1] init-host-status
+Date: Mon, 11 May 2020 17:34:51 +0800
+Subject: [PATCH 1/1] remove host state change in pgood monitor
 
 ---
- gpioMonMain.cpp | 71 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 71 insertions(+)
+ gpioMonMain.cpp | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
  mode change 100644 => 100755 gpioMonMain.cpp
 
 diff --git a/gpioMonMain.cpp b/gpioMonMain.cpp
 old mode 100644
 new mode 100755
-index 251e0d5..860c7f4
+index 251e0d5..d56417f
 --- a/gpioMonMain.cpp
 +++ b/gpioMonMain.cpp
-@@ -23,6 +23,7 @@
- #include <phosphor-logging/log.hpp>
- #include <iostream>
- 
-+
- using namespace phosphor::logging;
- 
- namespace phosphor
-@@ -41,6 +42,72 @@ std::map<std::string, int> polarityMap = {
+@@ -41,6 +41,37 @@ std::map<std::string, int> polarityMap = {
  }
  } // namespace phosphor
  
 +static constexpr char const* PgService = "org.openbmc.control.Power";
 +static constexpr char const* PgObj = "/org/openbmc/control/power0";
 +static constexpr char const* PgIntf = "org.openbmc.control.Power";
-+
-+static constexpr char const* HostService = "xyz.openbmc_project.State.Host";
-+static constexpr char const* HostObj = "/xyz/openbmc_project/state/host0";
-+static constexpr char const* HostIntf = "xyz.openbmc_project.State.Host";
-+static constexpr char const* HostOn = "xyz.openbmc_project.State.Host.HostState.Running";
-+static constexpr char const* HostOff = "xyz.openbmc_project.State.Host.HostState.Off";
-+
-+//static constexpr char const* HostOn = "xyz.openbmc_project.State.Host.Transition.On";
-+//static constexpr char const* HostOff =  "xyz.openbmc_project.State.Host.Transition.Off";
-+
-+static constexpr char const* ChassisService = "xyz.openbmc_project.State.Chassis";
-+static constexpr char const* ChassisObj = "/xyz/openbmc_project/state/chassis0";
-+static constexpr char const* ChassisIntf = "xyz.openbmc_project.State.Chassis";
-+
-+static constexpr char const* ChassisOn = "xyz.openbmc_project.State.Chassis.PowerState.On";
-+static constexpr char const* ChassisOff = "xyz.openbmc_project.State.Chassis.PowerState.Off";
-+
-+
 +#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 +
 +void pgoodhook(gpiod_line* line)
@@ -71,41 +45,24 @@ index 251e0d5..860c7f4
 +    method.append(PgIntf, "state", sdbusplus::message::variant<int>((int)resp));
 +    bus.call_noreply(method);
 +    
-+    std::cerr << "pgood inited\n";
-+
-+    //set host state
-+    std::string HostState = (resp == 1) ? HostOn:HostOff;
-+
-+    method = bus.new_method_call(HostService, HostObj, PROPERTY_INTERFACE, "Set");
-+    method.append(HostIntf, "CurrentHostState", sdbusplus::message::variant<std::string>(HostState));
-+    bus.call_noreply(method);
-+    std::cerr << "host state inited\n";
-+
-+    //set chassis state
-+    std::string ChassisState = (resp == 1) ? ChassisOn:ChassisOff;
-+    method = bus.new_method_call(ChassisService, ChassisObj, PROPERTY_INTERFACE, "Set");
-+    method.append(ChassisIntf, "CurrentPowerState", sdbusplus::message::variant<std::string>(ChassisState));
-+    bus.call_noreply(method);
-+    std::cerr << "chassis state inited\n";   
++    std::cerr << "pgood state init to: " << (int)resp << "\n";
 +
 +}
-+
-+
 +
  int main(int argc, char** argv)
  {
  
-@@ -133,6 +200,10 @@ int main(int argc, char** argv)
+@@ -133,6 +164,10 @@ int main(int argc, char** argv)
              std::string lineName = obj["LineName"];
              lineMsg += lineName;
              line = gpiod_line_find(lineName.c_str());
-+             if(lineName.compare("PS_PWROK") == 0)
-+             {
++            if(lineName.compare("PS_PWROK") == 0)
++            {
 +                pgoodhook(line);
-+             }
++            }
          }
  
          if (line == NULL)
 -- 
-2.22.0
+2.26.2
 
