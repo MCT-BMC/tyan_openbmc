@@ -3,8 +3,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 # Disable the CPU sensor Tcontrol threshold setting
 EXTRA_OECMAKE_append += " -DBMC_CPU_SENSOR_TCONTROL=OFF"
 
-SRC_URI += " \
-            file://0001-add-supported-pmbus-name-cffps1.patch \
+SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0002-Filter-out-FAN-threshold-event-during-power-transiti.patch \
             file://0003-s7106-new-processor-sensor-to-replace-gpio-sensor.patch \
             file://0004-support-ipmi-ACPI-sensor.patch \
@@ -24,9 +23,10 @@ SRC_URI += " \
             file://0030-add-sensor-reading-unavailable-bit-for-VR-sensor.patch \
             file://0031-Fix-the-cpu-sensor-display.patch \
             file://0032-mct-NVMe-sensor.patch \
-            file://0033-Modify-MNVMe-sensor-debug-message-with-using-debug-f.patch  \
+            file://0033-Modify-MNVMe-sensor-debug-message-with-using-debug-f.patch \
             file://0034-Fix-cpu-senor-data-update-error-after-code-base-upda.patch \
-           "
+            file://0035-Fix-CPU-DTS-margin-reading-incorrect.patch \
+            "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.acpisensor.service"
