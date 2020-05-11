@@ -1207,6 +1207,71 @@ ipmi::RspType<uint8_t> ipmi_GetService()
     return ipmi::responseSuccess(serviceResponse);
 }
 
+//===============================================================
+/* Get the latest 20 BIOS post codes
+NetFun: 0x30
+Cmd : 0x10
+Request:
+
+Response:
+    Byte 1 : Completion Code
+    Byte 2-21 : latest 20 BIOS post codes
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmi_GetPostCode()
+{
+    constexpr auto postCodeInterface = "xyz.openbmc_project.State.Boot.PostCode";
+    constexpr auto postCodeObjPath   = "/xyz/openbmc_project/State/Boot/PostCode";
+    constexpr auto postCodeService   = "xyz.openbmc_project.State.Boot.PostCode";
+
+    uint16_t bootCycleIndex = 0;
+    std::vector<uint64_t> tmpBuffer;
+    int tmpBufferIndex = 0;
+    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
+    std::vector<uint8_t> dataInfo;
+
+    try
+    {
+        /* Get CurrentBootCycleIndex property */
+        auto value = ipmi::getDbusProperty(*dbus, postCodeService, postCodeObjPath,
+                               postCodeInterface, "CurrentBootCycleIndex");
+        bootCycleIndex = std::get<uint16_t>(value);
+
+        /* Set the argument for method call */
+        auto msg = dbus->new_method_call(postCodeService, postCodeObjPath,
+                                         postCodeInterface, "GetPostCodes");
+        msg.append(bootCycleIndex);
+
+        /* Get the post code of CurrentBootCycleIndex */
+        auto reply = dbus->call(msg);
+        reply.read(tmpBuffer);
+
+        int tmpBufferSize = tmpBuffer.size();
+
+        // Set command return length to return the last 20 post code.
+        if (tmpBufferSize > retPostCodeLen)
+        {
+            tmpBufferIndex = tmpBufferSize - retPostCodeLen;
+        }
+        else
+        {
+            tmpBufferIndex = 0;
+        }
+
+        /* Get post code data */
+        for (int i = 0; ((i < retPostCodeLen) && (tmpBufferIndex < tmpBufferSize)); i++, tmpBufferIndex++)
+        {
+            dataInfo.push_back(tmpBuffer[tmpBufferIndex]);
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        sd_journal_print(LOG_ERR,"IPMI GetPostCode Failed in call method, %s\n",e.what());
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess(dataInfo);
+}
+
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
@@ -1223,5 +1288,6 @@ void register_netfn_mct_oem()
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
+    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetPostCode, ipmi::Privilege::Admin, ipmi_GetPostCode);
 }
 }

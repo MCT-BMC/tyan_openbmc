@@ -27,4 +27,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           crashdump-bin \
                                           button-monitor \
                                           entity-rescan \
+                                          phosphor-post-code-manager \
+                                          phosphor-host-postd \
                                         "
