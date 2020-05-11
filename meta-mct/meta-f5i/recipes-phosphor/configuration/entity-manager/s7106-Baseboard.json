@@ -831,7 +831,7 @@
             "Type": "EEPROM"
         },
         {
-            "FailSafePercent": 100,
+            "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
             "FloorDuty": 0,
@@ -839,7 +839,7 @@
             "Type": "Pid.Zone"
         },
         {
-            "FailSafePercent": 100,
+            "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
             "FloorDuty": 0,
@@ -847,7 +847,7 @@
             "Type": "Pid.Zone"
         },
         {
-            "FailSafePercent": 100,
+            "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
             "FloorDuty": 0,
@@ -855,7 +855,7 @@
             "Type": "Pid.Zone"
         },
         {
-            "FailSafePercent": 100,
+            "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
             "FloorDuty": 0,
@@ -863,7 +863,7 @@
             "Type": "Pid.Zone"
         },
         {
-            "FailSafePercent": 100,
+            "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
             "FloorDuty": 0,
