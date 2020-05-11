@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <host-ipmid/ipmid-api.h>
 
-
+static const size_t retPostCodeLen = 20;
 
 enum ipmi_net_fns_oem
 {
@@ -25,6 +25,7 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_PnmGetReading = 0xE2,
     IPMI_CMD_SendRawPeci = 0xE6, //Intel RAW PECI NetFn=0x30, cmd = 0xE6
     IPMI_CMD_RamdomDelayACRestorePowerON = 0x18,
+    IPMI_CMD_GetPostCode = 0x10,
 };
 
 struct PnmGetReadingRequest
@@ -33,4 +34,3 @@ struct PnmGetReadingRequest
     uint8_t reserved1;
     uint8_t reserved2;
 };
-
