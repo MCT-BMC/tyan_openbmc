@@ -26,6 +26,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0033-Modify-MNVMe-sensor-debug-message-with-using-debug-f.patch \
             file://0034-Fix-cpu-senor-data-update-error-after-code-base-upda.patch \
             file://0035-Fix-CPU-DTS-margin-reading-incorrect.patch \
+            file://0036-Fix-sensor-hysteresis-issue.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"

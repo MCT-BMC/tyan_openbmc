@@ -598,6 +598,7 @@
             "Name": "SYS_Air_Inlet",
             "Name1": "MB_Air_Inlet",
             "Name2": "SYS_Air_Outlet",
+            "HysteresisVal": 3,
             "Thresholds": [
                 {
                     "Direction": "greater than",
