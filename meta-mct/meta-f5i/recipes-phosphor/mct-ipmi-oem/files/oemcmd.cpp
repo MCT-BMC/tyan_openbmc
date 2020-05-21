@@ -982,7 +982,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFirmwareString()
 {
     std::vector<uint8_t>firmwareString(3,0);
     std::string osReleasePath = "/etc/os-release";
-    std::string searchFirmwareString = "OPENBMC_TARGET_MACHINE";
+    std::string searchFirmwareString = "BMC_NAME";
     std::string readText;
     std::ifstream readFile(osReleasePath);
 
