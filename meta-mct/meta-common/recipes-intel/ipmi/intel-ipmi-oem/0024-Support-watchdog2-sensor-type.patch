@@ -1,0 +1,32 @@
+From f19a70d714d2ab52c6d540189764d037a53f6203 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 May 2020 17:13:04 +0800
+Subject: [PATCH] Support watchdog2 sensor type
+
+---
+ include/sdrutils.hpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/sdrutils.hpp b/include/sdrutils.hpp
+index 50cbd20..3d05ac0 100755
+--- a/include/sdrutils.hpp
++++ b/include/sdrutils.hpp
+@@ -167,6 +167,7 @@ enum class SensorTypeCodes : uint8_t
+     pwr_button = 0x14,
+     restart = 0x1d,
+     acpi = 0x22,
++    watchdog2 = 0x23,
+     mgtsubsyshealth = 0x28,
+     versionchange = 0x2b,
+     fru_state = 0x2c,
+@@ -185,6 +186,7 @@ const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
+                  {"pwr_button", SensorTypeCodes::pwr_button},   
+                  {"restart", SensorTypeCodes::restart},  
+                  {"acpi", SensorTypeCodes::acpi},     
++                 {"watchdog2", SensorTypeCodes::watchdog2},
+                  {"mgtsubsyshealth", SensorTypeCodes::mgtsubsyshealth}, 
+                  {"versionchange", SensorTypeCodes::versionchange},     
+                  {"fru_state", SensorTypeCodes::fru_state},
+-- 
+2.7.4
+
