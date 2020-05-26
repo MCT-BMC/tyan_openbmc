@@ -889,8 +889,8 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t fiel
                         str2 = areaData(str,"Chassis Part","Chassis Serial");
                         break;
                     case 2:
-                        // chassis serial umber
-                        str2 = areaData(str,"Chassis Serial","Board Mfg Date");
+                        // chassis serial number
+                        str2 = areaData(str,"Chassis Serial","Chassis Extra");
                         break;
                     default:
                         break;
@@ -916,7 +916,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFruField(uint8_t fruId, uint4_t fiel
                         break;
                     case 3:
                         // board part number
-                        str2 = areaData(str1,"Board Part","Product Manufacturer");
+                        str2 = areaData(str1,"Board Part","Product Name");
                         break;
                     default:
                         break;
