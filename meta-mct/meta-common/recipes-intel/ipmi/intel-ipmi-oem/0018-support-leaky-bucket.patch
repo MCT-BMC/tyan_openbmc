@@ -122,7 +122,7 @@ index ecd4393..597bb3b 100755
 +          
 +            sdbusplus::message::message addEcc = bus->new_method_call(
 +                "xyz.openbmc_project.leaklyBucketSensor", 
-+                "/xyz/openbmc_project/sensors/leakyBucket/HOST_DIMM_ECC",
++                "/xyz/openbmc_project/leakyBucket/HOST_DIMM_ECC",
 +                "xyz.openbmc_project.Sensor.Value",
 +                "increaseEccToBucket");
 +            addEcc.append(ecc->second);

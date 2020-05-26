@@ -93,7 +93,7 @@ index 0000000..6453c1b
 +
 +static constexpr bool DEBUG = false;
 +
-+static const std::string hostEccSensorPath = "/xyz/openbmc_project/sensors/leakyBucket/HOST_DIMM_ECC";
++static const std::string hostEccSensorPath = "/xyz/openbmc_project/leakyBucket/HOST_DIMM_ECC";
 +static const std::string lbConfigFile = "/var/lib/ipmi/lbConfig";
 +
 +uint8_t t1 = 49;
