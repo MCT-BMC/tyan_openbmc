@@ -1,0 +1,180 @@
+From 5f95be59e5b80aadf1010408f71ce1b2e5ec2e07 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 15 May 2020 18:34:24 +0800
+Subject: [PATCH] tmp-commit
+
+---
+ include/CPUSensor.hpp |  2 ++
+ include/Utils.hpp     |  1 +
+ src/CPUSensor.cpp     | 44 ++++++++++++++++++++++++++++++++------------
+ src/Utils.cpp         | 21 +++++++++++++++++++++
+ 4 files changed, 56 insertions(+), 12 deletions(-)
+
+diff --git a/include/CPUSensor.hpp b/include/CPUSensor.hpp
+index 26bc80e..0cc3876 100755
+--- a/include/CPUSensor.hpp
++++ b/include/CPUSensor.hpp
+@@ -34,12 +34,14 @@ class CPUSensor : public Sensor
+     static double DieTemp0;
+     static double DieTemp1;
+     static constexpr const char* labelTcontrol = "Tcontrol";
++    static constexpr const double deviceAbsent = 0;
+ 
+   private:
+     sdbusplus::asio::object_server& objServer;
+     boost::asio::posix::stream_descriptor inputDev;
+     boost::asio::deadline_timer waitTimer;
+     boost::asio::streambuf readBuf;
++    std::shared_ptr<sdbusplus::asio::connection> connCPU;
+     std::string nameTcontrol;
+     std::string path;
+     double privTcontrol;
+diff --git a/include/Utils.hpp b/include/Utils.hpp
+index f5fd33d..92efbe3 100755
+--- a/include/Utils.hpp
++++ b/include/Utils.hpp
+@@ -46,6 +46,7 @@ bool findFiles(const std::filesystem::path dirPath,
+                unsigned int symlinkDepth = 1);
+ bool isPowerOn(void);
+ bool hasBiosPost(void);
++bool getPowerStatus(const std::shared_ptr<sdbusplus::asio::connection>& conn);
+ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn);
+ bool getSensorConfiguration(
+     const std::string& type,
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index b0719bd..e6a7fc9 100755
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -79,6 +79,7 @@ CPUSensor::CPUSensor(const std::string& path, const std::string& objectType,
+         setInitialProperties(conn);
+     }
+     setupPowerMatch(conn);
++    connCPU = conn;
+     setupRead();
+ }
+ 
+@@ -98,10 +99,17 @@ CPUSensor::~CPUSensor()
+ 
+ void CPUSensor::setupRead(void)
+ {
++#if 0
+     boost::asio::async_read_until(
+         inputDev, readBuf, '\n',
+         [&](const boost::system::error_code& ec,
+             std::size_t /*bytes_transfered*/) { handleResponse(ec); });
++#endif
++    // Sync read with Non-blocking IO to PECI sensor
++    boost::system::error_code ec;
++    inputDev.non_blocking(true);
++    boost::asio::read_until(inputDev, readBuf, '\n', ec);
++    handleResponse(ec);
+ }
+ 
+ void CPUSensor::handleResponse(const boost::system::error_code& err)
+@@ -113,17 +121,22 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+     }
+     size_t pollTime = CPUSensor::sensorPollMs;
+ 
++    getPowerStatus(connCPU);
++
+     // Set as sensor reading invalid for cup peci sensors
+     if (!isPowerOn())
+     {
+         updateValueInvalid(true);
+         errCount = 0;
+ 
+-        // clear response buffer reading
+-        std::istream invalidResponseStream(&readBuf);
+-        std::string invalidResponse;
+-        std::getline(invalidResponseStream, invalidResponse);
+-        invalidResponseStream.clear();
++        if(err != boost::system::errc::resource_unavailable_try_again)
++        {
++            // clear response buffer reading
++            std::istream invalidResponseStream(&readBuf);
++            std::string invalidResponse;
++            std::getline(invalidResponseStream, invalidResponse);
++            invalidResponseStream.clear();
++        }
+ 
+         inputDev.close();
+         int fd = open(path.c_str(), O_RDONLY);
+@@ -154,15 +167,22 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+             double nvalue = std::stof(response);
+             responseStream.clear();
+             nvalue /= CPUSensor::sensorScaleFactor;
+-            if (nvalue != value)
++            if (nvalue == deviceAbsent)
+             {
+-                if (show)
+-                {
+-                    updateValue(nvalue);
+-                }
+-                else
++                updateValueInvalid(true);
++            }
++            else
++            {
++                if (nvalue != value)
+                 {
+-                    value = nvalue;
++                    if (show)
++                    {
++                        updateValue(nvalue);
++                    }
++                    else
++                    {
++                        value = nvalue;
++                    }
+                 }
+             }
+ 
+diff --git a/src/Utils.cpp b/src/Utils.cpp
+index a46265c..9e54185 100755
+--- a/src/Utils.cpp
++++ b/src/Utils.cpp
+@@ -136,6 +136,25 @@ bool hasBiosPost(void)
+     return biosHasPost;
+ }
+ 
++bool getPowerStatus(const std::shared_ptr<sdbusplus::asio::connection>& conn)
++{
++    conn->async_method_call(
++        [](boost::system::error_code ec,
++           const std::variant<int>& state) {
++            if (ec)
++            {
++                // we commonly come up before power control, we'll capture the
++                // property change later
++                return;
++            }
++            powerStatusOn = (1 == (std::get<int>(state))) ? true : false;
++        },
++        power::busname, power::path, properties::interface, properties::get,
++        power::interface, power::property);
++
++    return powerStatusOn;
++}
++
+ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+ {
+     static boost::asio::steady_timer timer(conn->get_io_context());
+@@ -208,6 +227,7 @@ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+             {
+                 // we commonly come up before power control, we'll capture the
+                 // property change later
++                std::cerr << "Get power method error" << ec.message() << std::endl;
+                 return;
+             }
+             powerStatusOn = (1 == (std::get<int>(state))) ? true : false;
+@@ -222,6 +242,7 @@ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+             {
+                 // we commonly come up before power control, we'll capture the
+                 // property change later
++                std::cerr << "Get bios has post method error" << ec.message() << std::endl;
+                 return;
+             }
+             biosHasPost = std::get<std::string>(state) != "Inactive";
+-- 
+2.7.4
+
