@@ -29,4 +29,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_f5i =   " libgpiod \
                                           entity-rescan \
                                           phosphor-post-code-manager \
                                           phosphor-host-postd \
+                                          ethtool \
                                         "
