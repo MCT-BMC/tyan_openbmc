@@ -12,7 +12,7 @@ index b99396d..7946cd5 100755
 --- a/src/eventSensor.cpp
 +++ b/src/eventSensor.cpp
 @@ -41,7 +41,12 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
-         {"BMC_FW_UPDAT","versionchange"}, 
+         {"BMC_FW_UPDATE","versionchange"}, 
          {"BMC_Reboot","mgtsubsyshealth"},    
          {"PSU_STATUS","power_supply"}, 
 -        {"IPMI_POWER_CYCLE","fru_state"}    
