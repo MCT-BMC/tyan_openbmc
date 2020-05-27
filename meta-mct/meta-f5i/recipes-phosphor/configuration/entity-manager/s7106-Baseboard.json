@@ -80,7 +80,7 @@
                     "Label": "Die",
                     "Name": "upper critical",
                     "Severity": 1,
-                    "Value": 99
+                    "Value": 95
                 }
             ],
             "Type": "XeonCPU"
@@ -150,7 +150,7 @@
                     "Label": "Die",
                     "Name": "upper critical",
                     "Severity": 1,
-                    "Value": 99
+                    "Value": 95
                 }
             ],
             "Type": "XeonCPU"
@@ -878,8 +878,8 @@
                 "CPU0_Temp"
             ],
             "Name": "FSC_CPU0",
-            "SetPointH": 87,
-            "SetPointL": 82,
+            "SetPointH": 5000,
+            "SetPointL": 10000,
             "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
@@ -905,8 +905,8 @@
                 "CPU1_Temp"
             ],
             "Name": "FSC_CPU1",
-            "SetPointH": 87,
-            "SetPointL": 82,
+            "SetPointH": 5000,
+            "SetPointL": 10000,
             "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [

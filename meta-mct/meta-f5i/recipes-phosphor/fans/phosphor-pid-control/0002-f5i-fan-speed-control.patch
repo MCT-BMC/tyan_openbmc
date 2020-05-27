@@ -1,4 +1,4 @@
-From ae93ffaed97b797fce2f9e92c3a99765cb9c9882 Mon Sep 17 00:00:00 2001
+From 0148b8966a8a7e2cef5cb8449dd708a3dd17a71a Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Tue, 10 Dec 2019 10:13:38 +0800
 Subject: [PATCH] f5i fan speed control
@@ -6,19 +6,19 @@ Subject: [PATCH] f5i fan speed control
 ---
  Makefile.am                     |   5 +-
  conf.hpp                        |   4 +
- dbus/dbusconfiguration.cpp      | 149 ++++++++++++++++++++++++-
+ dbus/dbusconfiguration.cpp      | 149 ++++++++++++++++-
  dbus/dbuspassive.cpp            |   4 +-
- dbus/dbuswrite.cpp              |  33 +++++-
- phosphor-pid-control.service.in |   1 +
- pid/builder.cpp                 |  12 +++
- pid/buildjson.cpp               |  48 ++++++++-
- pid/ec/fsc.cpp                  |  44 ++++++++
- pid/ec/fsc.hpp                  |  40 +++++++
+ dbus/dbuswrite.cpp              |  33 +++-
+ phosphor-pid-control.service.in |   2 +
+ pid/builder.cpp                 |  12 ++
+ pid/buildjson.cpp               |  48 +++++-
+ pid/ec/fsc.cpp                  |  44 +++++
+ pid/ec/fsc.hpp                  |  40 +++++
  pid/fancontroller.cpp           |   2 +
- pid/fsccontroller.cpp           | 233 ++++++++++++++++++++++++++++++++++++++++
- pid/fsccontroller.hpp           |  58 ++++++++++
+ pid/fsccontroller.cpp           | 360 ++++++++++++++++++++++++++++++++++++++++
+ pid/fsccontroller.hpp           |  59 +++++++
  pid/zone.cpp                    |   1 +
- 14 files changed, 624 insertions(+), 10 deletions(-)
+ 14 files changed, 753 insertions(+), 10 deletions(-)
  mode change 100644 => 100755 Makefile.am
  mode change 100644 => 100755 conf.hpp
  mode change 100644 => 100755 dbus/dbusconfiguration.cpp
@@ -324,7 +324,7 @@ index 4a77ccf..9693694 100755
 diff --git a/dbus/dbuswrite.cpp b/dbus/dbuswrite.cpp
 old mode 100644
 new mode 100755
-index 502b988..cde391b
+index 502b988..3ca7c41
 --- a/dbus/dbuswrite.cpp
 +++ b/dbus/dbuswrite.cpp
 @@ -55,6 +55,10 @@ void DbusWritePercent::write(double value)
@@ -367,7 +367,7 @@ index 502b988..cde391b
 +
 +    Value = std::get<double>(valuetmp);
 +
-+    if (((int)(Value+0.5)) == (value * 100))
++    if (((int)(Value+0.5)) == (int)(value*100))
 +    {
 +        oldValue = static_cast<int64_t>(ovalue);
 +    }
@@ -377,13 +377,14 @@ index 502b988..cde391b
 diff --git a/phosphor-pid-control.service.in b/phosphor-pid-control.service.in
 old mode 100644
 new mode 100755
-index aa29377..d0244fe
+index aa29377..43f3c53
 --- a/phosphor-pid-control.service.in
 +++ b/phosphor-pid-control.service.in
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,7 @@
  [Unit]
  Description=Phosphor-Pid-Control Margin-based Fan Control Daemon
 +After=xyz.openbmc_project.fansensor.service
++After=xyz.openbmc_project.cpusensor.service
  
  [Service]
  Restart=always
@@ -612,10 +613,10 @@ index dd26d16..d43d753 100644
      percent /= 100;
 diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
 new file mode 100755
-index 0000000..2f0be5c
+index 0000000..2d54851
 --- /dev/null
 +++ b/pid/fsccontroller.cpp
-@@ -0,0 +1,233 @@
+@@ -0,0 +1,360 @@
 +/*
 +// Copyright (c) 2019
 +//
@@ -649,8 +650,27 @@ index 0000000..2f0be5c
 +#include <vector>
 +
 +#include <sdbusplus/asio/object_server.hpp>
++#include <filesystem>
 +
 +extern std::map<int64_t, struct conf::ZoneConfig> zoneDetailsConfig;
++#define FAN_OBJECTPATH "/xyz/openbmc_project/sensors/fan_tach/SYS_FAN_"
++namespace fs = std::filesystem;
++
++#define FSC_SERVICE "xyz.openbmc_project.EntityManager"
++#define PID_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/"
++#define PID_INTERFACE "xyz.openbmc_project.Configuration.Fsc"
++#define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
++
++static void setProperty(sdbusplus::bus::bus& bus, const std::string& path,
++                 const std::string& property, const double value)
++{
++    auto method = bus.new_method_call(FSC_SERVICE, path.c_str(),
++                                      PROPERTY_INTERFACE, "Set");
++    method.append(PID_INTERFACE, property, sdbusplus::message::variant<double>(value));
++    bus.call_noreply(method);
++
++    return;
++}
 +
 +void FscController::process(void)
 +{
@@ -660,6 +680,114 @@ index 0000000..2f0be5c
 +    ec::FscInfo info = get_fsc_info();
 +
 +    double output;
++
++    double Value , fanfail=0, value=0;
++    std::string id, object, PATH, str;
++    char Object[100], Tcontrol[100], path[100];
++    size_t pos;
++    auto bus = sdbusplus::bus::new_default();
++    std::fstream file;
++
++    // dynamically detected CPU Thigh and Tlow value
++    pos = _id.find("FSC_CPU");
++    if(pos != std::string::npos)
++    {
++        str = _id.substr(pos+7);
++        memset(path,0,sizeof(path));
++        snprintf(path,sizeof(path),"/sys/bus/peci/devices/peci-0/0-3%s/peci-cputemp.%s/hwmon",str.c_str(),str.c_str());
++
++        file.open(path,std::ios::in);
++        if(!file)
++        {
++            std::cout << path << " path doesn't exisit " << "\n";
++        }
++        else
++        {
++            file.close();
++
++            fs::path p1(path);
++            for( fs::directory_iterator it = fs::directory_iterator(p1);
++                    it != fs::directory_iterator(); ++ it )
++            {
++                PATH = it->path();
++            }
++
++            memset(path,0,sizeof(path));
++            snprintf(path,sizeof(path),"%s%s",PATH.c_str(),"/temp3_input");
++
++            file.open(path,std::ios::in);
++            if(!file)
++            {
++                std::cout << " can't open " << path << " file to read Tcontrol value" << "\n";
++            }
++            else
++            {
++                file.read(Tcontrol,sizeof(Tcontrol));
++                value = strtol(Tcontrol,NULL,10);
++                file.close();
++
++                memset(Object,0,sizeof(Object));
++                snprintf(Object,sizeof(Object),"%s%s",PID_OBJECTPATH,_id.c_str());
++
++                // CPU Thigh = Tcontrol -5
++                if(info.setPointH == 5000)
++                {
++                    info.setPointH = (value-info.setPointH)/1000;
++                    setProperty(bus,Object,"SetPointH",info.setPointH);
++                }
++
++                // CPU Tlow = Tcontrol -10
++                if(info.setPointL == 10000)
++                {
++                    info.setPointL = (value-info.setPointL)/1000;
++                    setProperty(bus,Object,"SetPointL",info.setPointL);
++                }
++            }
++        }
++    }
++
++    // check FAN sensors reading
++    for (size_t z = 1; z <= 5; z++)
++    {
++        memset(Object,0,sizeof(Object));
++        snprintf(Object,sizeof(Object),"%s%d",FAN_OBJECTPATH,z);
++
++        auto method = bus.new_method_call("xyz.openbmc_project.FanSensor", Object,
++                                        "org.freedesktop.DBus.Properties", "Get");
++        method.append("xyz.openbmc_project.Sensor.Value", "Value");
++        sdbusplus::message::variant<double> valuetmp;
++
++        try
++        {
++            auto reply = bus.call(method);
++            reply.read(valuetmp);
++        }
++        catch (const sdbusplus::exception::SdBusError& e)
++        {
++            std::cout << "fail to read " << object << " value " << std::endl;
++        }
++
++        Value = std::get<double>(valuetmp);
++        if (Value == 0)
++        {
++            fanfail++;
++        }
++    }
++
++    if (fanfail != 0)
++    {
++        if (maxDuty != 100)
++        {
++            maxDuty = 100;
++        }
++    }
++    else
++    {
++        if (maxDuty != info.outLimMax)
++        {
++            maxDuty = info.outLimMax;
++        }
++    }
 +
 +    if (std::isnan(lastOutput))
 +    {
@@ -703,9 +831,9 @@ index 0000000..2f0be5c
 +                if (input > info.setPointH)
 +                {
 +                    output = lastOutput + (input - info.setPointH)*2;
-+                    if (output >= info.outLimMax)
++                    if (output >= maxDuty)
 +                    {
-+                        output = info.outLimMax;
++                        output = maxDuty;
 +                    }
 +                    delayTime = 0;
 +                }
@@ -851,10 +979,10 @@ index 0000000..2f0be5c
 +}
 diff --git a/pid/fsccontroller.hpp b/pid/fsccontroller.hpp
 new file mode 100755
-index 0000000..f5aec53
+index 0000000..6d696aa
 --- /dev/null
 +++ b/pid/fsccontroller.hpp
-@@ -0,0 +1,58 @@
+@@ -0,0 +1,59 @@
 +#pragma once
 +
 +#include "controller.hpp"
@@ -912,6 +1040,7 @@ index 0000000..f5aec53
 +    double floorOutput = std::numeric_limits<double>::quiet_NaN();
 +    double delayTime = std::numeric_limits<double>::quiet_NaN();
 +    double updateDir = std::numeric_limits<double>::quiet_NaN();
++    double maxDuty = std::numeric_limits<double>::quiet_NaN();
 +};
 diff --git a/pid/zone.cpp b/pid/zone.cpp
 old mode 100644
