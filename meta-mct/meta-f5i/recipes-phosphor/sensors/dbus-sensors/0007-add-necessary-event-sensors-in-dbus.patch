@@ -19,7 +19,7 @@ index 6674c30..b99396d 100755
 +        {"IPMI_Power_Diag","fru_state"},
 +        {"SYSTEM_RESTART", "restart"}, //system restart sensor
 +        {"POWER_BUTTON","pwr_button"},  
-+        {"BMC_FW_UPDAT","versionchange"}, 
++        {"BMC_FW_UPDATE","versionchange"}, 
 +        {"BMC_Reboot","mgtsubsyshealth"},    
 +        {"PSU_STATUS","power_supply"}, 
 +        {"IPMI_POWER_CYCLE","fru_state"}    
