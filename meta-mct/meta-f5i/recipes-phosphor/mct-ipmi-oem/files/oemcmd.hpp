@@ -26,6 +26,7 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_SendRawPeci = 0xE6, //Intel RAW PECI NetFn=0x30, cmd = 0xE6
     IPMI_CMD_RamdomDelayACRestorePowerON = 0x18,
     IPMI_CMD_GetPostCode = 0x10,
+    IPMI_CMD_RelinkLan = 0x12,
 };
 
 struct PnmGetReadingRequest

@@ -1271,6 +1271,21 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_GetPostCode()
     return ipmi::responseSuccess(dataInfo);
 }
 
+//===============================================================
+/* re-link Lan port
+NetFun: 0x30
+Cmd : 0x12
+*/
+ipmi::RspType<> ipmi_RelinkLan()
+{
+    char command[100];
+
+    memset(command,0,sizeof(command));
+    sprintf(command,"/usr/sbin/relinkLan.sh &");
+    system(command);
+
+    return ipmi::responseSuccess();
+}
 
 void register_netfn_mct_oem()
 {
@@ -1289,5 +1304,6 @@ void register_netfn_mct_oem()
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetPostCode, ipmi::Privilege::Admin, ipmi_GetPostCode);
+    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RelinkLan, ipmi::Privilege::Admin, ipmi_RelinkLan);
 }
 }

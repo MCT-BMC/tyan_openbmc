@@ -13,7 +13,8 @@ SRC_URI = " \
            file://disable-sw2.sh \
            file://initFruFlag.service \
            file://initFruFlag.sh \
-           file://writeFRU.sh"
+           file://writeFRU.sh \
+           file://relinkLan.sh"
 
 DEPENDS = "systemd"
 RDEPENDS_${PN} = "bash"
@@ -29,4 +30,5 @@ do_install() {
     install -m 0755 ${S}disable-sw2.sh ${D}/${sbindir}/
     install -m 0755 ${S}initFruFlag.sh ${D}/${sbindir}/
     install -m 0755 ${S}writeFRU.sh ${D}/${sbindir}/
+    install -m 0755 ${S}relinkLan.sh ${D}/${sbindir}/
 }
