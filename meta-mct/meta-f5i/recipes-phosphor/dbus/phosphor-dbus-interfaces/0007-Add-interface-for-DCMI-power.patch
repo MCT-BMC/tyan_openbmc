@@ -1,0 +1,54 @@
+From 70c2aa7a9b4f217da8315c034ee49427e6e1cfe6 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 29 May 2020 14:01:36 +0800
+Subject: [PATCH] Add interface for DCMI power
+
+---
+ .../Control/Power/Cap.interface.yaml               | 30 ++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+ mode change 100644 => 100755 xyz/openbmc_project/Control/Power/Cap.interface.yaml
+
+diff --git a/xyz/openbmc_project/Control/Power/Cap.interface.yaml b/xyz/openbmc_project/Control/Power/Cap.interface.yaml
+old mode 100644
+new mode 100755
+index 2994b14..2514305
+--- a/xyz/openbmc_project/Control/Power/Cap.interface.yaml
++++ b/xyz/openbmc_project/Control/Power/Cap.interface.yaml
+@@ -13,3 +13,33 @@ properties:
+       description: >
+           Power cap enable.  Set to true to enable the PowerCap, false
+           to disable it.
++
++    - name: ExceptionAction
++      type: enum[self.Action]
++      description: >
++          Power exception action. The action for power exception.
++
++    - name: CorrectionTime
++      type: uint32
++      description: >
++          Power correction Time. The timeout time for power exception action.
++
++    - name: SamplingPeriod
++      type: uint16
++      description: >
++          Power sampling period. The time period for power value collect.
++
++enumerations:
++    - name: Action
++      description: >
++        The desired action for correction time timeout
++      values:
++        - name: 'None'
++          description: >
++            Correction time timeout do nothing
++        - name: 'OffAndLog'
++          description: >
++            Correction time timeout should be off and generate SEL event
++        - name: 'Log'
++          description: >
++            Correction time timeout should generate SEL event
+\ No newline at end of file
+-- 
+2.7.4
+
