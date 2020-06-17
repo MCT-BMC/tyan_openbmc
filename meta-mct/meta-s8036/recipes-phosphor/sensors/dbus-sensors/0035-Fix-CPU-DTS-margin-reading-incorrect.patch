@@ -1,0 +1,70 @@
+From 839565035be24990746aba5f1ca8ea81b0cbc97a Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 6 May 2020 15:03:20 +0800
+Subject: [PATCH] Fix CPU DTS margin reading incorrect
+
+---
+ include/CPUSensor.hpp |  3 ++-
+ src/CPUSensor.cpp     | 23 +++++++++++++++++------
+ 2 files changed, 19 insertions(+), 7 deletions(-)
+
+diff --git a/include/CPUSensor.hpp b/include/CPUSensor.hpp
+index 18312ee..26bc80e 100755
+--- a/include/CPUSensor.hpp
++++ b/include/CPUSensor.hpp
+@@ -31,7 +31,8 @@ class CPUSensor : public Sensor
+     static constexpr size_t warnAfterErrorCount = 10;
+     //static constexpr double maxReading = 127;
+     //static constexpr double minReading = -128;
+-    static double DieTemp;
++    static double DieTemp0;
++    static double DieTemp1;
+     static constexpr const char* labelTcontrol = "Tcontrol";
+ 
+   private:
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 095fac9..b0719bd 100755
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -33,7 +33,8 @@
+ #include <string>
+ #include <vector>
+ 
+-double CPUSensor::DieTemp=0;
++double CPUSensor::DieTemp0=0;
++double CPUSensor::DieTemp1=0;
+ 
+ CPUSensor::CPUSensor(const std::string& path, const std::string& objectType,
+                      sdbusplus::asio::object_server& objectServer,
+@@ -167,16 +168,26 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+             updateValueInvalid(false);
+ 
+-            auto findCpu = path.find("peci-cputemp");
++            auto findCpu0 = path.find("peci-cputemp.0");
++            auto findCpu1 = path.find("peci-cputemp.1");
+             auto findDie = path.find("temp1");
+             auto findMargin = path.find("temp5");
+-            if ((findCpu != std::string::npos) && (findDie != std::string::npos))
++            if ((findCpu0 != std::string::npos) && (findDie != std::string::npos))
+             {
+-                CPUSensor::DieTemp = nvalue;
++                CPUSensor::DieTemp0 = nvalue;
+             }
+-            else if ((findCpu != std::string::npos) && (findMargin != std::string::npos))
++            else if ((findCpu1 != std::string::npos) && (findDie != std::string::npos))
+             {
+-                nvalue = CPUSensor::DieTemp - nvalue;
++                CPUSensor::DieTemp1 = nvalue;
++            }
++            else if ((findCpu0 != std::string::npos) && (findMargin != std::string::npos))
++            {
++                nvalue = CPUSensor::DieTemp0 - nvalue;
++                updateValue(nvalue);
++            }
++            else if ((findCpu1 != std::string::npos) && (findMargin != std::string::npos))
++            {
++                nvalue = CPUSensor::DieTemp1 - nvalue;
+                 updateValue(nvalue);
+             }
+ 

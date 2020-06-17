@@ -1,0 +1,58 @@
+From 45e936cee742373440669dc857ca012a0d264858 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 5 Mar 2020 18:17:32 +0800
+Subject: [PATCH] Fix the cpu sensor display
+
+Remove cpu.state detect in create sensor function
+Remove created sensor detect function
+Add retry when new state with state-off
+---
+ src/CPUSensorMain.cpp | 18 +++---------------
+ 1 file changed, 3 insertions(+), 15 deletions(-)
+
+diff --git a/src/CPUSensorMain.cpp b/src/CPUSensorMain.cpp
+index 069323a..5f9fb2d 100755
+--- a/src/CPUSensorMain.cpp
++++ b/src/CPUSensorMain.cpp
+@@ -131,10 +131,6 @@ bool createSensors(boost::asio::io_service& io,
+             iface->initialize();
+         }
+     }
+-    if (!available)
+-    {
+-        return false;
+-    }
+ 
+     if (sensorConfigs.empty())
+     {
+@@ -325,17 +321,6 @@ bool createSensors(boost::asio::io_service& io,
+                 continue;
+             }
+ 
+-            auto findSensor = gCpuSensors.find(sensorName);
+-            if (findSensor != gCpuSensors.end())
+-            {
+-                if (DEBUG)
+-                {
+-                    std::cout << "Skipped: " << inputPath << ": " << sensorName
+-                              << " is already created\n";
+-                }
+-                continue;
+-            }
+-
+             // check hidden properties
+             bool show = true;
+             auto findCore = label.find("Core");
+@@ -538,6 +523,9 @@ void detectCpu(boost::asio::deadline_timer& pingTimer,
+                               << " is/are detected\n";
+                 }
+             }
++            else{
++                rescanDelaySeconds = 5;
++            }
+ 
+             config.state = newState;
+         }
+-- 
+2.7.4
+

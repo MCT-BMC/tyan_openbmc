@@ -1,0 +1,38 @@
+From e0899eec41a52d3ec048d2b3c9e9e5b5d982428d Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 10 Dec 2019 21:05:13 +0800
+Subject: [PATCH 1/1] s7106 add OCP NIC temperature sensor
+
+---
+ src/HwmonTempMain.cpp | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 5d6befc..10c29f2 100755
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -204,12 +204,15 @@ void createSensors(
+                               << sensorName << "\n";
+                 }
+                 std::vector<thresholds::Threshold> t = sensorThresholds;
+-                auto& sensor1 = sensors[sensorName];
+-                sensor1 = nullptr;
+-                sensor1 = std::make_unique<HwmonTempSensor>(
+-                    directory.string() + "/temp1_input", sensorType,
+-                    objectServer, dbusConnection, io, sensorName,
+-                    std::move(sensorThresholds), *interfacePath);
++                if (deviceName != "14-001f")
++                {
++                    auto& sensor1 = sensors[sensorName];
++                    sensor1 = nullptr;
++                    sensor1 = std::make_unique<HwmonTempSensor>(
++                        directory.string() + "/temp1_input", sensorType,
++                        objectServer, dbusConnection, io, sensorName,
++                        std::move(sensorThresholds), *interfacePath);
++                }
+                 auto findSecondName = baseConfiguration->second.find("Name1");
+                 if (findSecondName == baseConfiguration->second.end())
+                 {
+-- 
+2.22.0
+

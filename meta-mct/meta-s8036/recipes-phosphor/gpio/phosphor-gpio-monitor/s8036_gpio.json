@@ -1,0 +1,42 @@
+ [
+    {
+        "Name": "PowerGood",
+        "LineName": "PS_PWROK",
+        "EventMon": "BOTH",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "SetPowerGoodPropertyOff.service"
+            ],
+            "RISING": [
+                "SetPowerGoodPropertyOn.service"
+            ]
+        }
+    },
+    {
+        "Name": "ThermalTrip",
+        "LineName": "THERMTRIP",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.thermtrip.service"
+            ]
+        }
+    },
+    {
+        "Name": "CATERR",
+        "LineName": "CATERR",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.caterr.service"
+            ]
+        }
+    }
+ ]
+

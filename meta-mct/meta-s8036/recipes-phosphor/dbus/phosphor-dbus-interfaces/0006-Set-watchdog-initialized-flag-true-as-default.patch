@@ -1,0 +1,22 @@
+From 2c49771b63ac6cabe4a2a0cbc8336c2fa1c0f9c3 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 May 2020 14:27:36 +0800
+Subject: [PATCH] Set watchdog initialized flag true as default
+
+---
+ xyz/openbmc_project/State/Watchdog.interface.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xyz/openbmc_project/State/Watchdog.interface.yaml b/xyz/openbmc_project/State/Watchdog.interface.yaml
+index da95d4c..c2e17b5 100644
+--- a/xyz/openbmc_project/State/Watchdog.interface.yaml
++++ b/xyz/openbmc_project/State/Watchdog.interface.yaml
+@@ -22,7 +22,7 @@ properties:
+       type: boolean
+       description: >
+           Whether the host has configured the watchdog yet.
+-      default: false
++      default: True
+     - name: Enabled
+       type: boolean
+       description: >

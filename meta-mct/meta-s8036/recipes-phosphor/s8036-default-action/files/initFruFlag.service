@@ -1,0 +1,15 @@
+[Unit]
+Description=initialize Fru Flag and Fru Data
+Wants=xyz.openbmc_project.State.BMC.service
+After=xyz.openbmc_project.State.BMC.service
+Requires=phosphor-ipmi-host.service
+After=phosphor-ipmi-host.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env initFruFlag.sh
+SyslogIdentifier=initFruFlag
+
+[Install]
+WantedBy=multi-user.target
+
