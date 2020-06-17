@@ -1,0 +1,57 @@
+From 7c7135f51f9f48cef759c13d109be32654799c29 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 10 Dec 2019 22:54:32 +0800
+Subject: [PATCH 1/1] Implement NMI command in Chassis Control command
+
+---
+ chassishandler.cpp | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+index 0c8bdcb..8c509b3 100755
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -783,6 +783,7 @@ int initiate_state_transition(State::Host::Transition transition)
+ //------------------------------------------
+ int setNmiProperty(const bool value)
+ {
++#if 0    
+     constexpr const char* nmiSourceObjPath =
+         "/xyz/openbmc_project/Chassis/Control/NMISource";
+     constexpr const char* nmiSourceIntf =
+@@ -807,6 +808,32 @@ int setNmiProperty(const bool value)
+     }
+ 
+     return 0;
++#endif 
++    char command[100];
++    int rc = 0;
++ 
++    sprintf(command, "echo 317 > /sys/class/gpio/export");
++    rc = system(command);
++    if (rc != 0)
++    {
++        return rc;
++    }
++ 
++    sprintf(command, "echo out > /sys/class/gpio/gpio317/direction; sleep 1; echo in > /sys/class/gpio/gpio317/direction;");
++    rc = system(command);
++    if (rc != 0)
++    {
++        return rc;
++    }
++ 
++    sprintf(command, "echo 317 > /sys/class/gpio/unexport");
++    rc = system(command);
++    if (rc != 0)
++    {
++        return rc;
++    }
++ 
++    return rc;
+ }
+ 
+ namespace power_policy
+-- 
+2.22.0
+

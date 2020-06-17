@@ -1,0 +1,66 @@
+From 444c7bbd547843754807c07cfaef10e0c84ddbd5 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 14 Feb 2020 13:47:01 +0800
+Subject: [PATCH 1/1] Set-BMC-RTL8211E-PHY-LED.patch
+
+---
+ drivers/net/ftgmac100.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/drivers/net/ftgmac100.c b/drivers/net/ftgmac100.c
+index 02bccfc498..23efd5e5a3 100755
+--- a/drivers/net/ftgmac100.c
++++ b/drivers/net/ftgmac100.c
+@@ -383,6 +383,30 @@ static int ftgmac100_phy_init(struct eth_device *dev)
+ 	return 1;
+ }
+ 
++static int ftgmac100_phy_led_init(struct eth_device *dev)
++{
++	struct ftgmac100_data *priv = dev->priv;
++ 	//RTL8211E phy
++  	// Switch to LED control page
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x1f, 0x0007);
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x1e, 0x002c);
++
++  	// Write LED settings
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x1c, 0x0742);
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x1a, 0x0040);
++
++  	// Switch back to PHY default page
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x1f, 0x0000);
++
++  	/* Do not advertise EEE */
++ 	ftgmac100_phy_write(dev, priv->phy_addr, 0x0d, 0x0007);
++ 	ftgmac100_phy_write(dev, priv->phy_addr, 0x0e, 0x003c);
++  	ftgmac100_phy_write(dev, priv->phy_addr, 0x0d, 0x4007);
++	ftgmac100_phy_write(dev, priv->phy_addr, 0x0e, 0x0000);
++
++  return 0;
++}
++
+ static int ftgmac100_update_link_speed(struct eth_device *dev)
+ {
+ 	struct ftgmac100 *ftgmac100 = (struct ftgmac100 *)dev->iobase;
+@@ -597,6 +621,7 @@ static int ftgmac100_init(struct eth_device *dev, bd_t *bd)
+ 		FTGMAC100_MACCR_FULLDUP |
+ 		FTGMAC100_MACCR_RX_RUNT |
+ 		FTGMAC100_MACCR_RX_BROADPKT;
++		
+ 
+ 	__raw_writel(maccr, &ftgmac100->maccr);
+ 
+@@ -797,6 +822,10 @@ int ftgmac100_initialize(bd_t *bd)
+ 		ftgmac100_set_mac_from_env(dev);
+ 
+ 		card_number++;
++
++                ftgmac100_phy_init(dev);
++                ftgmac100_update_link_speed(dev);
++                ftgmac100_phy_led_init(dev);
+ 	}
+ 	return card_number;
+ 
+-- 
+2.22.0
+

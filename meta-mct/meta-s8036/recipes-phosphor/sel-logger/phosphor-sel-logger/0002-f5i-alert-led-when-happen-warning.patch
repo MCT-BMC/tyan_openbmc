@@ -1,0 +1,65 @@
+From 74dceab15d998984e2b2b82a6df78cf6e71361b1 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Tue, 7 Jan 2020 14:36:58 +0800
+Subject: [PATCH] f5i-alert-led-when-happen-warning
+
+---
+ include/threshold_event_monitor.hpp | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+ mode change 100644 => 100755 include/threshold_event_monitor.hpp
+
+diff --git a/include/threshold_event_monitor.hpp b/include/threshold_event_monitor.hpp
+old mode 100644
+new mode 100755
+index b1f2eed..49331e3
+--- a/include/threshold_event_monitor.hpp
++++ b/include/threshold_event_monitor.hpp
+@@ -19,6 +19,23 @@
+ #include <sensorutils.hpp>
+ #include <string_view>
+ #include <variant>
++#include <xyz/openbmc_project/Led/Physical/server.hpp>
++
++#define LED_OBJECTPATH_BASE "/xyz/openbmc_project/led/physical/hw_fault"
++#define LED_INTERFACE "xyz.openbmc_project.Led.Physical"
++#define LED_SERVICE "xyz.openbmc_project.LED.Controller.hw_fault"
++constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
++
++static int assertCount;
++
++static void setProperty(sdbusplus::bus::bus& bus, const std::string& path,
++    const std::string& property, const std::string& value,const std::string& service)
++{
++    auto method = bus.new_method_call(service.c_str(), path.c_str(), PROPERTY_INTERFACE, "Set");
++    method.append(LED_INTERFACE, property, sdbusplus::message::variant<std::string>(value));
++    bus.call_noreply(method);
++    return;
++}
+ 
+ enum class thresholdEventOffsets : uint8_t
+ {
+@@ -279,6 +296,24 @@ inline static sdbusplus::bus::match::match startThresholdEventMonitor(
+                                " Threshold=" + std::to_string(thresholdVal) +
+                                ".");
+ 
++        auto bus = sdbusplus::bus::new_default();
++        if (assert == true)
++        {
++            assertCount++;
++            if (assertCount == 1)
++            {
++                setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.On",LED_SERVICE);
++            }
++        }
++        else
++        {
++            assertCount--;
++            if (assertCount == 0)
++            {
++                setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.Off",LED_SERVICE);
++            }
++        }
++
+         selAddSystemRecord(
+             journalMsg, std::string(msg.get_path()), eventData, assert,
+             selBMCGenID, "REDFISH_MESSAGE_ID=%s", redfishMessageID.c_str(),

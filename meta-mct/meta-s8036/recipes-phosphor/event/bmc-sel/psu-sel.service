@@ -1,0 +1,13 @@
+[Unit]
+Description=Check and generate PSU SEL
+StopWhenUnneeded=false
+After=obmc-sync-pch-rtc.service
+After=xyz.openbmc_project.psufaultsensor.service
+
+[Service]
+ExecStartPre=/bin/bash -c 'while [ ! -e /run/time_sync_done ]; do sleep 1; done'
+ExecStart=/usr/sbin/psu-sel.sh
+SyslogIdentifier=psu-sel
+
+[Install]
+WantedBy=multi-user.target

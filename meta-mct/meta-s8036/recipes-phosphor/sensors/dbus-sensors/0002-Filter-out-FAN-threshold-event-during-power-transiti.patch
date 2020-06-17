@@ -1,0 +1,61 @@
+From d5b486a309f9fdac10eb66588a054aaee5146693 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 10 Dec 2019 21:53:52 +0800
+Subject: [PATCH 1/1] Filter out FAN threshold event during power transitio
+
+---
+ include/TachSensor.hpp | 1 +
+ src/TachSensor.cpp     | 5 ++++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 include/TachSensor.hpp
+ mode change 100644 => 100755 src/TachSensor.cpp
+
+diff --git a/include/TachSensor.hpp b/include/TachSensor.hpp
+old mode 100644
+new mode 100755
+index c7c1b0e..1c15982
+--- a/include/TachSensor.hpp
++++ b/include/TachSensor.hpp
+@@ -87,6 +87,7 @@ class TachSensor : public Sensor
+     void setupRead(void);
+     void handleResponse(const boost::system::error_code& err);
+     void checkThresholds(void) override;
++    thresholds::ThresholdTimer thresholdTimer;
+ };
+ 
+ inline void logFanInserted(const std::string& device)
+diff --git a/src/TachSensor.cpp b/src/TachSensor.cpp
+old mode 100644
+new mode 100755
+index 91a08c1..25cf6fd
+--- a/src/TachSensor.cpp
++++ b/src/TachSensor.cpp
+@@ -53,7 +53,7 @@ TachSensor::TachSensor(const std::string& path, const std::string& objectType,
+     objServer(objectServer), redundancy(redundancy),
+     presence(std::move(presenceSensor)),
+     inputDev(io, open(path.c_str(), O_RDONLY)), waitTimer(io), path(path),
+-    errCount(0)
++    errCount(0), thresholdTimer(io, this)
+ {
+     sensorInterface = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/fan_tach/" + name,
+@@ -208,6 +208,8 @@ void TachSensor::checkThresholds(void)
+         return;
+     }
+ 
++    thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
++# if 0    
+     bool status = thresholds::checkThresholds(this);
+ 
+     if (redundancy && *redundancy)
+@@ -215,6 +217,7 @@ void TachSensor::checkThresholds(void)
+         (*redundancy)
+             ->update("/xyz/openbmc_project/sensors/fan_tach/" + name, !status);
+     }
++#endif    
+ }
+ 
+ PresenceSensor::PresenceSensor(const size_t index, bool inverted,
+-- 
+2.22.0
+

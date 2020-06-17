@@ -1,0 +1,29 @@
+From f3ee8dac3107a1ac00a8e06e4c3e44c276c3f735 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 14 Nov 2019 13:20:06 +0800
+Subject: [PATCH] hidden peci core temperature sensor
+
+---
+ src/CPUSensorMain.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+ mode change 100644 => 100755 src/CPUSensorMain.cpp
+
+diff --git a/src/CPUSensorMain.cpp b/src/CPUSensorMain.cpp
+old mode 100644
+new mode 100755
+index 2a3ff16..fcca8e9
+--- a/src/CPUSensorMain.cpp
++++ b/src/CPUSensorMain.cpp
+@@ -278,6 +278,12 @@ bool createSensors(boost::asio::io_service& io,
+ 
+             // check hidden properties
+             bool show = true;
++            auto findCore = label.find("Core");
++            if (findCore != std::string::npos)
++            {
++                show = false;
++            }
++
+             for (const char* prop : hiddenProps)
+             {
+                 if (label == prop)

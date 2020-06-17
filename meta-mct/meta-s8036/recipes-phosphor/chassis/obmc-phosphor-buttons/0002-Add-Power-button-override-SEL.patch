@@ -1,0 +1,54 @@
+From 9ae7e62d540af622f4fd173cc267381cab44d038 Mon Sep 17 00:00:00 2001
+From: Varun Sampat <vsampat@twitter.com>
+Date: Tue, 7 Jan 2020 21:40:20 -0500
+Subject: [PATCH] Add Power button override SEL
+
+---
+ src/button_handler.cpp | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/src/button_handler.cpp b/src/button_handler.cpp
+index 528a59b..1a26744 100755
+--- a/src/button_handler.cpp
++++ b/src/button_handler.cpp
+@@ -34,6 +34,7 @@ static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
+ static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
+ static const std::string ipmiSELAddMessage = "SEL Entry";
+ static const std::string sensorPath = "/xyz/openbmc_project/sensors/pwr_button/POWER_BUTTON";
++static const std::string sensorPathAcpi = "/xyz/openbmc_project/sensors/acpi/ACPI_POWER_STATE";
+ static constexpr size_t selEvtDataMaxSize = 3;
+ 
+ Handler::Handler(sdbusplus::bus::bus& bus) : bus(bus)
+@@ -186,6 +187,12 @@ void Handler::powerPressed(sdbusplus::message::message& msg)
+ 
+ void Handler::longPowerPressed(sdbusplus::message::message& msg)
+ {
++    
++    uint16_t genid = 0x20;
++    bool assert = 1;
++    std::vector<uint8_t> eventData(selEvtDataMaxSize, 0xFF);
++    eventData[0] = 0x0A;
++
+     try
+     {
+         if (!poweredOn())
+@@ -197,6 +204,19 @@ void Handler::longPowerPressed(sdbusplus::message::message& msg)
+ 
+         log<level::INFO>("Handling long power button press");
+ 
++        sdbusplus::message::message writeSEL = bus.new_method_call(
++            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
++        writeSEL.append(ipmiSELAddMessage, sensorPathAcpi, eventData, assert,
++                    genid);
++        try
++        {
++            bus.call(writeSEL);
++        }
++        catch (sdbusplus::exception_t& e)
++        {
++            log<level::ERR>("call IpmiSelAdd failed");
++        }
++
+         sdbusplus::message::variant<std::string> state =
+             convertForMessage(Chassis::Transition::Off);
+ 

@@ -1,0 +1,7 @@
+[Unit]
+Description=Set Power Good Property On
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/setPowerProperty.sh on
+
