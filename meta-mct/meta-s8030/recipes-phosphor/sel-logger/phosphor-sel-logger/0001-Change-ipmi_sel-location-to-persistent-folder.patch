@@ -1,0 +1,22 @@
+From 27a740fd346df41eaced23f3497ad4dfd3a7866a Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Wed, 13 Nov 2019 17:07:15 +0800
+Subject: [PATCH] Change ipmi_sel location to persistent folder
+
+---
+ include/sel_logger.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/sel_logger.hpp b/include/sel_logger.hpp
+index bd40dff..bef6f8f 100644
+--- a/include/sel_logger.hpp
++++ b/include/sel_logger.hpp
+@@ -33,7 +33,7 @@ static constexpr uint16_t selInvalidRecID =
+ static constexpr size_t selEvtDataMaxSize = 3;
+ static constexpr size_t selOemDataMaxSize = 13;
+ 
+-static const std::filesystem::path selLogDir = "/var/log";
++static const std::filesystem::path selLogDir = "/var/lib/ipmi";
+ static const std::string selLogFilename = "ipmi_sel";
+ 
+ template <typename... T>

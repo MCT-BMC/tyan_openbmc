@@ -1,0 +1,29 @@
+bmc_booted:
+    heartbeat:
+        Action: 'Blink'
+        DutyOn: 50
+        Period: 1000
+
+enclosure_identify_blink:
+    identify:
+        Action: 'Blink'
+        DutyOn: 50
+        Period: 1000
+
+enclosure_identify:
+    identify:
+        Action: 'On'
+
+# The Op Panel on the Romulus system holds a multicolor LED.
+# Both the 'fault' and 'identify' gpios are wired to the same LED.
+# By holding one in 'on' while the other in 'blink' state, ensures
+# the manufacturing process can verify both colors function
+lamp_test:
+    fault:
+        Action: 'On'
+    identify:
+        Action: 'On'
+        Action: 'Blink'
+        DutyOn: 50
+        Period: 1000
+

@@ -1,0 +1,14 @@
+[Unit]
+Description=Rescan Entity for Entity Manager
+Wants=xyz.openbmc_project.State.BMC.service
+After=xyz.openbmc_project.State.BMC.service
+Requires=phosphor-ipmi-host.service
+After=phosphor-ipmi-host.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env entity_rescan.sh
+SyslogIdentifier=entity_rescan
+
+[Install]
+WantedBy=multi-user.target

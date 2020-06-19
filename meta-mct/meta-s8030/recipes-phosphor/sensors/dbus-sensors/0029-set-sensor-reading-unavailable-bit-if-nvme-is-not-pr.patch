@@ -1,0 +1,141 @@
+From 65115255c11d0d082a6344f13149cbe05427788b Mon Sep 17 00:00:00 2001
+From: Mirage Su <mirage.su@mic.com.tw>
+Date: Wed, 5 Feb 2020 11:56:45 +0800
+Subject: [PATCH] set sensor reading unavailable bit if nvme is not present
+
+---
+ .../xyz.openbmc_project.nvmesensor.service         |  5 +-
+ src/NVMeSensor.cpp                                 | 64 +++++++++++-----------
+ 2 files changed, 36 insertions(+), 33 deletions(-)
+
+diff --git a/service_files/xyz.openbmc_project.nvmesensor.service b/service_files/xyz.openbmc_project.nvmesensor.service
+index a5c8725..e94bf9b 100755
+--- a/service_files/xyz.openbmc_project.nvmesensor.service
++++ b/service_files/xyz.openbmc_project.nvmesensor.service
+@@ -1,7 +1,8 @@
+ [Unit]
+ Description=NVMe Sensor
+ StopWhenUnneeded=false
+-After=xyz.openbmc_project.FruDevice.service
++Requires=xyz.openbmc_project.EntityManager.service
++After=xyz.openbmc_project.EntityManager.service
+ 
+ [Service]
+ Restart=always
+@@ -9,4 +10,4 @@ RestartSec=5
+ ExecStart=/usr/bin/nvmesensor
+ 
+ [Install]
+-WantedBy=multi-user.target
+\ No newline at end of file
++WantedBy=multi-user.target
+diff --git a/src/NVMeSensor.cpp b/src/NVMeSensor.cpp
+index 4da1e1b..918b308 100755
+--- a/src/NVMeSensor.cpp
++++ b/src/NVMeSensor.cpp
+@@ -68,7 +68,7 @@ NVMeSensor::NVMeSensor(std::shared_ptr<sdbusplus::asio::connection>& conn,
+     }
+     association = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/temperature/" + name,
+-        "org.openbmc.Associations");  //association::interface);  //mirage: temporarily use old code
++        association::interface);
+ }
+ 
+ NVMeSensor::~NVMeSensor()
+@@ -192,8 +192,8 @@ static inline __s32 i2c_read_after_write(int file, __u8 command,
+ int NVMeSensor::getNVMeTemp(uint8_t* pu8data)
+ {
+     int res, res_len;
+-	unsigned char Rx_buf[I2C_DATA_MAX] = {0};
+-	unsigned char tx_data = 0;	//command code
++    unsigned char Rx_buf[I2C_DATA_MAX] = {0};
++    unsigned char tx_data = 0;  //command code
+     std::string i2cBus = "/dev/i2c-" + std::to_string(busId);
+     int fd = open(i2cBus.c_str(), O_RDWR);
+ 
+@@ -212,19 +212,21 @@ int NVMeSensor::getNVMeTemp(uint8_t* pu8data)
+     if (res < 0)
+     {
+         std::cerr << "Error: block write read failed\n";
++		close(fd);
++		return -1;
+     }
+ 
+     res_len = Rx_buf[0] + 1;
+ 
+-	if constexpr (debug)
+-	{
+-		std::cerr << "Block data read \n\t";
+-		for (int i=0; i<32; i++)
+-		{
+-		    std::cerr << std::to_string(Rx_buf[i]) << "  ";
+-		}
+-	    std::cerr << "\n";
+-	}
++    if constexpr (debug)
++    {
++        std::cerr << "Block data read \n\t";
++        for (int i=0; i<32; i++)
++        {
++            std::cerr << std::to_string(Rx_buf[i]) << "  ";
++        }
++        std::cerr << "\n";
++    }
+ 
+     *pu8data = Rx_buf[3];
+     
+@@ -234,35 +236,35 @@ int NVMeSensor::getNVMeTemp(uint8_t* pu8data)
+     {
+         return 0;
+     }
+-	else if (*pu8data == 0x7F)
+-	{
++    else if (*pu8data == 0x7F)
++    {
+         std::cerr << "Temperature is 127 or higher\n";
+         return -1;
+-	}
+-	else if (*pu8data == 0x80)
+-	{
++    }
++    else if (*pu8data == 0x80)
++    {
+         std::cerr << "No temperature data or temperature data is more than 5 seconds old\n";
+         return -1;
+-	}
+-	else if (*pu8data == 0x81)
+-	{
++    }
++    else if (*pu8data == 0x81)
++    {
+         std::cerr << "Temperature sensor failure\n";
+         return -1;
+-	}
+-	else if (*pu8data == 0xC4)
+-	{
++    }
++    else if (*pu8data == 0xC4)
++    {
+         std::cerr << "Temperature is -60 or lower\n";
+         return -1;
+-	}
+-	else if (*pu8data >= 0xC5 && *pu8data <= 0xFF)
+-	{
++    }
++    else if (*pu8data >= 0xC5 && *pu8data <= 0xFF)
++    {
+         std::cerr << "Temperature measured in degrees Celsius is represented\n in twos complement(-1 to -59)\n";
+         return -1;
+-	}
+-	else
+-	{
+-		return -1;
+-	}
++    }
++    else
++    {
++        return -1;
++    }
+ }
+ 
+ void NVMeSensor::read(void)

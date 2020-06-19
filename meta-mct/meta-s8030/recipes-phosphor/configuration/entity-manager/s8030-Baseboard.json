@@ -1,0 +1,22 @@
+{
+    "Exposes": [
+        {
+            "Address": "0x28",
+            "Bus": 5,
+            "Name": "SYS_Air_Inlet",
+            "Name1": "MB_Air_Inlet",
+            "Name2": "SYS_Air_Outlet",
+            "HysteresisVal": 3,
+            "Type": "TMP75"
+        },   
+    ],
+    "Name": "s8030 Baseboard",
+    "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': '.*S8030*'})",
+    "Type": "Board",
+    "xyz.openbmc_project.Inventory.Decorator.Asset": {
+        "Manufacturer": "$PRODUCT_MANUFACTURER",
+        "Model": "$PRODUCT_PRODUCT_NAME",
+        "PartNumber": "$PRODUCT_PART_NUMBER",
+        "SerialNumber": "$PRODUCT_SERIAL_NUMBER"
+    }
+}

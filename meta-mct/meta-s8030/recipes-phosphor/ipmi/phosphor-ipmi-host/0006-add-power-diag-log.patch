@@ -1,0 +1,44 @@
+From 4c3cfec00fa373f31f2c03745c0de87b9350c0c3 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 22 Jan 2020 15:35:23 +0800
+Subject: [PATCH] add power diag log
+
+---
+ chassishandler.cpp | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+index 8c509b3..1f44888 100755
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -1245,6 +1245,30 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+             break;
+ 
+         case CMD_PULSE_DIAGNOSTIC_INTR:
++            { //variable scope
++            static constexpr char const* ipmiSELService =    "xyz.openbmc_project.Logging.IPMI";
++            static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
++            static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
++            static constexpr char const* fruStateSensorPath= "/xyz/openbmc_project/sensors/fru_state/IPMI_Power_Diag";
++            
++            std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
++
++            uint16_t genid = 0x20;
++            bool assert=1;
++            std::vector<uint8_t> eventData{0x02, 0x22, 0xff};
++               
++            sdbusplus::message::message writeSEL = busp->new_method_call(
++                            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
++            writeSEL.append("SEL Entry",  std::string(fruStateSensorPath), eventData, assert,genid);            
++            try
++            {
++                busp->call(writeSEL);
++            }
++            catch (sdbusplus::exception_t& e)
++            {
++                std::cerr << "call IpmiSelAdd failed\n";
++            }
++            }
+             rc = setNmiProperty(true);
+             break;
+ 

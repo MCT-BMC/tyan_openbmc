@@ -1,0 +1,1 @@
+FILESEXTRAPATHS_prepend_s8030 := "${THISDIR}/${PN}:"

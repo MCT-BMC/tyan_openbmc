@@ -1,0 +1,75 @@
+From 015396e63a1c097e977e8682ac5988e6451b2ae9 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 12 Mar 2020 16:42:26 +0800
+Subject: [PATCH 1/1] add-sensor-reading-unavailable-bit-for-VR-sensor
+
+---
+ .../xyz.openbmc_project.mostempsensor.service       |  2 ++
+ src/CPUSensor.cpp                                   |  2 +-
+ src/MOSTempSensor.cpp                               | 13 ++++++++++---
+ 3 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/service_files/xyz.openbmc_project.mostempsensor.service b/service_files/xyz.openbmc_project.mostempsensor.service
+index c839a71..f65f165 100644
+--- a/service_files/xyz.openbmc_project.mostempsensor.service
++++ b/service_files/xyz.openbmc_project.mostempsensor.service
+@@ -1,6 +1,8 @@
+ [Unit]
+ Description=MOS Temp Sensor
+ StopWhenUnneeded=false
++Requires=xyz.openbmc_project.EntityManager.service
++After=xyz.openbmc_project.EntityManager.service
+ 
+ [Service]
+ Restart=always
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 1d21585..c41177a 100644
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -169,7 +169,7 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+             auto findCpu = path.find("peci-cputemp");
+             auto findDie = path.find("temp1");
+-            auto findMargin = path.find("temp4");
++            auto findMargin = path.find("temp5");
+             if ((findCpu != std::string::npos) && (findDie != std::string::npos))
+             {
+                 CPUSensor::DieTemp = nvalue;
+diff --git a/src/MOSTempSensor.cpp b/src/MOSTempSensor.cpp
+index dcfccaf..87939bc 100644
+--- a/src/MOSTempSensor.cpp
++++ b/src/MOSTempSensor.cpp
+@@ -126,8 +126,10 @@ int MOSTempSensor::getMOSRegsInfoWord(uint8_t regs, int16_t* pu16data)
+ 
+     if (*pu16data < 0)
+     {
+-        std::cerr << " read word data failed at " << static_cast<int>(regs)
+-                  << "\n";
++        if constexpr (debug)
++        {
++            std::cerr << " read word data failed at " << static_cast<int>(regs) << "\n";
++        }
+         return -1;
+     }
+ 
+@@ -160,11 +162,16 @@ void MOSTempSensor::read(void)
+                 std::cerr << "Value update to " << (double)v << "raw reading "
+                           << static_cast<int>(temp) << "\n";
+             }
++            updateValueInvalid(false);
+             updateValue(v);
+         }
+         else
+         {
+-            std::cerr << "Invalid read getMOSRegsInfoWord\n";
++            if constexpr (debug)
++            {
++                std::cerr << "Invalid read getMOSRegsInfoWord\n";
++            }
++            updateValueInvalid(true);
+             updateValue(-1);
+         }
+         read();
+-- 
+2.22.0
+

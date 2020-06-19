@@ -1,0 +1,24 @@
+From 0ec824f31f2568300b2d685a5d8c3a12572cf1d2 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 23 Jan 2020 09:06:16 +0800
+Subject: [PATCH] fix set static ip fail issue
+
+---
+ transporthandler.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/transporthandler.cpp b/transporthandler.cpp
+index 0c7bb93..4e4ad52 100755
+--- a/transporthandler.cpp
++++ b/transporthandler.cpp
+@@ -773,7 +773,9 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
+         if (strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0)
+         {
+             // We want to rethrow real errors
+-            throw;
++            //throw;
++            log<level::ERR>("org.freedesktop.DBus.Error.UnknownObject",
++                         entry("ERROR=%s", e.what()));
+         }
+     }
+ }

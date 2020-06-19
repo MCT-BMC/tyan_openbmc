@@ -1,0 +1,91 @@
+From c311a8bb311dee7b403a4e3e1cabb50c1692d913 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 12 Mar 2020 15:42:26 +0800
+Subject: [PATCH 1/1] Add-Invalid-Value-property-for-power-on-sensors
+
+---
+ include/sensor.hpp | 25 +++++++++++++++++++++++--
+ src/PwmSensor.cpp  |  1 +
+ 2 files changed, 24 insertions(+), 2 deletions(-)
+ mode change 100644 => 100755 include/sensor.hpp
+ mode change 100644 => 100755 src/PwmSensor.cpp
+
+diff --git a/include/sensor.hpp b/include/sensor.hpp
+old mode 100644
+new mode 100755
+index e298677..2a2be54
+--- a/include/sensor.hpp
++++ b/include/sensor.hpp
+@@ -37,6 +37,7 @@ struct Sensor
+     std::shared_ptr<sdbusplus::asio::dbus_interface> thresholdInterfaceCritical;
+     std::shared_ptr<sdbusplus::asio::dbus_interface> association;
+     double value = std::numeric_limits<double>::quiet_NaN();
++    bool invalidValue = false;
+     bool overriddenState = false;
+     bool internalSet = false;
+     double hysteresisTrigger;
+@@ -59,6 +60,13 @@ struct Sensor
+         return 1;
+     }
+ 
++    int setSensorValueInvalid(const bool& newState, bool& oldState)
++    {
++        oldState = newState;
++        invalidValue = newState;
++        return 1;
++    }
++
+     void
+         setInitialProperties(std::shared_ptr<sdbusplus::asio::connection>& conn)
+     {
+@@ -70,6 +78,12 @@ struct Sensor
+             "Value", value, [&](const double& newValue, double& oldValue) {
+                 return setSensorValue(newValue, oldValue);
+             });
++
++        sensorInterface->register_property(
++            "InvalidValue", invalidValue, [&](const bool& newState, bool& oldState) {
++                return setSensorValueInvalid(newState, oldState);
++            });
++
+         for (auto& threshold : thresholds)
+         {
+             std::shared_ptr<sdbusplus::asio::dbus_interface> iface;
+@@ -199,7 +213,7 @@ struct Sensor
+             std::cerr << "error setting property to " << newValue << "\n";
+         }
+         internalSet = false;
+-
++        value = newValue;
+         // Always check thresholds after changing the value,
+         // as the test against hysteresisTrigger now takes place in
+         // the thresholds::checkThresholds() method,
+@@ -207,4 +221,11 @@ struct Sensor
+         // in all current implementations of sensors that have thresholds.
+         checkThresholds();
+     }
++    void updateValueInvalid(const bool& newState)
++    {
++        if(newState != invalidValue)
++        {
++            sensorInterface->set_property("InvalidValue", newState);
++        }
++    }
+ };
+diff --git a/src/PwmSensor.cpp b/src/PwmSensor.cpp
+old mode 100644
+new mode 100755
+index eee29ef..7710f51
+--- a/src/PwmSensor.cpp
++++ b/src/PwmSensor.cpp
+@@ -81,6 +81,7 @@ PwmSensor::PwmSensor(const std::string& name, const std::string& sysPath,
+     // pwm sensor interface is in percent
+     sensorInterface->register_property("MaxValue", static_cast<int64_t>(100));
+     sensorInterface->register_property("MinValue", static_cast<int64_t>(0));
++    sensorInterface->register_property("InvalidValue", static_cast<bool>(false));
+ 
+     controlInterface = objectServer.add_interface(
+         "/xyz/openbmc_project/control/fanpwm/" + name,
+-- 
+2.22.0
+
