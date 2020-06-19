@@ -1,0 +1,25 @@
+From 34922c640747bdc5ac4369dd527daa86d36e9669 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 18 Jun 2020 16:24:52 +0800
+Subject: [PATCH] s8030 not connected fio board show no reading
+
+---
+ src/HwmonTempSensor.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/HwmonTempSensor.cpp b/src/HwmonTempSensor.cpp
+index f322a6c..41a0f68 100755
+--- a/src/HwmonTempSensor.cpp
++++ b/src/HwmonTempSensor.cpp
+@@ -149,6 +149,11 @@ void HwmonTempSensor::handleResponse(const boost::system::error_code& err)
+             }
+             errCount = 0;
+             updateValueInvalid(false);
++
++            if ((name == "SYS_Air_Inlet") && (nvalue < 0))
++            {
++                updateValueInvalid(true);
++            }
+         }
+         catch (const std::invalid_argument&)
+         {
