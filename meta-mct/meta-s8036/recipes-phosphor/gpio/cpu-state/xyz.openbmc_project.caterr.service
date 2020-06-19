@@ -1,8 +1,0 @@
-[Unit]
-Description=assert CATERR 
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/caterrHandler
-SyslogIdentifier=caterr_assert
-

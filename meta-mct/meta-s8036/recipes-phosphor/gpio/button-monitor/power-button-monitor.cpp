@@ -106,9 +106,9 @@ void buttonPress(Button *button)
 
         if(!button->pgood){
             // To set power button press and release by software
-            system("/usr/bin/gpioset gpiochip0 33=0");
+            system("/usr/bin/gpioset `gpiofind PWBTN_OUT`=0");
             usleep(100000);
-            system("/usr/bin/gpioset gpiochip0 33=1");
+            system("/usr/bin/gpioset `gpiofind PWBTN_OUT`=1");
         }
 
         button->buttonStatus = true;

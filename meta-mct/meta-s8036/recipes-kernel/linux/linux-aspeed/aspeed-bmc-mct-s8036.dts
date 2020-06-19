@@ -1,0 +1,591 @@
+// SPDX-License-Identifier: GPL-2.0
+// Copyright (c) 2017 Intel Corporation
+/dts-v1/;
+
+#include "aspeed-g5.dtsi"
+#include <dt-bindings/gpio/aspeed-gpio.h>
+
+/ {
+    model = "F5i BMC";
+    compatible = "mct,s8036-bmc", "aspeed,ast2500";
+
+    chosen {
+        stdout-path = &uart5;
+        bootargs = "earlyprintk";
+    };
+
+    memory {
+        reg = <0x80000000 0x20000000>;
+    };
+
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        flash_memory: region@5c000000 {
+            no-map;
+            reg = <0x5c000000 0x02000000>; /* 32M */
+        };
+
+        gfx_memory: framebuffer {
+                size = <0x04000000>;
+                alignment = <0x01000000>;
+                compatible = "shared-dma-pool";
+                reusable;
+        };
+    };
+
+    leds {
+            compatible = "gpio-leds";
+
+            identify {
+                gpios = <&gpio ASPEED_GPIO(A, 2) GPIO_ACTIVE_LOW>;
+            };
+
+            heartbeat {
+                gpios = <&gpio ASPEED_GPIO(E, 7) GPIO_ACTIVE_LOW>;
+            };
+
+            hw-fault {
+                gpios = <&gpio ASPEED_GPIO(F, 4) GPIO_ACTIVE_LOW>;
+            };
+        };
+      gpio-keys {
+                   compatible = "gpio-keys";
+                            id-button {
+                                  label = "id-button";
+                                  gpios = <&gpio ASPEED_GPIO(Q, 6) GPIO_ACTIVE_LOW>;
+                                  linux,code = <ASPEED_GPIO(Q, 6)>;
+                            };
+                            prochot0 {
+                                  label = "prochot0";
+                                  gpios = <&gpio ASPEED_GPIO(H, 6) GPIO_ACTIVE_LOW>;
+                                  linux,code = <ASPEED_GPIO(H, 6)>;
+                            };
+        };
+
+    iio-hwmon {
+        compatible = "iio-hwmon";
+        io-channels = <&adc 0>, <&adc 1>, <&adc 2>, <&adc 3>,
+            <&adc 4>, <&adc 5>, <&adc 6>, <&adc 7>,
+            <&adc 8>, <&adc 9>, <&adc 10>, <&adc 11>,
+            <&adc 12>, <&adc 13>, <&adc 14>, <&adc 15>;
+    };
+};
+
+&fmc {
+    status = "okay";
+    flash@0 {
+        status = "okay";
+        m25p,fast-read;
+        label = "bmc";
+#include "openbmc-flash-layout.dtsi"
+    };
+};
+
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_spi1_default>;
+
+    flash@0 {
+        status = "okay";
+        m25p,fast-read;
+        label = "pnor";
+    };
+};
+
+&vuart {
+       status = "okay";
+};
+
+&uart1 {
+    status = "okay";
+   pinctrl-names = "default";
+   pinctrl-0 = <&pinctrl_txd1_default
+            &pinctrl_rxd1_default
+            &pinctrl_ncts1_default
+            &pinctrl_ndcd1_default
+            &pinctrl_ndsr1_default
+            &pinctrl_nri1_default
+            &pinctrl_ndtr1_default
+            &pinctrl_nrts1_default>;
+};
+
+&uart2 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_txd2_default
+            &pinctrl_rxd2_default
+            &pinctrl_ncts2_default
+            &pinctrl_ndcd2_default
+            &pinctrl_ndsr2_default
+            &pinctrl_nri2_default
+            &pinctrl_ndtr2_default
+            &pinctrl_nrts2_default>;
+};
+
+&uart3 {
+    status = "okay";
+};
+
+&uart5 {
+    status = "okay";
+};
+/*
+&mac0 {
+    status = "okay";
+
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_rmii1_default>;
+    use-ncsi;
+};
+*/
+&mac1 {
+    status = "okay";
+
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_rgmii2_default>;
+};
+
+&i2c0 {
+    status = "okay";
+};
+
+&i2c1 {
+    multi-master =<1>;
+    status = "okay";
+};
+
+&i2c2 {
+    status = "okay";
+    /* FRU 24C256 @50h */
+    eeprom@50 {
+        compatible = "atmel,24c256";
+        reg = <0x50>;
+        pagesize = <32>;
+    };
+    eeprom@56 {
+        compatible = "atmel,24c256";
+        reg = <0x56>;
+        pagesize = <32>;
+    };
+    ipmb@10 {
+        compatible = "ipmb-dev";
+        reg = <0x10>;
+        i2c-protocol;
+    };
+};
+
+&i2c3 {
+    status = "okay";
+    power-supply@58 {
+        compatible = "ibm,cffps1";
+        reg = <0x58>;
+    };
+};
+
+&i2c4 {
+    status = "okay";
+};
+
+&i2c5 {
+    status = "okay";
+    /* NCT7802 Hardware Monitor @50h*/
+    nct7802@28 {
+        compatible = "nuvoton,nct7802";
+        reg = <0x28>;
+    };
+
+    i2c-mux@77 {
+        compatible = "nxp,pca9544";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x77>;
+        i2c-mux-idle-disconnect;
+
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+        };
+
+        i2c@1 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <1>;
+        };
+
+        i2c@2 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+        };
+
+        i2c@3 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <3>;
+        };
+    };
+};
+
+&i2c6 {
+    status = "okay";
+    i2c-mux@70 {
+        compatible = "nxp,pca9548";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x70>;
+        i2c-mux-idle-disconnect;
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+        };
+
+        i2c@1 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <1>;
+        };
+
+        i2c@2 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+        };
+
+        i2c@3 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <3>;
+        };
+
+        i2c@4 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <4>;
+        };
+
+        i2c@5 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <5>;
+        };
+
+        i2c@6 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <6>;
+        };
+
+        i2c@7 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <7>;
+        };
+    };
+
+    i2c-mux@71 {
+        compatible = "nxp,pca9548";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x71>;
+        i2c-mux-idle-disconnect;
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+        };
+
+        i2c@1 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <1>;
+        };
+
+        i2c@2 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+        };
+
+        i2c@3 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <3>;
+        };
+
+        i2c@4 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <4>;
+        };
+
+        i2c@5 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <5>;
+        };
+
+        i2c@6 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <6>;
+        };
+
+        i2c@7 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <7>;
+        };
+    };
+
+    i2c-mux@72 {
+        compatible = "nxp,pca9544";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x72>;
+        i2c-mux-idle-disconnect;
+
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+        };
+
+        i2c@1 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <1>;
+        };
+
+        i2c@2 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+        };
+
+        i2c@3 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <3>;
+        };
+    };
+};
+
+&i2c7 {
+    status = "okay";
+    i2c-mux@70 {
+            compatible = "nxp,pca9544";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0x70>;
+            i2c-mux-idle-disconnect;
+
+            i2c@0 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0>;
+            };
+
+            i2c@1 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <1>;
+            };
+
+            i2c@2 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <2>;
+            };
+
+            i2c@3 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <3>;
+            };
+    };
+};
+
+&i2c8 {
+    status = "okay";
+
+    i2c-mux@77 {
+        compatible = "nxp,pca9544";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x77>;
+        i2c-mux-idle-disconnect;
+
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+        };
+
+        i2c@1 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <1>;
+        };
+
+        i2c@2 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+        };
+
+        i2c@3 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <3>;
+        };
+    };
+};
+
+&gfx {
+       status = "okay";
+       memory-region = <&gfx_memory>;
+};
+
+&video {
+       status = "okay";
+       memory-region = <&gfx_memory>;
+};
+
+&vhub {
+       status = "okay";
+};
+
+&pwm_tacho {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default>;
+    cpufan@0 {
+        reg = <0x00>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x00>;
+    };
+
+    sysfan1@1 {
+        reg = <0x01>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x01>;
+    };
+
+    sysfan2@1 {
+        reg = <0x02>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x02>;
+    };
+
+    sysfan3@2 {
+        reg = <0x03>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
+    };
+
+    sysfan4@3 {
+        reg = <0x04>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
+    };
+
+    sysfan5@1 {
+        reg = <0x04>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x05>;
+    };
+};
+
+&lpc_ctrl {
+    status = "okay";
+    memory-region = <&flash_memory>;
+    flash = <&spi1>;
+};
+
+&adc {
+    status = "okay";
+};
+
+&lpc_bmc {
+    compatible = "aspeed,ast2500-lpc-bmc", "simple-mfd", "syscon";
+    reg = <0x0 0x80>;
+    reg-io-width = <4>;
+    #address-cells = <1>;
+    #size-cells = <1>;
+    ranges = <0x0 0x0 0x80>;
+
+    kcs1@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <1>;
+        kcs_addr = <0xca0>;
+        status = "okay";
+    };
+
+    kcs2@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <2>;
+        kcs_addr = <0xca8>;
+        status = "okay";
+    };
+
+    kcs3@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <3>;
+        kcs_addr = <0xca2>;
+        status = "okay";
+    };
+};
+
+&hbled {
+    status = "okay";
+};
+
+&peci0 {
+    status = "okay";
+};
+
+&gpio {
+    status = "okay";
+    gpio-line-names =
+    /*A0-A7*/   "","","ID_LED","AC_LOSS","","","","",
+    /*B0-B7*/   "","","","","","","LPC_PME_L","",
+    /*C0-C7*/   "","","","","","","","",
+    /*D0-D7*/   "SLP_S3","SLP_S5","PS_PWROK","RESET_LED","","","","",
+    /*E0-E7*/   "PWBTN_IN","PWBTN_OUT","RSTBTN_IN","RSTBTN_OUT","NMIBTN_IN","NMIBTN_OUT","TSI_RESERT","",
+    /*F0-F7*/   "","CLR_CMOS","LOCAL_LOCK","ASSERT_PME","HWM_FAULT_LED","SYS_FAULT_LED","BIOS_WP","",
+    /*G0-G7*/   "JTAG_MUX","JTAG_MUX_OE","HDT_SEL","JTAG_OE","","","JTAG_HDR","",
+    /*H0-H7*/   "","","","","","","PROCHOT0","THERMTRIP",
+    /*I0-I7*/   "","","","","","","","",
+    /*J0-J7*/   "P0_ABCD_EVENT","P0_EFGH_EVENT","","","","","","",
+    /*K0-K7*/   "","","","","","","","",
+    /*L0-L7*/   "","","","","","","","",
+    /*M0-M7*/   "","","","","","","","",
+    /*N0-N7*/   "","","","","","","","BEEP",
+    /*O0-O7*/   "","","","","","","","",
+    /*P0-P7*/   "","","","","","","","",
+    /*Q0-Q7*/   "","","","","APML_SEL","","id-button","",
+    /*R0-R7*/   "","","","BAT_PRESENT","","","","",
+    /*S0-S7*/   "","","","","","","","",
+    /*T0-T7*/   "","","","","","","","",
+    /*U0-U7*/   "","","","","","","","",
+    /*V0-V7*/   "","","","","","","","",
+    /*W0-W7*/   "","","","","","","","",
+    /*X0-X7*/   "","","","","","","","",
+    /*Y0-Y7*/   "","","","","","","","",
+    /*Z0-Z7*/   "SENSOR_THERM","","","PWROK_LED","","","","",
+    /*AA0-AA7*/ "","","","","","ASSERT_P0_PROCHOT","","ASSERT_BMC_READY",
+    /*AB0-AB7*/ "SPD_SEL","BIOS_WDT_RST2","BMC_WDT_RST1","BMC_WDT_RST2","","","","",
+    /*AC0-AC7*/ "","","","","","","","";
+};
+
+&lpc_snoop {
+    status = "okay";
+    snoop-ports = <0x80>;
+};
+

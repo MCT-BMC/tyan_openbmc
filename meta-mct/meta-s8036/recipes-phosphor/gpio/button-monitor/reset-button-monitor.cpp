@@ -104,9 +104,9 @@ void buttonPress(Button *button)
         button->wait = getCurrentTimeWithMs();
 
         // To set reset button press and release by software
-        system("/usr/bin/gpioset gpiochip0 35=0");
+        system("/usr/bin/gpioset `gpiofind RSTBTN_OUT`=0");
         usleep(100000);
-        system("/usr/bin/gpioset gpiochip0 35=1");
+        system("/usr/bin/gpioset `gpiofind RSTBTN_OUT`=1");
         button->buttonStatus = true;
     }
 }
