@@ -1,0 +1,130 @@
+From 39123934de5b3b1077b6af0b7e4b439aae7ef99e Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 22 May 2020 11:50:28 +0800
+Subject: [PATCH] Implement power control SEL generated in chassis control
+ command
+
+---
+ chassishandler.cpp | 63 +++++++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 41 insertions(+), 22 deletions(-)
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+index a312656..269a690 100755
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -793,6 +793,33 @@ int initiate_state_transition(State::Host::Transition transition)
+     return rc;
+ }
+ 
++//-----------------------------------------------
++// Calls IpmiSelAdd Dbus method to generate a SEL
++//-----------------------------------------------
++void generateSELEvent(char const* SensorPath,std::vector<uint8_t> eventData)
++{
++    static constexpr char const* ipmiSELService =    "xyz.openbmc_project.Logging.IPMI";
++    static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
++    static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
++
++    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
++
++    uint16_t genid = 0x20;
++    bool assert=1;
++
++    sdbusplus::message::message writeSEL = busp->new_method_call(
++                            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
++    writeSEL.append("SEL Entry",  std::string(SensorPath), eventData, assert,genid);
++    try
++    {
++        busp->call(writeSEL);
++    }
++    catch (sdbusplus::exception_t& e)
++    {
++        std::cerr << "call IpmiSelAdd failed\n";
++    }
++}
++
+ //------------------------------------------
+ // Set Enabled property to inform NMI source
+ // handling to trigger a NMI_OUT BSOD.
+@@ -1197,10 +1224,19 @@ void indicate_no_softoff_needed()
+  */
+ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+ {
++    static constexpr char const* fruStatePowerCycle= "/xyz/openbmc_project/sensors/fru_state/IPMI_POWER_CYCLE";
++    static constexpr char const* fruStatePowerOn= "/xyz/openbmc_project/sensors/fru_state/IPMI_POWER_ON";
++    static constexpr char const* fruStatePowerOff= "/xyz/openbmc_project/sensors/fru_state/IPMI_POWER_OFF";
++    static constexpr char const* fruStatePowerSoft= "/xyz/openbmc_project/sensors/fru_state/IPMI_POWER_SOFT";
++    static constexpr char const* fruStatePowerReset= "/xyz/openbmc_project/sensors/fru_state/IPMI_POWER_RESET";
++    static constexpr char const* fruStateSensorPath= "/xyz/openbmc_project/sensors/fru_state/IPMI_Power_Diag";
++    std::vector<uint8_t> powerControlEventData{0x02,0x01,0xff};
+     int rc = 0;
++
+     switch (chassisControl)
+     {
+         case CMD_POWER_ON:
++            generateSELEvent(fruStatePowerOn,powerControlEventData);
+             rc = initiate_state_transition(State::Host::Transition::On);
+             break;
+         case CMD_POWER_OFF:
+@@ -1229,6 +1265,7 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+                 indicate_no_softoff_needed();
+ 
+                 // Now request the shutdown
++                generateSELEvent(fruStatePowerOff,powerControlEventData);
+                 rc = initiate_state_transition(State::Host::Transition::Off);
+             }
+             else
+@@ -1239,6 +1276,7 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+             break;
+ 
+         case CMD_HARD_RESET:
++            generateSELEvent(fruStatePowerReset,powerControlEventData);
+             rc = initiate_state_transition(State::Host::Transition::ForceWarmReboot);
+             break;
+             
+@@ -1252,39 +1290,20 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+             // power reboot request (i.e. a reboot request that is not
+             // originating via a soft power off SMS request)
+             indicate_no_softoff_needed();
+-
++            generateSELEvent(fruStatePowerCycle,powerControlEventData);
+             rc = initiate_state_transition(State::Host::Transition::Reboot);
+             break;
+ 
+         case CMD_SOFT_OFF_VIA_OVER_TEMP:
+             // Request Host State Manager to do a soft power off
++            generateSELEvent(fruStatePowerSoft,powerControlEventData);
+             rc = initiate_state_transition(State::Host::Transition::Off);
+             break;
+ 
+         case CMD_PULSE_DIAGNOSTIC_INTR:
+             { //variable scope
+-            static constexpr char const* ipmiSELService =    "xyz.openbmc_project.Logging.IPMI";
+-            static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
+-            static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
+-            static constexpr char const* fruStateSensorPath= "/xyz/openbmc_project/sensors/fru_state/IPMI_Power_Diag";
+-            
+-            std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+-
+-            uint16_t genid = 0x20;
+-            bool assert=1;
+             std::vector<uint8_t> eventData{0x02, 0x22, 0xff};
+-               
+-            sdbusplus::message::message writeSEL = busp->new_method_call(
+-                            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
+-            writeSEL.append("SEL Entry",  std::string(fruStateSensorPath), eventData, assert,genid);            
+-            try
+-            {
+-                busp->call(writeSEL);
+-            }
+-            catch (sdbusplus::exception_t& e)
+-            {
+-                std::cerr << "call IpmiSelAdd failed\n";
+-            }
++            generateSELEvent(fruStateSensorPath,eventData);
+             }
+             rc = setNmiProperty(true);
+             break;
+-- 
+2.7.4
+

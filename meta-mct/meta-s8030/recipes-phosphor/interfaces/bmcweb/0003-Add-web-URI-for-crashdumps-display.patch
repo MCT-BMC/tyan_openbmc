@@ -1,0 +1,65 @@
+From b72a67a24d2e80b7cc5e67179706f6a69a62d5a4 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 1 Apr 2020 11:01:18 +0800
+Subject: [PATCH] Add web URI for crashdumps display
+
+---
+ include/openbmc_dbus_rest.hpp | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+ mode change 100644 => 100755 include/openbmc_dbus_rest.hpp
+
+diff --git a/include/openbmc_dbus_rest.hpp b/include/openbmc_dbus_rest.hpp
+old mode 100644
+new mode 100755
+index fb58465..adca1bd
+--- a/include/openbmc_dbus_rest.hpp
++++ b/include/openbmc_dbus_rest.hpp
+@@ -26,6 +26,7 @@
+ #include <regex>
+ #include <sdbusplus/message/types.hpp>
+ 
++
+ namespace crow
+ {
+ namespace openbmc_mapper
+@@ -2254,6 +2255,37 @@ template <typename... Middlewares> void requestRoutes(Crow<Middlewares...> &app)
+             }
+         });
+ 
++    BMCWEB_ROUTE(app, "/crashdumps")
++        .requires({"Login"})
++        .methods("GET"_method)([](const crow::Request &req, crow::Response &res) {
++            std::vector<std::string> crashdumpslist;
++            nlohmann::json crashdumpslistData;
++            std::string path = "/tmp/crashdumps/";
++
++            if(std::filesystem::exists(std::filesystem::path(path))){
++                for (const auto & entry : std::filesystem::directory_iterator(path))
++                {
++                    if(entry.path().filename().string().find("json",0) == std::string::npos)
++                    {
++                        continue;
++                    }
++                    std::ifstream ifs(entry.path().string());
++                    nlohmann::json crashdumpsData = nlohmann::json::parse(ifs);
++                    crashdumpslist.push_back(entry.path().filename().string());
++                    crashdumpslistData.push_back({entry.path().filename().string(),crashdumpsData});
++                }
++            }
++
++            res.addHeader("Content-Type", "application/json");
++
++            res.jsonValue = {{"status", "ok"},
++                             {"message", "200 OK"},
++                             {"list", std::move(crashdumpslist)},
++                             {"data", std::move(crashdumpslistData)}
++                             };
++            res.end();
++        });
++
+ 
+     BMCWEB_ROUTE(app, "/bus/system/<str>/")
+         .requires({"Login"})
+-- 
+2.7.4
+

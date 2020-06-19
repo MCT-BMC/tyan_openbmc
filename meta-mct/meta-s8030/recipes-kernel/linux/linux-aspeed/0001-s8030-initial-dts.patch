@@ -1,0 +1,369 @@
+From f70d93d0f5dec5e16efbebfb848ec3772dbbf8e1 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 3 Jun 2020 15:09:29 +0800
+Subject: [PATCH] s8030 initial dts
+
+---
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 353 +++++++++++++++++++++++++++++
+ 1 file changed, 353 insertions(+)
+ create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
+
+diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
+new file mode 100755
+index 0000000..31d0ea1
+--- /dev/null
++++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
+@@ -0,0 +1,353 @@
++// SPDX-License-Identifier: GPL-2.0
++// Copyright (c) 2017 Intel Corporation
++/dts-v1/;
++
++#include "aspeed-g5.dtsi"
++#include <dt-bindings/gpio/aspeed-gpio.h>
++
++/ {
++    model = "S8030 BMC";
++    compatible = "mct,s8030-bmc", "aspeed,ast2500";
++
++    chosen {
++        stdout-path = &uart5;
++        bootargs = "earlyprintk";
++    };
++
++    memory {
++        reg = <0x80000000 0x20000000>;
++    };
++
++    reserved-memory {
++        #address-cells = <1>;
++        #size-cells = <1>;
++        ranges;
++
++        flash_memory: region@98000000 {
++            no-map;
++            reg = <0x98000000 0x04000000>; /* 64M */
++        };
++
++        vga_memory: framebuffer@7f000000 {
++            no-map;
++            reg = <0x7f000000 0x01000000>;
++        };
++        safs_memory: region@30000000 {
++            no-map;
++            reg = <0x30000000 0x08000000>; /* 128M */
++        };
++
++        gfx_memory: framebuffer {
++            size = <0x04000000>;
++            alignment = <0x01000000>;
++            compatible = "shared-dma-pool";
++            reusable;
++        };
++    };
++
++        vga-shared-memory {
++            compatible = "aspeed,ast2500-vga-sharedmem";
++            reg = <0x9ff00000 0x100000>;
++        };
++
++    leds {
++        compatible = "gpio-leds";
++
++        identify {
++            gpios = <&gpio ASPEED_GPIO(A, 2) GPIO_ACTIVE_LOW>;
++        };
++
++        heartbeat {
++            gpios = <&gpio ASPEED_GPIO(D, 7) GPIO_ACTIVE_LOW>;
++        };
++
++        hw-fault {
++            gpios = <&gpio ASPEED_GPIO(H, 1) GPIO_ACTIVE_LOW>;
++        };
++
++    };
++    gpio-keys {
++        compatible = "gpio-keys";
++
++        id-button {
++            label = "id-button";
++            gpios = <&gpio ASPEED_GPIO(F, 5) GPIO_ACTIVE_LOW>;
++            linux,code = <ASPEED_GPIO(F, 5)>;
++        };
++
++    };
++
++    iio-hwmon {
++        compatible = "iio-hwmon";
++        io-channels = <&adc 0>, <&adc 1>, <&adc 2>, <&adc 3>,
++            <&adc 4>, <&adc 5>, <&adc 6>, <&adc 7>,
++            <&adc 8>, <&adc 9>, <&adc 10>, <&adc 11>,
++            <&adc 12>, <&adc 13>, <&adc 14>, <&adc 15>;
++    };
++};
++
++&fmc {
++    status = "okay";
++    flash@0 {
++        status = "okay";
++        m25p,fast-read;
++        label = "bmc";
++#include "openbmc-flash-layout.dtsi"
++    };
++};
++
++&spi1 {
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_spi1_default>;
++
++    flash@0 {
++        status = "okay";
++        m25p,fast-read;
++        label = "pnor";
++    };
++};
++
++&vuart {
++    status = "okay";
++};
++
++&uart1 {
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_txd1_default
++            &pinctrl_rxd1_default
++            &pinctrl_ncts1_default
++            &pinctrl_ndcd1_default
++            &pinctrl_ndsr1_default
++            &pinctrl_nri1_default
++            &pinctrl_ndtr1_default
++            &pinctrl_nrts1_default>;
++};
++
++&uart2 {
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_txd2_default
++            &pinctrl_rxd2_default
++            &pinctrl_ncts2_default
++            &pinctrl_ndcd2_default
++            &pinctrl_ndsr2_default
++            &pinctrl_nri2_default
++            &pinctrl_ndtr2_default
++            &pinctrl_nrts2_default>;
++};
++
++&uart3 {
++    status = "okay";
++};
++
++&uart5 {
++    status = "okay";
++};
++/*
++&mac0 {
++    status = "okay";
++
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_rmii1_default>;
++    use-ncsi;
++};
++*/
++&mac1 {
++    status = "okay";
++
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_rgmii2_default>;
++};
++
++&i2c0 {
++    status = "okay";
++};
++
++&i2c1 {
++    multi-master =<1>;
++    status = "okay";
++    ipmb@10 {
++        compatible = "ipmb-dev";
++        reg = <0x10>;
++        i2c-protocol;
++
++    };
++};
++
++&i2c2 {
++    status = "okay";
++    /* FRU 24C256 @50h */
++    eeprom@50 {
++        compatible = "atmel,24c256";
++        reg = <0x50>;
++        pagesize = <32>;
++    };
++};
++
++&i2c3 {
++    status = "okay";
++    power-supply@58 {
++        compatible = "ibm,cffps1";
++        reg = <0x58>;
++    };
++};
++
++&i2c4 {
++    status = "okay";
++};
++
++&i2c5 {
++    status = "okay";
++    /* NCT7802 Hardware Monitor @50h*/
++    nct7802@28 {
++        compatible = "nuvoton,nct7802";
++        reg = <0x28>;
++    };
++};
++
++&i2c6 {
++    status = "okay";
++};
++
++&i2c7 {
++    status = "okay";
++};
++&gfx {
++       status = "okay";
++       memory-region = <&gfx_memory>;
++};
++
++&video {
++       status = "okay";
++       memory-region = <&gfx_memory>;
++};
++
++&vhub {
++       status = "okay";
++};
++&pwm_tacho {
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default>;
++    cpufan@0 {
++        reg = <0x00>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x00>;
++    };
++
++    cpufan@1 {
++        reg = <0x01>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x01>;
++    };
++
++    frontfan@1 {
++        reg = <0x02>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x02>;
++    };
++
++    frontfan@2 {
++        reg = <0x03>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
++    };
++
++    frontfan@3 {
++        reg = <0x04>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
++    };
++
++    rearfan@1 {
++        reg = <0x04>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x05>;
++    };
++
++    rearfan@2 {
++        reg = <0x04>;
++        aspeed,fan-tach-ch = /bits/ 8 <0x06>;
++    };
++};
++
++&lpc_ctrl {
++    status = "okay";
++    memory-region = <&flash_memory>;
++    flash = <&spi1>;
++};
++
++&adc {
++    status = "okay";
++};
++
++&lpc_bmc {
++    compatible = "aspeed,ast2500-lpc-bmc", "simple-mfd", "syscon";		
++    reg = <0x0 0x80>;
++    reg-io-width = <4>;
++    #address-cells = <1>;
++    #size-cells = <1>;
++    ranges = <0x0 0x0 0x80>;
++
++    kcs1@0 {
++        compatible = "aspeed,ast2500-kcs-bmc";
++        reg = <0x0 0x80>;
++        interrupts = <8>;
++        kcs_chan = <1>;
++        kcs_addr = <0xca0>;
++        status = "okay";
++    };
++
++    kcs2@0 {
++        compatible = "aspeed,ast2500-kcs-bmc";
++        reg = <0x0 0x80>;
++        interrupts = <8>;
++        kcs_chan = <2>;
++        kcs_addr = <0xca8>;
++        status = "okay";
++    };
++
++    kcs3@0 {
++        compatible = "aspeed,ast2500-kcs-bmc";
++        reg = <0x0 0x80>;
++        interrupts = <8>;
++        kcs_chan = <3>;
++        kcs_addr = <0xca2>;
++        status = "okay";
++    };
++};
++
++&gpio {
++    status = "okay";
++    gpio-line-names =
++    /*A0-A7*/   "","","","","","","","",
++    /*B0-B7*/   "","","","","","","","",
++    /*C0-C7*/   "","","","","","","","",
++    /*D0-D7*/   "","","","PS_PWROK","","","","",
++    /*E0-E7*/   "","","","","","","","",
++    /*F0-F7*/   "","","","","","","","",
++    /*G0-G7*/   "","","","","","","","",
++    /*H0-H7*/   "","","","","","","THERMTRIP","",
++    /*I0-I7*/   "","","","","","","","",
++    /*J0-J7*/   "","","","","","","","",
++    /*K0-K7*/   "","","","","","","","",
++    /*L0-L7*/   "","","","","","","","",
++    /*M0-M7*/   "","","","","","","","",
++    /*N0-N7*/   "","","","","","","","",
++    /*O0-O7*/   "","","","","","","","",
++    /*P0-P7*/   "","","","","","","","",
++    /*Q0-Q7*/   "","","","","","","","",
++    /*R0-R7*/   "","","","","","","","",
++    /*S0-S7*/   "","","","","","","","",
++    /*T0-T7*/   "","","","","","","","",
++    /*U0-U7*/   "","","","","","","","",
++    /*V0-V7*/   "","","","","","","","",
++    /*W0-W7*/   "","","","","","","","",
++    /*X0-X7*/   "","","","","","","","",
++    /*Y0-Y7*/   "","","","","","","","",
++    /*Z0-Z7*/   "","","","","","","","",
++    /*AA0-AA7*/ "","","","","","","","",
++    /*AB0-AB7*/ "","","","","","","","",
++    /*AC0-AC7*/ "","","","","","","","";
++};
++
++&lpc_snoop {
++    status = "okay";
++    snoop-ports = <0x80>;
++};

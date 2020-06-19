@@ -1,0 +1,33 @@
+From 4908881c373dded750c8a1d681efa4e7e53aa819 Mon Sep 17 00:00:00 2001
+From: Varun Sampat <vsampat@twitter.com>
+Date: Thu, 2 Jan 2020 16:42:59 -0500
+Subject: [PATCH] Add thermtrip sensor
+
+---
+ src/ProcessorSensorMain.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/ProcessorSensorMain.cpp b/src/ProcessorSensorMain.cpp
+index 1e2ea28..da9d50b 100755
+--- a/src/ProcessorSensorMain.cpp
++++ b/src/ProcessorSensorMain.cpp
+@@ -79,6 +79,9 @@ int main()
+     std::shared_ptr<sdbusplus::asio::dbus_interface> iface3 =
+         objServer.add_interface("/xyz/openbmc_project/sensors/processor/CPU1_State",sensorValueInterface);
+ 
++    std::shared_ptr<sdbusplus::asio::dbus_interface> iface4 =
++        objServer.add_interface("/xyz/openbmc_project/sensors/processor/CPU_State",sensorValueInterface);
++
+     double value = 0;
+     //ray__ test value
+     iface->register_property("Value", value);
+@@ -90,6 +93,9 @@ int main()
+     iface3->register_property("Value", value);
+     iface3->initialize();
+ 
++    iface4->register_property("Value", value);
++    iface4->initialize();
++
+     auto caterrEventMatcherCallback =
+         [systemBus](sdbusplus::message::message& message) {
+             boost::container::flat_map<std::string, sdbusplus::message::variant<std::string>> propertiesChanged;

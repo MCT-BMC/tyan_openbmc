@@ -1,0 +1,58 @@
+From 917bb5f98f4fe16b962ef0a634aae616e223ce24 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 12 May 2020 14:01:06 +0800
+Subject: [PATCH] Add try and catch to system configuration
+
+Fix the issue for dbus method failed to call
+---
+ system_configuration.cpp | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
+ mode change 100644 => 100755 system_configuration.cpp
+
+diff --git a/system_configuration.cpp b/system_configuration.cpp
+old mode 100644
+new mode 100755
+index 4c5700e..f4d07e2
+--- a/system_configuration.cpp
++++ b/system_configuration.cpp
+@@ -69,21 +69,29 @@ std::string SystemConfiguration::hostName(std::string name)
+ std::string SystemConfiguration::getHostNameFromSystem() const
+ {
+     sdbusplus::message::variant<std::string> name;
+-    auto method = bus.new_method_call(HOSTNAMED_SERVICE, HOSTNAMED_SERVICE_PATH,
+-                                      PROPERTY_INTERFACE, METHOD_GET);
+-
+-    method.append(HOSTNAMED_INTERFACE, "Hostname");
+-
+-    auto reply = bus.call(method);
+-
+-    if (reply)
++    try
+     {
+-        reply.read(name);
++        auto method = bus.new_method_call(HOSTNAMED_SERVICE, HOSTNAMED_SERVICE_PATH,
++                                        PROPERTY_INTERFACE, METHOD_GET);
++
++        method.append(HOSTNAMED_INTERFACE, "Hostname");
++
++        auto reply = bus.call(method);
++
++        if (reply)
++        {
++            reply.read(name);
++        }
++        else
++        {
++            log<level::ERR>("Failed to get hostname");
++            report<InternalFailure>();
++            return "";
++        }
+     }
+-    else
++    catch (const sdbusplus::exception::SdBusError& e)
+     {
+         log<level::ERR>("Failed to get hostname");
+-        report<InternalFailure>();
+         return "";
+     }
+     return sdbusplus::message::variant_ns::get<std::string>(name);
