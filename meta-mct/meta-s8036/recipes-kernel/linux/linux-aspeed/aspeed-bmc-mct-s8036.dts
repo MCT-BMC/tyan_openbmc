@@ -546,10 +546,6 @@
     status = "okay";
 };
 
-&peci0 {
-    status = "okay";
-};
-
 &gpio {
     status = "okay";
     gpio-line-names =
