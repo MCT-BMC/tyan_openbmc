@@ -262,6 +262,18 @@
                 }
             ],
             "Type": "TMP75"
+        },
+        {
+            "Address": "0x58",
+            "Bus": 3,
+            "Name": "PSU0",
+            "Type": "pmbus"
+        },
+        {
+            "Address": "0x59",
+            "Bus": 3,
+            "Name": "PSU1",
+            "Type": "pmbus"
         }
     ],
     "Name": "s8030 Baseboard",
