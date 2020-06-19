@@ -73,5 +73,11 @@ int main(int argc, char *argv[])
         // TODO: GPIOs should be used as interrupt feature
     }
 
+    //Initialize for pin which used in sysfs
+    if(!popen("/usr/sbin/gpio-initial.sh", "r"))
+    {
+        std::cerr << "Couldn't start gpio initial for sysfs." << std::endl;
+    }
+
     return 0;
 }

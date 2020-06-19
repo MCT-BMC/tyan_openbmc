@@ -20,7 +20,6 @@ SRC_URI = "file://bootstrap.sh \
            file://gpio-initial-config.json \
            file://gpio-initial.sh \
            file://gpio-initial.service \
-           file://gpio-initial-sysfs.service \
            "
 
 DEPENDS = "systemd"
@@ -33,7 +32,6 @@ RDEPENDS_${PN} = "libgpiod"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE_${PN} = "gpio-initial.service"
-SYSTEMD_SERVICE_${PN} = "gpio-initial-sysfs.service"
 
 FILES_${PN} += "${datadir}/gpio-initial/*"
 

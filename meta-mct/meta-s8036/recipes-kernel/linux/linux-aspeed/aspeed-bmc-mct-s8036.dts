@@ -197,38 +197,6 @@
         compatible = "nuvoton,nct7802";
         reg = <0x28>;
     };
-
-    i2c-mux@77 {
-        compatible = "nxp,pca9544";
-        #address-cells = <1>;
-        #size-cells = <0>;
-        reg = <0x77>;
-        i2c-mux-idle-disconnect;
-
-        i2c@0 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <0>;
-        };
-
-        i2c@1 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <1>;
-        };
-
-        i2c@2 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <2>;
-        };
-
-        i2c@3 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <3>;
-        };
-    };
 };
 
 &i2c6 {
@@ -376,77 +344,6 @@
     };
 };
 
-&i2c7 {
-    status = "okay";
-    i2c-mux@70 {
-            compatible = "nxp,pca9544";
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <0x70>;
-            i2c-mux-idle-disconnect;
-
-            i2c@0 {
-                #address-cells = <1>;
-                #size-cells = <0>;
-                reg = <0>;
-            };
-
-            i2c@1 {
-                #address-cells = <1>;
-                #size-cells = <0>;
-                reg = <1>;
-            };
-
-            i2c@2 {
-                #address-cells = <1>;
-                #size-cells = <0>;
-                reg = <2>;
-            };
-
-            i2c@3 {
-                #address-cells = <1>;
-                #size-cells = <0>;
-                reg = <3>;
-            };
-    };
-};
-
-&i2c8 {
-    status = "okay";
-
-    i2c-mux@77 {
-        compatible = "nxp,pca9544";
-        #address-cells = <1>;
-        #size-cells = <0>;
-        reg = <0x77>;
-        i2c-mux-idle-disconnect;
-
-        i2c@0 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <0>;
-        };
-
-        i2c@1 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <1>;
-        };
-
-        i2c@2 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <2>;
-        };
-
-        i2c@3 {
-            #address-cells = <1>;
-            #size-cells = <0>;
-            reg = <3>;
-        };
-    };
-};
-
 &gfx {
        status = "okay";
        memory-region = <&gfx_memory>;
@@ -465,34 +362,29 @@
     status = "okay";
     pinctrl-names = "default";
     pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default>;
-    cpufan@0 {
-        reg = <0x00>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x00>;
-    };
-
-    sysfan1@1 {
-        reg = <0x01>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x01>;
+    sysfan1@0 {
+        reg = <0x05>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x08>;
     };
 
     sysfan2@1 {
-        reg = <0x02>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x02>;
-    };
-
-    sysfan3@2 {
         reg = <0x03>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x09>;
     };
 
-    sysfan4@3 {
-        reg = <0x04>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
+    cpufan@2 {
+        reg = <0x03>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x0a>;
     };
 
-    sysfan5@1 {
+    sysfan3@3 {
+        reg = <0x03>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x0b>;
+    };
+
+    sysfan4@4 {
         reg = <0x04>;
-        aspeed,fan-tach-ch = /bits/ 8 <0x05>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x0c>;
     };
 };
 
@@ -576,7 +468,7 @@
     /*Y0-Y7*/   "","","","","","","","",
     /*Z0-Z7*/   "SENSOR_THERM","","","PWROK_LED","","","","",
     /*AA0-AA7*/ "","","","","","ASSERT_P0_PROCHOT","","ASSERT_BMC_READY",
-    /*AB0-AB7*/ "SPD_SEL","BIOS_WDT_RST2","BMC_WDT_RST1","BMC_WDT_RST2","","","","",
+    /*AB0-AB3*/ "SPD_SEL","BIOS_WDT_RST2","BMC_WDT_RST1","BMC_WDT_RST2",
     /*AC0-AC7*/ "","","","","","","","";
 };
 
