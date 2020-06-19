@@ -151,6 +151,11 @@
 
 &i2c0 {
     status = "okay";
+
+    cpu@4c {
+        compatible = "apml,sb-tsi";
+        reg = <0x4c>;
+    };
 };
 
 &i2c1 {
