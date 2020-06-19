@@ -2,7 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 
 SRC_URI += "file://s8036.cfg \
-            file://0001-f5i-Initial-dts.patch \
+            file://aspeed-bmc-mct-s8036.dts;subdir=git/arch/${ARCH}/boot/dts \
             file://0002-S7106-Common-sourec-files.patch \
             file://0003-Implement-Heart-Beat-LED.patch \
             file://0004-Set-RTD_1_2_3-to-thermistor-mode.patch \

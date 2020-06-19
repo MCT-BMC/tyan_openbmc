@@ -1,0 +1,230 @@
+[
+    {
+        "LineName": "ID_LED",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOA2"
+    },
+    {
+        "LineName": "AC_LOSS",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOA3"
+    },
+    {
+        "LineName": "LPC_PME_L",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOB6"
+    },
+    {
+        "LineName": "SLP_S3",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOD0"
+    },
+    {
+        "LineName": "SLP_S5",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOD1"
+    },
+    {
+        "LineName": "PS_PWROK",
+        "Direction": "Input",
+        "Value":1,
+        "PIN":"GPIOD2"
+    },
+    {
+        "LineName": "RESET_LED",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOD3"
+    },
+    {
+        "LineName": "PWBTN_IN",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOE0"
+    },
+    {
+        "LineName": "PWBTN_OUT",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOE1"
+    },
+    {
+        "LineName": "RSTBTN_IN",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOE2"
+    },
+    {
+        "LineName": "RSTBTN_OUT",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOE3"
+    },
+    {
+        "LineName": "NMIBTN_IN",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOE4"
+    },
+    {
+        "LineName": "NMIBTN_OUT",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOE5"
+    },
+    {
+        "LineName": "TSI_RESERT",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOE6"
+    },
+    {
+        "LineName": "CLR_CMOS",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF1"
+    },
+    {
+        "LineName": "LOCAL_LOCK",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF2"
+    },
+    {
+        "LineName": "ASSERT_PME",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF3"
+    },
+    {
+        "LineName": "HWM_FAULT_LED",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF4"
+    },
+    {
+        "LineName": "SYS_FAULT_LED",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF5"
+    },
+    {
+        "LineName": "BIOS_WP",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF6"
+    },
+    {
+        "LineName": "JTAG_MUX",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG0"
+    },
+    {
+        "LineName": "JTAG_MUX_OE",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG1"
+    },
+    {
+        "LineName": "HDT_SEL",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG2"
+    },
+    {
+        "LineName": "JTAG_OE",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG3"
+    },
+    {
+        "LineName": "JTAG_HDR",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOG6"
+    },
+    {
+        "LineName": "P0_ABCD_EVENT",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOJ0"
+    },
+    {
+        "LineName": "P0_EFGH_EVENT",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOJ1"
+    },
+    {
+        "LineName": "BEEP",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPION7"
+    },
+    {
+        "LineName": "APML_SEL",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOQ4"
+    },
+    {
+        "LineName": "BAT_PRESENT",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOR3"
+    },
+    {
+        "LineName": "SENSOR_THERM",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOZ0"
+    },
+    {
+        "LineName": "PWROK_LED",
+        "Direction": "Input",
+        "Value":0,
+        "PIN":"GPIOZ3"
+    },
+    {
+        "LineName": "ASSERT_P0_PROCHOT",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOAA5"
+    },
+    {
+        "LineName": "ASSERT_BMC_READY",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOAA7"
+    },
+    {
+        "LineName": "SPD_SEL",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOAB0"
+    },
+    {
+        "LineName": "BIOS_WDT_RST2",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOAB1"
+    },
+    {
+        "LineName": "BMC_WDT_RST1",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOAB2"
+    },
+    {
+        "LineName": "BMC_WDT_RST2",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOAB3"
+    }
+]

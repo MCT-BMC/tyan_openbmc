@@ -236,32 +236,7 @@ GPIO_AC5=225
 GPIO_AC6=226
 GPIO_AC7=227
 
-output="\
- $GPIO_B5=1\
- $GPIO_C6=0\
- $GPIO_F0=0\
- $GPIO_F1=1\
- $GPIO_F2=0\
- $GPIO_F5=1\
- $GPIO_N6=1\
- $GPIO_N7=0\
- $GPIO_AB1=0\
-"
-
-input="\
-"
-
-int="\
-"
 set -x
-
-# Use libgpiod utilities to set initial GPIO settings
-gpioset gpiochip0 $output
-gpioget gpiochip0 $input
-
-# TODO: Those GPIOs should be used as interrupt, but libgpiod has no tool to set it.
-# Leave it as input
-gpioget gpiochip0 $int
 
 # TO set pin using sysfs
 GPIO_EXPORT_PATH="/sys/class/gpio/export"

@@ -17,15 +17,10 @@ DEPENDS += "libpeci"
 
 S = "${WORKDIR}/"
 SRC_URI += " \
-            file://CMakeLists.txt\
             file://LICENSE \
-            file://caterrHandler.cpp \
             file://prochot_thermtrip_update.sh \
-            file://xyz.openbmc_project.caterr.service \
             file://xyz.openbmc_project.prochot0.service \
             file://xyz.openbmc_project.prochot0_deassert.service \
-            file://xyz.openbmc_project.prochot1.service \
-            file://xyz.openbmc_project.prochot1_deassert.service \
             file://xyz.openbmc_project.thermtrip.service \
             "
 
@@ -41,13 +36,9 @@ do_install_append() {
 
 SYSTEMD_ENVIRONMENT_FILE_${PN} +="obmc/gpio/prochot0"
 SYSTEMD_ENVIRONMENT_FILE_${PN} +="obmc/gpio/prochot0_deassert"
-SYSTEMD_ENVIRONMENT_FILE_${PN} +="obmc/gpio/prochot1"
-SYSTEMD_ENVIRONMENT_FILE_${PN} +="obmc/gpio/prochot1_deassert"
 
 PROCHOT0_SERVICE = "prochot0"
 PROCHOT0_DEASSERT_SERVICE = "prochot0_deassert"
-PROCHOT1_SERVICE = "prochot1"
-PROCHOT1_DEASSERT_SERVICE = "prochot1_deassert"
 
 
 TMPL = "phosphor-gpio-monitor@.service"
@@ -55,17 +46,12 @@ INSTFMT = "phosphor-gpio-monitor@{0}.service"
 TGT = "${SYSTEMD_DEFAULT_TARGET}"
 FMT = "../${TMPL}:${TGT}.requires/${INSTFMT}"
 
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.caterr.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0_deassert.service"
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1.service"
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1_deassert.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.thermtrip.service"
 
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT0_SERVICE')}"
 SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT0_DEASSERT_SERVICE')}"
-SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT1_SERVICE')}"
-SYSTEMD_LINK_${PN} += "${@compose_list(d, 'FMT', 'PROCHOT1_DEASSERT_SERVICE')}"
 
 # linux-libc-headers guides this way to include custom uapi headers
 CFLAGS_append = " -I ${STAGING_KERNEL_DIR}/include/uapi"

@@ -1,8 +1,8 @@
 [Unit]
-Description=Initial GPIO Settings
+Description=Initial GPIO Sysfs Settings
 
 [Service]
-ExecStart=/usr/sbin/gpio-initial
+ExecStart=/usr/sbin/gpio-initial.sh
 Type=simple
 SyslogIdentifier=gpio-initial
 
