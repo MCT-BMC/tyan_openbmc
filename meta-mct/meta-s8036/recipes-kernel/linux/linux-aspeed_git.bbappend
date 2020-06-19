@@ -10,5 +10,6 @@ SRC_URI += "file://s8036.cfg \
             file://0007-Fix-fan-sensor-disappear-when-power-off-problem.patch \
             file://0008-s7106-increase-rofs-space.patch \
             file://0009-Register-all-of-dimm-sensors-when-initializing.patch \
+            file://0010-hwmon-Add-APML-SB-TSI-driver.patch \
             "
 

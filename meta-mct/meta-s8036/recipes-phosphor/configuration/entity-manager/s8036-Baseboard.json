@@ -1,6 +1,21 @@
 {
     "Exposes": [
         {
+            "Address": "0x4c",
+            "Bus": 0,
+            "Name": "CPU0_Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "temp1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 95
+                }
+            ],
+            "Type": "TMP75"
+        },
+        {
             "Index": 1,
             "Name": "P3V3_AUX",
             "PowerState": "Always",
