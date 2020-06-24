@@ -1,0 +1,335 @@
+From c4ecefc17e79860159f4bfec8d3a5bfde9dcde4d Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 16 Jun 2020 18:05:08 +0800
+Subject: [PATCH] hwmon: Add APML SB-TSI driver
+
+Support APML(Advanced Platform Management Link) SB Temperature Sensor Interface
+This providing temperature, offset and update rate reading or setting.
+---
+ drivers/hwmon/Kconfig       |   7 ++
+ drivers/hwmon/Makefile      |   1 +
+ drivers/hwmon/apml-sb-tsi.c | 275 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 283 insertions(+)
+ mode change 100644 => 100755 drivers/hwmon/Kconfig
+ mode change 100644 => 100755 drivers/hwmon/Makefile
+ create mode 100755 drivers/hwmon/apml-sb-tsi.c
+
+diff --git a/drivers/hwmon/Kconfig b/drivers/hwmon/Kconfig
+old mode 100644
+new mode 100755
+index e244a79..008c28c
+--- a/drivers/hwmon/Kconfig
++++ b/drivers/hwmon/Kconfig
+@@ -1950,6 +1950,13 @@ config SENSORS_XGENE
+ 	  If you say yes here you get support for the temperature
+ 	  and power sensors for APM X-Gene SoC.
+ 
++config SENSORS_APML_SB_TSI
++	tristate "APML SB-TSI"
++	depends on I2C
++	help
++	  If you say yes here you get support for the APML SB Temperature
++	  Sensor Interface.
++
+ if ACPI
+ 
+ comment "ACPI drivers"
+diff --git a/drivers/hwmon/Makefile b/drivers/hwmon/Makefile
+old mode 100644
+new mode 100755
+index 1c7ab36..4eab595
+--- a/drivers/hwmon/Makefile
++++ b/drivers/hwmon/Makefile
+@@ -179,6 +179,7 @@ obj-$(CONFIG_SENSORS_W83L786NG)	+= w83l786ng.o
+ obj-$(CONFIG_SENSORS_WM831X)	+= wm831x-hwmon.o
+ obj-$(CONFIG_SENSORS_WM8350)	+= wm8350-hwmon.o
+ obj-$(CONFIG_SENSORS_XGENE)	+= xgene-hwmon.o
++obj-$(CONFIG_SENSORS_APML_SB_TSI)	+= apml-sb-tsi.o
+ 
+ obj-$(CONFIG_SENSORS_OCC)	+= occ/
+ obj-$(CONFIG_PMBUS)		+= pmbus/
+diff --git a/drivers/hwmon/apml-sb-tsi.c b/drivers/hwmon/apml-sb-tsi.c
+new file mode 100755
+index 0000000..a332446
+--- /dev/null
++++ b/drivers/hwmon/apml-sb-tsi.c
+@@ -0,0 +1,275 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * Copyright (C) 2020 MCT Corp.
++ *
++ * Driver for the APML SB Temperature Sensor Interface.
++ * Supported models: SB-TSI
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/i2c.h>
++#include <linux/hwmon.h>
++#include <linux/hwmon-sysfs.h>
++#include <linux/err.h>
++#include <linux/of_device.h>
++#include <linux/regmap.h>
++
++/* The SB-TSI registers */
++#define SB_TSI_UPDATE_RATE_REG        0x04
++#define SB_TSI_TEMP_MSB               0x01
++#define SB_TSI_TEMP_LSB               0x10
++#define SB_TSI_OFFSET_MSB             0x11
++#define SB_TSI_OFFSET_LSB             0x12
++
++static const char *cpu_dts_label = "DTS";
++
++/* this is the number of sensors in the device */
++static const struct i2c_device_id sb_tsi_id[] = {
++    { "sb-tsi" },
++    { }
++};
++
++MODULE_DEVICE_TABLE(i2c, sb_tsi_id);
++
++static const struct of_device_id __maybe_unused sb_tsi_of_match[] = {
++    {
++        .compatible = "apml,sb-tsi"
++    },
++    { },
++};
++MODULE_DEVICE_TABLE(of, sb_tsi_of_match);
++
++static inline long temp_of_sum(s8 hb, u8 lb)
++{
++    return (hb << 3 | lb >> 5) * 125;
++}
++
++static int get_temp(struct regmap *regmap, long *val)
++{
++    unsigned int regval_high;
++    unsigned int regval_low;
++    int ret;
++
++    ret = regmap_read(regmap, SB_TSI_TEMP_MSB, &regval_high);
++    if (ret < 0)
++        return ret;
++
++    ret = regmap_read(regmap, SB_TSI_TEMP_LSB, &regval_low);
++    if (ret < 0)
++        return ret;
++
++    *val = temp_of_sum(regval_high, regval_low);
++    return 0;
++}
++
++static int get_offset(struct regmap *regmap, long *val)
++{
++    unsigned int regval_high;
++    unsigned int regval_low;
++    int ret;
++
++    ret = regmap_read(regmap, SB_TSI_OFFSET_MSB, &regval_high);
++    if (ret < 0)
++        return ret;
++
++    ret = regmap_read(regmap, SB_TSI_OFFSET_LSB, &regval_low);
++    if (ret < 0)
++        return ret;
++
++    *val = temp_of_sum(regval_high, regval_low);
++    return 0;
++}
++
++static int set_offset(struct regmap *regmap, long val)
++{
++    int ret;
++    u8 high_byte;
++    u8 low_byte;
++
++    val = clamp_val(val, -127825, 127825);
++    /* offset value equals to (high_byte << 3 | low_byte >> 5) * 125 */
++    val /= 125;
++    high_byte = val >> 3;
++    low_byte = (val & 0x07) << 5;
++
++    ret = regmap_write(regmap, SB_TSI_OFFSET_MSB, high_byte);
++    if (ret < 0)
++        return ret;
++
++    return regmap_write(regmap, SB_TSI_OFFSET_LSB, low_byte);
++}
++
++static int get_update_interval(struct regmap *regmap, long *val)
++{
++    unsigned int regval;
++    int ret;
++
++    ret = regmap_read(regmap, SB_TSI_UPDATE_RATE_REG, &regval);
++    if (ret < 0)
++        return ret;
++
++    *val = 16000 >> regval;
++    return 0;
++}
++
++static int set_update_interval(struct regmap *regmap, long val)
++{
++    int rate;
++
++    /*
++     * For valid rates, interval can be calculated as
++     *    interval = (1 << (8 - rate)) * 62.5;
++     * Rounded rate is therefore
++     *    rate = 8 - __fls(interval * 8 / (62.5 * 7));
++     * Use clamp_val() to avoid overflows, and to ensure valid input
++     * for __fls.
++     */
++    val = clamp_val(val, 62, 16000) * 10;
++    rate = 8 - __fls((val * 8 / (625 * 7)));
++    return regmap_write(regmap, SB_TSI_UPDATE_RATE_REG, rate);
++}
++
++static int sb_tsi_read_string(struct device *dev, enum hwmon_sensor_types type,
++            u32 attr, int channel, const char **str)
++{
++	struct peci_cputemp *priv = dev_get_drvdata(dev);
++
++	if (attr != hwmon_temp_label)
++		return -EOPNOTSUPP;
++
++	*str = cpu_dts_label;
++
++	return 0;
++}
++
++static int sb_tsi_read(struct device *dev, enum hwmon_sensor_types type,
++               u32 attr, int channel, long *val)
++{
++    struct regmap *regmap = dev_get_drvdata(dev);
++
++    if (type == hwmon_chip) {
++        if (attr == hwmon_chip_update_interval)
++            return get_update_interval(regmap, val);
++        return -EOPNOTSUPP;
++    }
++
++    switch (attr) {
++    case hwmon_temp_input:
++        return get_temp(regmap, val);
++    case hwmon_temp_offset:
++        return get_offset(regmap, val);
++    default:
++        return -EOPNOTSUPP;
++    }
++}
++
++static int sb_tsi_write(struct device *dev, enum hwmon_sensor_types type,
++            u32 attr, int channel, long val)
++{
++    struct regmap *regmap = dev_get_drvdata(dev);
++
++    if (type == hwmon_chip && attr == hwmon_chip_update_interval)
++        return set_update_interval(regmap, val);
++
++    if (type == hwmon_temp && attr == hwmon_temp_offset)
++        return set_offset(regmap, val);
++
++    return -EOPNOTSUPP;
++}
++
++static umode_t sb_tsi_is_visible(const void *data, enum hwmon_sensor_types type,
++                 u32 attr, int channel)
++{
++    switch (type) {
++    case hwmon_chip:
++        switch (attr) {
++        case hwmon_chip_update_interval:
++            return 0644;
++        }
++        break;
++    case hwmon_temp:
++        switch (attr) {
++        case hwmon_temp_input:
++        case hwmon_temp_label:
++            return 0444;
++        case hwmon_temp_offset:
++            return 0644;
++        }
++        break;
++    default:
++        break;
++    }
++    return 0;
++}
++
++static const struct hwmon_channel_info *sb_tsi_info[] = {
++    HWMON_CHANNEL_INFO(chip,
++               HWMON_C_REGISTER_TZ | HWMON_C_UPDATE_INTERVAL),
++    HWMON_CHANNEL_INFO(temp,
++               HWMON_T_LABEL | HWMON_T_INPUT | HWMON_T_OFFSET),
++    NULL
++};
++
++static const struct hwmon_ops sb_tsi_ops = {
++    .is_visible = sb_tsi_is_visible,
++    .read_string = sb_tsi_read_string,
++    .read = sb_tsi_read,
++    .write = sb_tsi_write,
++};
++
++static const struct hwmon_chip_info sb_tsi_chip_info = {
++    .ops = &sb_tsi_ops,
++    .info = sb_tsi_info,
++};
++
++static const struct regmap_config sb_tsi_regmap_config = {
++    .reg_bits = 8,
++    .val_bits = 8,
++};
++
++static int sb_tsi_probe(struct i2c_client *client,
++            const struct i2c_device_id *id)
++{
++    struct device *dev = &client->dev;
++    struct device *hwmon_dev;
++    struct regmap *regmap;
++    int ret;
++
++    regmap = devm_regmap_init_i2c(client, &sb_tsi_regmap_config);
++    if (IS_ERR(regmap)) {
++        dev_err(dev, "failed to allocate register map\n");
++        return PTR_ERR(regmap);
++    }
++
++    /* Set the update rate to 2 Hz */
++    ret = regmap_write(regmap, SB_TSI_UPDATE_RATE_REG, 0x05);
++    if (ret < 0) {
++        dev_err(&client->dev, "using default update rate\n");
++    }
++
++    i2c_set_clientdata(client, regmap);
++
++    hwmon_dev = devm_hwmon_device_register_with_info(dev,
++                             client->name,
++                             regmap,
++                             &sb_tsi_chip_info,
++                             NULL);
++    return PTR_ERR_OR_ZERO(hwmon_dev);
++}
++
++static struct i2c_driver sb_tsi_driver = {
++    .class = I2C_CLASS_HWMON,
++    .driver = {
++        .name    = "sb-tsi",
++        .of_match_table = of_match_ptr(sb_tsi_of_match),
++    },
++    .probe = sb_tsi_probe,
++    .id_table = sb_tsi_id,
++};
++
++module_i2c_driver(sb_tsi_driver);
++
++MODULE_AUTHOR("John Chung <john.chung@mic.com.tw>");
++MODULE_DESCRIPTION("APML SB Temperature Sensor Interface driver");
++MODULE_LICENSE("GPL");
+\ No newline at end of file
+-- 
+2.7.4
+
