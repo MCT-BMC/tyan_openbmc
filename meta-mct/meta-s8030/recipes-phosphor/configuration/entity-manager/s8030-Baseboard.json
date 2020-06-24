@@ -264,6 +264,266 @@
             "Type": "TMP75"
         },
         {
+            "FailSafePercent": 25,
+            "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 0,
+            "Name": "Pid 1",
+            "Type": "Pid.Zone"
+        },
+        {
+            "FailSafePercent": 25,
+            "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 0,
+            "Name": "Pid 2",
+            "Type": "Pid.Zone"
+        },
+        {
+            "FailSafePercent": 25,
+            "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 0,
+            "Name": "Pid 3",
+            "Type": "Pid.Zone"
+        },
+        {
+            "FailSafePercent": 25,
+            "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 0,
+            "Name": "Pid 4",
+            "Type": "Pid.Zone"
+        },
+        {
+            "FailSafePercent": 25,
+            "MinThermalOutput": 25,
+            "CommandSet": 0,
+            "FloorDuty": 0,
+            "Name": "Pid 5",
+            "Type": "Pid.Zone"
+        },
+        {
+            "Connector": {
+                "Name": "CPU Fan Connector 0",
+                "Pwm": 0,
+                "Tachs": [
+                    0
+                ]
+            },
+            "Index": 0,
+            "Name": "CPU_FAN",
+            "Thresholds": [
+                {
+                    "Direction": "less than",
+                    "Name": "lower critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "AspeedFan"
+        },
+        {
+            "Connector": {
+                "Name": "Sys FAN Connector 0",
+                "Pwm": 2,
+                "Tachs": [
+                    2
+                ]
+            },
+            "Index": 2,
+            "Name": "SYS_FAN_1",
+            "Thresholds": [
+                {
+                    "Direction": "less than",
+                    "Name": "lower critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "AspeedFan"
+        },
+        {
+            "Connector": {
+                "Name": "Sys FAN Connector 1",
+                "Pwm": 3,
+                "Tachs": [
+                    3
+                ]
+            },
+            "Index": 3,
+            "Name": "SYS_FAN_2",
+            "Thresholds": [
+                {
+                    "Direction": "less than",
+                    "Name": "lower critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "AspeedFan"
+        },
+        {
+            "Connector": {
+                "Name": "Sys FAN Connector 2",
+                "Pwm": 4,
+                "Tachs": [
+                    4
+                ]
+            },
+            "Index": 4,
+            "Name": "SYS_FAN_3",
+            "Thresholds": [
+                {
+                    "Direction": "less than",
+                    "Name": "lower critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "AspeedFan"
+        },
+        {
+            "Connector": {
+                "Name": "Sys FAN Connector 3",
+                "Pwm": 5,
+                "Tachs": [
+                    5
+                ]
+            },
+            "Index": 5,
+            "Name": "SYS_FAN_4",
+            "Thresholds": [
+                {
+                    "Direction": "less than",
+                    "Name": "lower critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "AspeedFan"
+        },
+        {
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "CPU_FAN"
+            ],
+            "Name": "FSC_CPU_FAN",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 25.0,
+            "Outputs": [
+                "Pwm 1"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 1"
+            ]
+        },
+        {
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "SYS_FAN_1"
+            ],
+            "Name": "FSC_SYS_FAN_1",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 25.0,
+            "Outputs": [
+                "Pwm 3"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 2"
+            ]
+        },
+        {
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "SYS_FAN_2"
+            ],
+            "Name": "FSC_SYS_FAN_2",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 25.0,
+            "Outputs": [
+                "Pwm 4"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 3"
+            ]
+        },
+        {
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "SYS_FAN_3"
+            ],
+            "Name": "FSC_SYS_FAN_3",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 25.0,
+            "Outputs": [
+                "Pwm 5"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 4"
+            ]
+        },
+        {
+            "Class": "fan",
+            "FFGainCoefficient": 1.0,
+            "FFOffCoefficient": 0.0,
+            "ICoefficient": 0.0,
+            "ILimitMax": 0.0,
+            "ILimitMin": 0.0,
+            "Inputs": [
+                "SYS_FAN_4"
+            ],
+            "Name": "FSC_SYS_FAN_4",
+            "OutLimitMax": 100.0,
+            "OutLimitMin": 25.0,
+            "Outputs": [
+                "Pwm 6"
+            ],
+            "PCoefficient": 0.0,
+            "SlewNeg": 0.0,
+            "SlewPos": 0.0,
+            "Type": "Pid",
+            "Zones": [
+                "Pid 5"
+            ]
+        },
+        {
             "Address": "0x58",
             "Bus": 3,
             "Name": "PSU0",

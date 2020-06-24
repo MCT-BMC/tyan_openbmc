@@ -1,19 +1,19 @@
-From dec495f8a67f6c6df54164d944dba59d8126a5f7 Mon Sep 17 00:00:00 2001
+From 79eb95becc55c0511e3cf09b599160d78a7b3a2b Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 343 +++++++++++++++++++++++++++++
- 1 file changed, 343 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 333 +++++++++++++++++++++++++++++
+ 1 file changed, 333 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 new file mode 100755
-index 0000000..d81631d
+index 0000000..2c35a27
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,343 @@
+@@ -0,0 +1,333 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -236,40 +236,30 @@ index 0000000..d81631d
 +&pwm_tacho {
 +    status = "okay";
 +    pinctrl-names = "default";
-+    pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default>;
++    pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default &pinctrl_pwm6_default>;
 +    cpufan@0 {
 +        reg = <0x00>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x00>;
 +    };
 +
-+    cpufan@1 {
-+        reg = <0x01>;
-+        aspeed,fan-tach-ch = /bits/ 8 <0x01>;
-+    };
-+
-+    frontfan@1 {
++    sysfan@1 {
 +        reg = <0x02>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x02>;
 +    };
 +
-+    frontfan@2 {
++    sysfan@2 {
 +        reg = <0x03>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
 +    };
 +
-+    frontfan@3 {
++    sysfan@3 {
 +        reg = <0x04>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
 +    };
 +
-+    rearfan@1 {
-+        reg = <0x04>;
++    sysfan@4 {
++        reg = <0x05>;
 +        aspeed,fan-tach-ch = /bits/ 8 <0x05>;
-+    };
-+
-+    rearfan@2 {
-+        reg = <0x04>;
-+        aspeed,fan-tach-ch = /bits/ 8 <0x06>;
 +    };
 +};
 +
