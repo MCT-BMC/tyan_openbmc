@@ -444,7 +444,7 @@
         {
             "Address": "0x60",
             "Bus": 4,
-            "Reg": "0x8d",
+            "Reg": "0x8e",
             "Class": "MOSTemp",
             "Name": "CPU_CORE_MOSFET",
             "Thresholds": [
