@@ -1,19 +1,19 @@
-From f70d93d0f5dec5e16efbebfb848ec3772dbbf8e1 Mon Sep 17 00:00:00 2001
+From dec495f8a67f6c6df54164d944dba59d8126a5f7 Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 353 +++++++++++++++++++++++++++++
- 1 file changed, 353 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 343 +++++++++++++++++++++++++++++
+ 1 file changed, 343 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 new file mode 100755
-index 0000000..31d0ea1
+index 0000000..d81631d
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,353 @@
+@@ -0,0 +1,343 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -69,10 +69,6 @@ index 0000000..31d0ea1
 +    leds {
 +        compatible = "gpio-leds";
 +
-+        identify {
-+            gpios = <&gpio ASPEED_GPIO(A, 2) GPIO_ACTIVE_LOW>;
-+        };
-+
 +        heartbeat {
 +            gpios = <&gpio ASPEED_GPIO(D, 7) GPIO_ACTIVE_LOW>;
 +        };
@@ -84,12 +80,6 @@ index 0000000..31d0ea1
 +    };
 +    gpio-keys {
 +        compatible = "gpio-keys";
-+
-+        id-button {
-+            label = "id-button";
-+            gpios = <&gpio ASPEED_GPIO(F, 5) GPIO_ACTIVE_LOW>;
-+            linux,code = <ASPEED_GPIO(F, 5)>;
-+        };
 +
 +    };
 +
@@ -294,7 +284,7 @@ index 0000000..31d0ea1
 +};
 +
 +&lpc_bmc {
-+    compatible = "aspeed,ast2500-lpc-bmc", "simple-mfd", "syscon";		
++    compatible = "aspeed,ast2500-lpc-bmc", "simple-mfd", "syscon";
 +    reg = <0x0 0x80>;
 +    reg-io-width = <4>;
 +    #address-cells = <1>;

@@ -34,11 +34,6 @@
             "direction": "out"
         },
         {
-            "name": "ID_BUTTON",
-            "pin": "F5",
-            "direction": "both"
-        },
-        {
             "name": "BUTTON_LOCK_PIN",
             "pin": "F2",
             "direction": "out"
