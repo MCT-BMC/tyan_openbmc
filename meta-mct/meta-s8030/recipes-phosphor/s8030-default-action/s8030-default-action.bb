@@ -12,7 +12,9 @@ SRC_URI = " \
            file://initFruFlag.service \
            file://initFruFlag.sh \
            file://writeFRU.sh \
-           file://relinkLan.sh"
+           file://relinkLan.sh \
+           file://blinkUid.sh \
+           "
 
 DEPENDS = "systemd"
 RDEPENDS_${PN} = "bash"
@@ -27,4 +29,5 @@ do_install() {
     install -m 0755 ${S}initFruFlag.sh ${D}/${sbindir}/
     install -m 0755 ${S}writeFRU.sh ${D}/${sbindir}/
     install -m 0755 ${S}relinkLan.sh ${D}/${sbindir}/
+    install -m 0755 ${S}blinkUid.sh ${D}/${sbindir}/
 }

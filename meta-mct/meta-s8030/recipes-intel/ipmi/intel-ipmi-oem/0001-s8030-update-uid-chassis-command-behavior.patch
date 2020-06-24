@@ -1,0 +1,106 @@
+From bd32c33585a2f0e4f37f820ae87b981f2e4e9635 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Fri, 12 Jun 2020 15:48:28 +0800
+Subject: [PATCH] s8030 update uid chassis command behavior
+
+---
+ src/chassiscommands.cpp | 60 ++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 57 insertions(+), 3 deletions(-)
+ mode change 100644 => 100755 src/chassiscommands.cpp
+
+diff --git a/src/chassiscommands.cpp b/src/chassiscommands.cpp
+old mode 100644
+new mode 100755
+index 1af5b28..7915ecd
+--- a/src/chassiscommands.cpp
++++ b/src/chassiscommands.cpp
+@@ -180,23 +180,72 @@ void createIdentifyTimer()
+     }
+ }
+ 
++int execmd(char* cmd,char* result) {
++    char buffer[128];
++    FILE* pipe = popen(cmd, "r");
++    if (!pipe)
++        return -1;
++
++    while(!feof(pipe)) {
++        if(fgets(buffer, 128, pipe)){
++            strcat(result,buffer);
++        }
++    }
++    pclose(pipe);
++    return 0;
++}
++
++void pressUidButton()
++{
++    system("/usr/bin/gpioset gpiochip0 45=0");
++    usleep(100000);
++    system("/usr/bin/gpioset gpiochip0 45=1");
++    system("/usr/bin/gpioget gpiochip0 45");
++}
++
+ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
+                                     std::optional<uint8_t> force)
+ {
++    char command[100],temp[50];
++    int rc=0;
++    uint8_t ledStatus = 0;
++
+     uint8_t identifyInterval = interval.value_or(defaultIdentifyTimeOut);
+     bool forceIdentify = force.value_or(0) & 0x01;
+ 
+-    enclosureIdentifyLed(ledIDOnObj, false);
++    //enclosureIdentifyLed(ledIDOnObj, false);
+     identifyTimer->stop();
+ 
++    // check UID LED status high or low
++    memset(command,0,sizeof(command));
++    sprintf(command, "/usr/bin/gpioget gpiochip0 2");
++    memset(temp, 0, sizeof(temp));
++    rc = execmd((char *)command, temp);
++    ledStatus = strtol(temp,NULL,10);
++
+     if (identifyInterval || forceIdentify)
+     {
+-        enclosureIdentifyLed(ledIDBlinkObj, true);
++        //enclosureIdentifyLed(ledIDBlinkObj, true);
+         if (forceIdentify)
+         {
++            if ((int)ledStatus == 1)
++            {
++                pressUidButton();
++            }
++
+             chassisIDState = ChassisIDState::indefinite;
+             return ipmi::responseSuccess();
+         }
++
++        if ((int)ledStatus == 0)
++        {
++            pressUidButton();
++            usleep(500000);
++        }
++
++        snprintf(command,sizeof(command),"/usr/sbin/blinkUid.sh %d &",(int)identifyInterval);
++        system(command);
++
+         chassisIDState = ChassisIDState::temporary;
+         // start the timer
+         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
+@@ -205,8 +254,13 @@ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
+     }
+     else
+     {
++        if ((int)ledStatus == 0)
++        {
++            pressUidButton();
++        }
++
+         chassisIDState = ChassisIDState::off;
+-        enclosureIdentifyLed(ledIDBlinkObj, false);
++        //enclosureIdentifyLed(ledIDBlinkObj, false);
+     }
+     return ipmi::responseSuccess();
+ }
