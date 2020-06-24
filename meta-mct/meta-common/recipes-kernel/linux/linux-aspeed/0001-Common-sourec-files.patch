@@ -1,0 +1,47 @@
+From c9daaa5bcb0273deff3a95ad7649065d6e596698 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 15 May 2019 18:30:21 +0800
+Subject: [PATCH 1/1] Update kernel patches
+
+---
+ arch/arm/boot/dts/aspeed-g5.dtsi         | 6 ++++++
+ include/dt-bindings/clock/aspeed-clock.h | 1 +
+ 2 files changed, 7 insertions(+)
+ mode change 100644 => 100755 arch/arm/boot/dts/aspeed-g5.dtsi
+ mode change 100644 => 100755 include/dt-bindings/clock/aspeed-clock.h
+
+diff --git a/arch/arm/boot/dts/aspeed-g5.dtsi b/arch/arm/boot/dts/aspeed-g5.dtsi
+old mode 100644
+new mode 100755
+index 6580b23..009f4a0
+--- a/arch/arm/boot/dts/aspeed-g5.dtsi
++++ b/arch/arm/boot/dts/aspeed-g5.dtsi
+@@ -545,6 +545,12 @@
+ 				#size-cells = <1>;
+ 				ranges = <0 0x1e78a000 0x1000>;
+ 			};
++			hbled: hbled@1e6c0000 {
++				compatible = "aspeed,ast2500-hbled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <0x1e6c0000 0x1000>;
++			};
+ 		};
+ 	};
+ };
+diff --git a/include/dt-bindings/clock/aspeed-clock.h b/include/dt-bindings/clock/aspeed-clock.h
+old mode 100644
+new mode 100755
+index 9ff4f6e..6943854
+--- a/include/dt-bindings/clock/aspeed-clock.h
++++ b/include/dt-bindings/clock/aspeed-clock.h
+@@ -52,5 +52,6 @@
+ #define ASPEED_RESET_I2C		7
+ #define ASPEED_RESET_AHB		8
+ #define ASPEED_RESET_CRT1		9
++#define ASPEED_RESET_VIDEO		10
+ 
+ #endif
+-- 
+2.7.4
+
