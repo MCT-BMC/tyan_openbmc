@@ -1,0 +1,345 @@
+From ecb3a3eeca826a9541034d947c4ed76fdb779d02 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 19 Jun 2020 11:44:50 +0800
+Subject: [PATCH] hwmon: Add MCT OCP sensors driver
+
+Support MCT OCP sensors in OCP card.
+This providing the reading for temperature and label which support auto identify.
+---
+ drivers/hwmon/Kconfig   |   7 ++
+ drivers/hwmon/Makefile  |   1 +
+ drivers/hwmon/mct-ocp.c | 291 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 299 insertions(+)
+ create mode 100755 drivers/hwmon/mct-ocp.c
+
+diff --git a/drivers/hwmon/Kconfig b/drivers/hwmon/Kconfig
+index 008c28c..e7097e7 100755
+--- a/drivers/hwmon/Kconfig
++++ b/drivers/hwmon/Kconfig
+@@ -1957,6 +1957,13 @@ config SENSORS_APML_SB_TSI
+ 	  If you say yes here you get support for the APML SB Temperature
+ 	  Sensor Interface.
+ 
++config SENSORS_MCT_OCP
++	tristate "MCT OCP"
++	depends on I2C
++	help
++	  If you say yes here you get support for the OCP card temperature
++	  sensor.
++
+ if ACPI
+ 
+ comment "ACPI drivers"
+diff --git a/drivers/hwmon/Makefile b/drivers/hwmon/Makefile
+index 4eab595..68bb6fb 100755
+--- a/drivers/hwmon/Makefile
++++ b/drivers/hwmon/Makefile
+@@ -180,6 +180,7 @@ obj-$(CONFIG_SENSORS_WM831X)	+= wm831x-hwmon.o
+ obj-$(CONFIG_SENSORS_WM8350)	+= wm8350-hwmon.o
+ obj-$(CONFIG_SENSORS_XGENE)	+= xgene-hwmon.o
+ obj-$(CONFIG_SENSORS_APML_SB_TSI)	+= apml-sb-tsi.o
++obj-$(CONFIG_SENSORS_MCT_OCP)	+= mct-ocp.o
+ 
+ obj-$(CONFIG_SENSORS_OCC)	+= occ/
+ obj-$(CONFIG_PMBUS)		+= pmbus/
+diff --git a/drivers/hwmon/mct-ocp.c b/drivers/hwmon/mct-ocp.c
+new file mode 100755
+index 0000000..233bccc
+--- /dev/null
++++ b/drivers/hwmon/mct-ocp.c
+@@ -0,0 +1,291 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * Copyright (C) 2020 MCT Corp.
++ *
++ * Driver for the OCP card temperature sensor.
++ * Supported models: OCP card in ID list
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/i2c.h>
++#include <linux/hwmon.h>
++#include <linux/hwmon-sysfs.h>
++#include <linux/err.h>
++#include <linux/of_device.h>
++#include <linux/regmap.h>
++
++enum ocp_type {
++    default_ocp,
++    intel_xxv710_da1,
++    mellanox_cx4411a
++};
++
++struct ocp_data {
++    struct i2c_client       *client;
++    struct regmap           *regmap;
++    enum ocp_type           kind;
++};
++
++/* The OCP registers */
++#define OCP_OFFSET_00_REG             0x00
++#define OCP_OFFSET_01_REG             0x01
++#define OCP_OFFSET_02_REG             0x02
++#define OCP_OFFSET_10_REG             0x10
++#define OCP_OFFSET_11_REG             0x11
++#define OCP_MANUFACTURER_ID_REG       0xFE
++#define OCP_DEVICE_ID_REG             0xFF
++
++#define INTEL_MANUFACTURER_ID         0x55
++#define XXV710_DA1_DEVICE_ID          0x21
++#define MELLANOX_MANUFACTURER_ID      0x19
++#define CX4411A_DEVICE_ID             0x15
++
++// static const char *cpu_dts_label = "DTS";
++
++static const char *OCP_DEFAULT = "DEFAULT";
++static const char *OCP_INTEL_XXV710_DA1 = "INTET-XXV710-DA1";
++static const char *OCP_MELLANOX_CX4411A = "MELLANOX-CX4411A";
++
++
++/* this is the number of sensors in the device */
++static const struct i2c_device_id ocp_id[] = {
++    { "default_ocp", default_ocp, },
++    { "intel_xxv710_da1", intel_xxv710_da1, },
++    { "mellanox_cx4411a", mellanox_cx4411a, },
++    {}
++};
++
++MODULE_DEVICE_TABLE(i2c, ocp_id);
++
++static const struct of_device_id __maybe_unused ocp_of_match[] = {
++    {
++        .compatible = "mct,ocp",
++        .data = default_ocp
++    },
++    { },
++};
++MODULE_DEVICE_TABLE(of, ocp_of_match);
++
++static int get_temp(struct ocp_data *data, long *val, int reg_high, int reg_low)
++{
++    unsigned int regval_high;
++    unsigned int regval_low;
++    unsigned int offset;
++    int ret;
++    /**
++     *  @param tmp75 algorithm (regval_high * 1000)
++     *  @param tmp421 algorithm ((((regval_high << 8| regval_low) & ~0xf)* 1000 + 128) / 256)
++     */
++    ret = regmap_read(data->regmap, reg_high, &regval_high);
++    if (ret < 0)
++        return ret;
++    ret = regmap_read(data->regmap, reg_low, &regval_low);
++    if (ret < 0)
++        return ret;
++
++    switch(data->kind){
++    case intel_xxv710_da1:
++        offset=0;
++        *val = ((((regval_high << 8| regval_low) & ~0xf)* 1000 + 128) / 256) + offset;
++        break;
++    case mellanox_cx4411a:
++        offset=0;
++        *val = ((((regval_high << 8| regval_low) & ~0xf)* 1000 + 128) / 256) + offset;
++        break;
++    default:
++        break;
++    }
++
++    return 0;
++}
++
++static int get_ocp_device(struct ocp_data *data)
++{
++    enum ocp_type kind;
++    unsigned int manufacturer;
++    unsigned int device;
++    int ret;
++
++    ret = regmap_read(data->regmap, OCP_MANUFACTURER_ID_REG, &manufacturer);
++    if (ret < 0)
++        return ret;
++
++    ret = regmap_read(data->regmap, OCP_DEVICE_ID_REG, &device);
++    if (ret < 0)
++        return ret;
++
++    switch(manufacturer){
++    case INTEL_MANUFACTURER_ID:
++        switch (device) {
++        case XXV710_DA1_DEVICE_ID:
++            data->kind = intel_xxv710_da1;
++            break;
++        default:
++            data->kind = default_ocp;
++            break;
++        }
++        break;
++    case MELLANOX_MANUFACTURER_ID:
++        switch (device) {
++        case CX4411A_DEVICE_ID:
++            data->kind = mellanox_cx4411a;
++            break;
++        default:
++            data->kind = default_ocp;
++            break;
++        }
++        break;
++    default:
++        data->kind = default_ocp;
++        break;
++    }
++
++    return 0;
++}
++
++static int ocp_read_string(struct device *dev, enum hwmon_sensor_types type,
++            u32 attr, int channel, const char **str)
++{
++    struct ocp_data *data = dev_get_drvdata(dev);
++
++    if (attr != hwmon_temp_label)
++        return -EOPNOTSUPP;
++
++    switch(data->kind){
++    case intel_xxv710_da1:
++         *str = OCP_INTEL_XXV710_DA1;
++        break;
++    case mellanox_cx4411a:
++         *str = OCP_MELLANOX_CX4411A;
++        break;
++    default:
++        *str = OCP_DEFAULT;
++        break;
++    }
++
++    return 0;
++}
++
++static int ocp_read(struct device *dev, enum hwmon_sensor_types type,
++               u32 attr, int channel, long *val)
++{
++    struct ocp_data *data = dev_get_drvdata(dev);
++    int ret;
++
++    if(data->kind == default_ocp){
++        get_ocp_device(data);
++    }
++
++    switch (attr) {
++    case hwmon_temp_input:
++        switch(data->kind){
++        case intel_xxv710_da1:
++            ret=get_temp(data, val,OCP_OFFSET_00_REG,OCP_OFFSET_00_REG);
++            break;
++        case mellanox_cx4411a:
++            ret=get_temp(data, val,OCP_OFFSET_01_REG,OCP_OFFSET_11_REG);
++            break;
++        default:
++            return -EINVAL;
++        }
++        return ret;
++    default:
++        return -EOPNOTSUPP;
++    }
++}
++
++static umode_t ocp_is_visible(const void *data, enum hwmon_sensor_types type,
++                 u32 attr, int channel)
++{
++    switch (type) {
++    case hwmon_temp:
++        switch (attr) {
++        case hwmon_temp_input:
++        case hwmon_temp_label:
++            return 0444;
++        }
++        break;
++    default:
++        break;
++    }
++    return 0;
++}
++
++static const struct hwmon_channel_info *ocp_info[] = {
++    HWMON_CHANNEL_INFO(temp,
++               HWMON_T_LABEL | HWMON_T_INPUT),
++    NULL
++};
++
++static const struct hwmon_ops ocp_ops = {
++    .is_visible = ocp_is_visible,
++    .read_string = ocp_read_string,
++    .read = ocp_read,
++};
++
++static const struct hwmon_chip_info ocp_chip_info = {
++    .ops = &ocp_ops,
++    .info = ocp_info,
++};
++
++static const struct regmap_config ocp_regmap_config = {
++    .reg_bits = 8,
++    .val_bits = 8,
++};
++
++static int ocp_probe(struct i2c_client *client,
++            const struct i2c_device_id *id)
++{
++    struct device *dev = &client->dev;
++    struct device *hwmon_dev;
++    struct ocp_data *data;
++    enum ocp_type kind;
++
++    if (client->dev.of_node){
++        kind = (enum ocp_type)of_device_get_match_data(&client->dev);
++    }
++    else{
++        kind = id->driver_data;
++    }
++
++    if (!i2c_check_functionality(client->adapter,
++        I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA))
++    return -EIO;
++
++    data = devm_kzalloc(dev, sizeof(struct ocp_data), GFP_KERNEL);
++    if (!data)
++        return -ENOMEM;
++
++    data->client = client;
++    data->kind = kind;
++
++    data->regmap = devm_regmap_init_i2c(client, &ocp_regmap_config);
++    if (IS_ERR(data->regmap)) {
++        dev_err(dev, "failed to allocate register map\n");
++        return PTR_ERR(data->regmap);
++    }
++
++    hwmon_dev = devm_hwmon_device_register_with_info(dev,
++                             client->name,
++                             data,
++                             &ocp_chip_info,
++                             NULL);
++    return PTR_ERR_OR_ZERO(hwmon_dev);
++}
++
++static struct i2c_driver ocp_driver = {
++    .class = I2C_CLASS_HWMON,
++    .driver = {
++        .name    = "ocp",
++        .of_match_table = of_match_ptr(ocp_of_match),
++    },
++    .probe = ocp_probe,
++    .id_table = ocp_id,
++};
++
++module_i2c_driver(ocp_driver);
++
++MODULE_AUTHOR("John Chung <john.chung@mic.com.tw>");
++MODULE_DESCRIPTION("MCT OCP card temperature sensor driver");
++MODULE_LICENSE("GPL");
+\ No newline at end of file
+-- 
+2.7.4
+
