@@ -202,6 +202,10 @@
         compatible = "nuvoton,nct7802";
         reg = <0x28>;
     };
+    ocp@1f {
+        compatible = "mct,ocp";
+        reg = <0x1f>;
+    };
 };
 
 &i2c6 {

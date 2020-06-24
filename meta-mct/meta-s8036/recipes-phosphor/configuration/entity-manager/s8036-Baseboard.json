@@ -506,6 +506,21 @@
             "Type": "MOSTempSensor"
         },
         {
+            "Address": "0x1f",
+            "Bus": 5,
+            "Name": "NIC_Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "temp1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 100
+                }
+            ],
+            "Type": "TMP75"
+        },
+        {
             "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,
