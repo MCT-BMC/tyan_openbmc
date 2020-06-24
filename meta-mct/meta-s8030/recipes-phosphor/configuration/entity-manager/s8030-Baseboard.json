@@ -264,6 +264,86 @@
             "Type": "TMP75"
         },
         {
+            "Address": "0x4c",
+            "Bus": 5,
+            "Name": "X550",
+            "Name1": "X550_TEMP",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "temp2",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 105
+                }
+            ],
+            "Type": "TMP411"
+        },
+        {
+            "Address": "0x60",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU_CORE_MOSFET",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x62",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "CPU_SOC_MOSFET",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x64",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "DIMM_MOSFET_1",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
+            "Address": "0x65",
+            "Bus": 4,
+            "Reg": "0x8d",
+            "Class": "MOSTemp",
+            "Name": "DIMM_MOSFET_2",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 110
+                }
+            ],
+            "Type": "MOSTempSensor"
+        },
+        {
             "FailSafePercent": 25,
             "MinThermalOutput": 25,
             "CommandSet": 0,

@@ -1,0 +1,27 @@
+From da49b1c51eec20ee6a4f2bbca62283cd6ba9246c Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 24 Jun 2020 11:11:28 +0800
+Subject: [PATCH] add tmp411 to sensor types
+
+---
+ include/devices.hpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+ mode change 100644 => 100755 include/devices.hpp
+
+diff --git a/include/devices.hpp b/include/devices.hpp
+old mode 100644
+new mode 100755
+index 4fa2b70..f92c025
+--- a/include/devices.hpp
++++ b/include/devices.hpp
+@@ -92,6 +92,10 @@ const boost::container::flat_map<const char*, ExportTemplate, CmpStr>
+                                    "/sys/bus/i2c/devices/i2c-$Bus/new_device")},
+          {"TMP175", ExportTemplate("tmp175 $Address",
+                                    "/sys/bus/i2c/devices/i2c-$Bus/new_device")},
++         {"TMP401", ExportTemplate("tmp401 $Address",
++                                   "/sys/bus/i2c/devices/i2c-$Bus/new_device")},
++         {"TMP411", ExportTemplate("tmp411 $Address",
++                                   "/sys/bus/i2c/devices/i2c-$Bus/new_device")},
+          {"TMP421", ExportTemplate("tmp421 $Address",
+                                    "/sys/bus/i2c/devices/i2c-$Bus/new_device")},
+          {"TMP441", ExportTemplate("tmp441 $Address",

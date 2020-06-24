@@ -1,0 +1,38 @@
+From 358137f257b0b16b200de478f4df4bef3c7ff5ca Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 24 Jun 2020 11:16:48 +0800
+Subject: [PATCH] add tmp411 to sensor types
+
+---
+ src/HwmonTempMain.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 0e9b2cb..36b6b0e 100755
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -39,12 +39,14 @@
+ static constexpr bool DEBUG = false;
+ 
+ namespace fs = std::filesystem;
+-static constexpr std::array<const char*, 8> sensorTypes = {
++static constexpr std::array<const char*, 10> sensorTypes = {
+     "xyz.openbmc_project.Configuration.EMC1413",
+     "xyz.openbmc_project.Configuration.MAX31725",
+     "xyz.openbmc_project.Configuration.MAX31730",
+     "xyz.openbmc_project.Configuration.TMP112",
+     "xyz.openbmc_project.Configuration.TMP175",
++    "xyz.openbmc_project.Configuration.TMP401",
++    "xyz.openbmc_project.Configuration.TMP411",
+     "xyz.openbmc_project.Configuration.TMP421",
+     "xyz.openbmc_project.Configuration.TMP441",
+     "xyz.openbmc_project.Configuration.TMP75"};
+@@ -220,7 +222,7 @@ void createSensors(
+                                              findHysteresisVal->second);
+                 }
+ 
+-                if (deviceName != "14-001f"){
++                if ((deviceName != "14-001f") && (sensorName != "X550")){
+                     auto& sensor = sensors[sensorName];
+                     sensor = nullptr;
+                     sensor = std::make_unique<HwmonTempSensor>(
