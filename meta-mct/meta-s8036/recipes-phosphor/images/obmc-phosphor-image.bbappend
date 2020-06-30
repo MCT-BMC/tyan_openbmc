@@ -32,3 +32,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s8036 =   " libgpiod \
                                           ethtool \
                                           mct-dcmi-power \
                                         "
+OBMC_IMAGE_EXTRA_INSTALL_remove = " sync-pch-rtc \
+                                    "

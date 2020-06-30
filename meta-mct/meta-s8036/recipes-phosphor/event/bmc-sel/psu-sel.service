@@ -1,7 +1,7 @@
 [Unit]
 Description=Check and generate PSU SEL
 StopWhenUnneeded=false
-After=obmc-sync-pch-rtc.service
+After=sync-time-initial.service
 After=xyz.openbmc_project.psufaultsensor.service
 
 [Service]

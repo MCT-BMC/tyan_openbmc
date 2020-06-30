@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     }
 
     //Initialize for pin which used in sysfs
-    if(!popen("/usr/sbin/gpio-initial.sh", "r"))
+    if(system("/usr/sbin/gpio-initial.sh"))
     {
         std::cerr << "Couldn't start gpio initial for sysfs." << std::endl;
     }
