@@ -708,8 +708,7 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_Air_Inlet",
-                "PCH_Temp"
+                "SYS_Air_Inlet"
             ],
             "Name": "FSC_PCH",
             "SetPointH": 77,

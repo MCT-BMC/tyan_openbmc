@@ -12,14 +12,16 @@ SRC_URI = " \
            file://initFruFlag.service \
            file://initFruFlag.sh \
            file://writeFRU.sh \
-           file://relinkLan.sh"
+           file://relinkLan.sh \
+           file://sync-time-initial.py"
 
 DEPENDS = "systemd"
 RDEPENDS_${PN} = "bash"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE_${PN} = " \
-                         initFruFlag.service"
+                         initFruFlag.service \
+                         sync-time-initial.service"
 
 
 do_install() {
@@ -27,4 +29,5 @@ do_install() {
     install -m 0755 ${S}initFruFlag.sh ${D}/${sbindir}/
     install -m 0755 ${S}writeFRU.sh ${D}/${sbindir}/
     install -m 0755 ${S}relinkLan.sh ${D}/${sbindir}/
+    install -m 0755 ${S}sync-time-initial.py ${D}/${sbindir}/
 }

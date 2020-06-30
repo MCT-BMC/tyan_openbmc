@@ -56,7 +56,7 @@ index 0000000..ceff86f
 +Description=IPMI defined ac lost Sensor
 +StopWhenUnneeded=false
 +After=xyz.openbmc_project.Logging.IPMI.service
-+After=obmc-sync-pch-rtc.service
++After=sync-time-initial.service
 +
 +[Service]
 +Restart=always
