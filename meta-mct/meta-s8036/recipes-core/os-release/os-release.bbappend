@@ -4,7 +4,7 @@
 python() {
         d.setVar('VERSION', "v0.01-00-s8036")
         d.setVar('VERSION_ID', "v0.01-00-s8036")
-        d.setVar('BMC_NAME', "GT62I-B7106")
+        d.setVar('BMC_NAME', "S8036")
 }
 
 OS_RELEASE_FIELDS_append += "BMC_NAME"
