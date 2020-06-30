@@ -3,45 +3,22 @@
 set -e
 
 POWER_CMD="/usr/bin/obmcutil"
-GPIO_SET_CMD="/usr/bin/gpioset"
+REGISTER_CMD="/sbin/devmem"
 IMAGE_FILE=$1
-GPIOJ0=72
-GPIOJ1=73
+HW_STRAP_REGISTER=0x1e6e2070
+HW_STRAP_CLEAR_REGISTER=0x1e6e207C
+SPI_MODE_bit_1=0x00001000
+SPI_MODE_bit_2=0x00002000
 
-IPMB_OBJ="xyz.openbmc_project.Ipmi.Channel.Ipmb"
-IPMB_PATH="/xyz/openbmc_project/Ipmi/Channel/Ipmb"
-IPMB_INTF="org.openbmc.Ipmb"
-IPMB_CALL="sendRequest yyyyay"
-ME_CMD_RECOVER="1 0x2e 0 0xdf 4 0x57 0x01 0x00 0x01"
-ME_CMD_RESET="1 6 0 0x2 0"
 SPI_DEV="1e630000.spi"
 SPI_PATH="/sys/bus/platform/drivers/aspeed-smc"
 
 MTD_MAX=10
 
-set_gpio_value()
+set_ast2500_register()
 {
-    $GPIO_SET_CMD gpiochip0 $1=$2
-}
-
-set_gpio_to_bmc()
-{
-    echo "switch bios GPIO to bmc"
-
-    set_gpio_value $GPIOJ0 0
-    set_gpio_value $GPIOJ1 1
-
-    return 0
-}
-
-set_gpio_to_pch()
-{
-    echo "switch bios GPIO to pch"
-
-    set_gpio_value $GPIOJ0 1
-    set_gpio_value $GPIOJ1 0
-
-    return 0
+    original_register=`$REGISTER_CMD $1`
+    $REGISTER_CMD $1 32 $(($original_register|$2))
 }
 
 echo "Bios upgrade started at $(date)"
@@ -66,15 +43,10 @@ then
 fi
 echo "Host server powered off"
 
-#Set ME to recovery mode
-echo "Set ME to recovery mode"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RECOVER
-sleep 5
-
-#Flip GPIO to access SPI flash used by host.
-echo "Set GPIO to access SPI flash from BMC used by host"
-set_gpio_to_bmc
-sleep 5
+echo "Set SPI to master mode"
+set_ast2500_register $HW_STRAP_CLEAR_REGISTER $SPI_MODE_bit_2
+set_ast2500_register $HW_STRAP_REGISTER $SPI_MODE_bit_1
+sleep 1
 
 #Bind spi driver to access flash
 echo "bind aspeed-smc spi driver"
@@ -106,15 +78,9 @@ echo "Unbind aspeed-smc spi driver"
 echo -n $SPI_DEV > $SPI_PATH/unbind
 sleep 10
 
-#Flip GPIO back for host to access SPI flash
-echo "Set GPIO $GPIO back for host to access SPI flash"
-set_gpio_to_pch
-sleep 5
-
-#Reset ME to boot from new bios
-echo "Reset ME to boot from new bios"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RESET
-sleep 10
+echo "Set SPI to Pass-through mode"
+set_ast2500_register $HW_STRAP_REGISTER $(($SPI_MODE_bit_1|$SPI_MODE_bit_2))
+sleep 1
 
 #Power on server
 echo "Power on server"

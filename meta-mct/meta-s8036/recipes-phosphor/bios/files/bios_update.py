@@ -22,12 +22,11 @@ DOWNLOAD_INTF = 'org.openbmc.managers.Download'
 HOST_DBUS_NAME = 'xyz.openbmc_project.State.Host'
 HOST_OBJ_NAME =  '/xyz/openbmc_project/state/host0'
 
-IPMB_OBJ="xyz.openbmc_project.Ipmi.Channel.Ipmb"
-IPMB_PATH="/xyz/openbmc_project/Ipmi/Channel/Ipmb"
-IPMB_INTF="org.openbmc.Ipmb"
-IPMB_CALL="sendRequest yyyyay"
-ME_CMD_RECOVER="1 0x2e 0 0xdf 4 0x57 0x01 0x00 0x01"
-ME_CMD_RESET="1 6 0 0x2 0"
+REGISTER_CMD="/sbin/devmem"
+HW_STRAP_REGISTER=0x1e6e2070
+HW_STRAP_CLEAR_REGISTER=0x1e6e207C
+SPI_MODE_bit_1=0x00001000
+SPI_MODE_bit_2=0x00002000
 
 UPDATE_PATH = '/run/initramfs'
 
@@ -56,6 +55,16 @@ def save_fw_env():
     if (lines < 1 or lines > 2 or (lines == 2 and files[0] != files[1])):
             raise Exception("Error parsing %s\n" % fw_env)
     shutil.copyfile(files[0], os.path.join(UPDATE_PATH, "image-u-boot-env"))
+
+def set_ast2500_register(address, set_register):
+    process=subprocess.Popen('%s %d'
+        %(REGISTER_CMD,address),
+        stdout=subprocess.PIPE,
+        shell=True)
+    original_register=process.communicate()
+    subprocess.Popen('%s %d 32 %d'
+        %(REGISTER_CMD,address,(int(original_register[0], base=16)|set_register))
+        ,shell=True)
 
 class BiosFlashControl(DbusProperties, DbusObjectManager):
     def __init__(self, bus, name):
@@ -242,12 +251,9 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
     def SwitchSPIInterface(self):
         self.Set(DBUS_NAME, "status", "Connect SPI interface to BMC")
         
-        # into recovery mode, no recovery mode pin on s8036
-        #subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
-        
-        # connect BMC to SPI Flash 
-        subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
-        subprocess.Popen('gpioset gpiochip0 73=1', shell=True)
+        # set SPI to master mode
+        set_ast2500_register(HW_STRAP_CLEAR_REGISTER,SPI_MODE_bit_2)
+        set_ast2500_register(HW_STRAP_REGISTER,SPI_MODE_bit_1)
 
         # Load the ASpeed SMC driver
         subprocess.Popen('echo 1e630000.spi > /sys/bus/platform/drivers/aspeed-smc/bind', shell=True)
@@ -260,9 +266,8 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         # unLoad the ASpeed SMC driver
         subprocess.Popen('echo 1e630000.spi > /sys/bus/platform/drivers/aspeed-smc/unbind', shell=True)
         
-        # connect PCH to SPI Flash 
-        subprocess.Popen('gpioget gpiochip0 72', shell=True)
-        subprocess.Popen('gpioget gpiochip0 73', shell=True)
+        # set SPI to Pass-through mode
+        set_ast2500_register(HW_STRAP_REGISTER,(SPI_MODE_bit_1|SPI_MODE_bit_2))
 
         #self.update_process = None
         if self.update_process:
@@ -278,17 +283,15 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         DBUS_NAME, in_signature='', out_signature='')
     def SetMERecoveryMode(self):
         #Set ME to recovery mode
-        subprocess.Popen('busctl call %s %s %s %s %s' %(IPMB_OBJ,IPMB_PATH,IPMB_INTF,IPMB_CALL,ME_CMD_RECOVER), shell=True)
 
-        self.Set(DBUS_NAME, "status", "Set Intel ME To Recovery Mode")
+        self.Set(DBUS_NAME, "status", "")
 
     @dbus.service.method(
         DBUS_NAME, in_signature='', out_signature='')
     def SetMEReset(self):
         #Reset ME to boot from new bios
-        subprocess.Popen('busctl call %s %s %s %s %s' %(IPMB_OBJ,IPMB_PATH,IPMB_INTF,IPMB_CALL,ME_CMD_RESET), shell=True)
 
-        self.Set(DBUS_NAME, "status", "Set Intel ME To Reset")
+        self.Set(DBUS_NAME, "status", "")
 
 if __name__ == '__main__':
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
