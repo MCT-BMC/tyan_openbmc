@@ -1,19 +1,19 @@
-From f1b69dcd803cbc8572a5f8ab4fb0b294bfdf1908 Mon Sep 17 00:00:00 2001
+From b405b4b9d07679f1f728b6c8760eb13b8779c83b Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 338 +++++++++++++++++++++++++++++
- 1 file changed, 338 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 329 +++++++++++++++++++++++++++++
+ 1 file changed, 329 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 new file mode 100755
-index 0000000..6e30336
+index 0000000..615be40
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,338 @@
+@@ -0,0 +1,329 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -44,15 +44,6 @@ index 0000000..6e30336
 +            reg = <0x98000000 0x04000000>; /* 64M */
 +        };
 +
-+        vga_memory: framebuffer@7f000000 {
-+            no-map;
-+            reg = <0x7f000000 0x01000000>;
-+        };
-+        safs_memory: region@30000000 {
-+            no-map;
-+            reg = <0x30000000 0x08000000>; /* 128M */
-+        };
-+
 +        gfx_memory: framebuffer {
 +            size = <0x04000000>;
 +            alignment = <0x01000000>;
@@ -60,11 +51,6 @@ index 0000000..6e30336
 +            reusable;
 +        };
 +    };
-+
-+        vga-shared-memory {
-+            compatible = "aspeed,ast2500-vga-sharedmem";
-+            reg = <0x9ff00000 0x100000>;
-+        };
 +
 +    leds {
 +        compatible = "gpio-leds";
@@ -81,6 +67,11 @@ index 0000000..6e30336
 +    gpio-keys {
 +        compatible = "gpio-keys";
 +
++        prochot0 {
++            label = "prochot0";
++            gpios = <&gpio ASPEED_GPIO(H, 4) GPIO_ACTIVE_LOW>;
++            linux,code = <ASPEED_GPIO(H, 4)>;
++        };
 +    };
 +
 +    iio-hwmon {

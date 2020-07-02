@@ -4,6 +4,7 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s8030 = " libgpiod \
                                           gpio-initial \
                                           s8030-powerctrl \
                                           s8030-default-action \
+                                          cpu-state \ 
                                           phosphor-ipmi-ipmb \
                                           entity-manager \
                                           dbus-sensors \

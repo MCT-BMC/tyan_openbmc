@@ -13,7 +13,6 @@ SRC_URI += "file://0001-Add-web-entry-for-sol-log-download.patch \
 
 # Enable CPU Log and Raw PECI support
 EXTRA_OECMAKE += "-DBMCWEB_ENABLE_REDFISH_CPU_LOG=ON"
-EXTRA_OECMAKE += "-DBMCWEB_ENABLE_REDFISH_RAW_PECI=ON"
 
 # Enable Redfish BMC Journal support
 EXTRA_OECMAKE += "-DBMCWEB_ENABLE_REDFISH_BMC_JOURNAL=ON"

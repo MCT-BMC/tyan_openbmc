@@ -29,12 +29,11 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message/types.hpp>
-#include <peci.h>
 
 #include "xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp"
 
 #define FSC_SERVICE "xyz.openbmc_project.EntityManager"
-#define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s7106_Baseboard/Pid_"
+#define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s8030_Baseboard/Pid_"
 #define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
 #define PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 
@@ -1002,29 +1001,6 @@ ipmi::RspType<std::vector<uint8_t>> ipmi_getFirmwareString()
 }
 
 //===============================================================
-
-ipmi::RspType<std::vector<uint8_t>>
-    ipmi_sendRawPeci(uint8_t clientAddr, uint8_t writeLength, uint8_t readLength,
-                        std::vector<uint8_t> writeData)
-{
-    if (readLength > PECI_BUFFER_SIZE)
-    {
-        log<level::ERR>("sendRawPeci command: Read length exceeds limit");
-        return ipmi::responseParmOutOfRange();
-    }
-    std::vector<uint8_t> rawResp(readLength);
-    if (peci_raw(clientAddr, readLength, writeData.data(), writeData.size(),
-                             rawResp.data(), rawResp.size()) != PECI_CC_SUCCESS)
-    {
-        log<level::ERR>("sendRawPeci command: PECI command failed");
-        return ipmi::responseResponseError();
-    }
-
-    return ipmi::responseSuccess(rawResp);
-
-}
-
-//===============================================================
 /* Set/Get Ramdom Delay AC Restore Power ON Command
 NetFun: 0x30
 Cmd : 0x18
@@ -1299,7 +1275,6 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetFruField, ipmi::Privilege::Admin, ipmi_setFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFirmwareString, ipmi::Privilege::Admin, ipmi_getFirmwareString);
-    ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SendRawPeci, ipmi::Privilege::Admin, ipmi_sendRawPeci);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
