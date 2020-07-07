@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
@@ -1263,6 +1264,33 @@ ipmi::RspType<> ipmi_RelinkLan()
     return ipmi::responseSuccess();
 }
 
+//===============================================================
+/* Get specified service enable or disable status
+ * Override the general IPMI command
+NetFun: 0x0A
+Cmd : 0x49
+Request:
+    Byte 1-4 : Set sel time
+Response:
+    Byte 1 : Completion Code
+*/
+ipmi::RspType<> ipmi_setSELTime(uint32_t selTime)
+{
+    time_t t = selTime;
+    if (t == (time_t) -1){
+        return ipmi::responseParmOutOfRange();
+    }
+    try
+    {
+        stime(&t);
+    }
+    catch (const std::exception& e)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess();
+}
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
@@ -1280,5 +1308,6 @@ void register_netfn_mct_oem()
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetPostCode, ipmi::Privilege::Admin, ipmi_GetPostCode);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RelinkLan, ipmi::Privilege::Admin, ipmi_RelinkLan);
+    ipmi::registerHandler(ipmi::prioMax, ipmi::netFnStorage, ipmi::storage::cmdSetSelTime, ipmi::Privilege::Admin,ipmi_setSELTime);
 }
 }
