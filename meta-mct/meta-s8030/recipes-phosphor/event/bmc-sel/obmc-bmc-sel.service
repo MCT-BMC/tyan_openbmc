@@ -1,7 +1,7 @@
 [Unit]
 Description=Check and generate BMC SEL
 
-After=obmc-sync-pch-rtc.service
+After=sync-time-initial.service
 [Service]
 Restart=no
 ExecStartPre=/bin/bash -c 'while [ ! -e /run/time_sync_done ]; do sleep 1; done'

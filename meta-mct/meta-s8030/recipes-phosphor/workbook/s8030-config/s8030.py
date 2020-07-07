@@ -40,7 +40,3 @@ ID_LOOKUP = {
     'SENSOR' : {},
     'GPIO_PRESENT' : {}
 }
-
-PCH_CONFIG = {
-    'i2c_bus' : '5'
-}

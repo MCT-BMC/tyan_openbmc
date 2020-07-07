@@ -1,0 +1,11 @@
+[Unit]
+Description=Timesync Initialize
+
+[Service]
+Restart=no
+ExecStart=/usr/sbin/sync-time-initial.py
+SyslogIdentifier=sync-time-initial
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target
