@@ -8,7 +8,7 @@ INTERFACE="xyz.openbmc_project.Logging.IPMI"
 METHOD="IpmiSelAdd"
 
     echo "action: host reset"
-#pwrstatus=$(/usr/bin/gpioget gpiochip0 26)
+#pwrstatus=$(/usr/bin/gpioget gpiochip0 27)
 pwrstatus=$(busctl get-property org.openbmc.control.Power /org/openbmc/control/power0 org.openbmc.control.Power pgood | cut -d' ' -f2)
 if [ $pwrstatus -eq 1 ]; then
 
