@@ -1,4 +1,4 @@
-From ecb3a3eeca826a9541034d947c4ed76fdb779d02 Mon Sep 17 00:00:00 2001
+From fe1559bcb5fb872a34cc55e2b109fc6ab9e85296 Mon Sep 17 00:00:00 2001
 From: John Chung <john.chung@mic.com.tw>
 Date: Fri, 19 Jun 2020 11:44:50 +0800
 Subject: [PATCH] hwmon: Add MCT OCP sensors driver
@@ -8,8 +8,8 @@ This providing the reading for temperature and label which support auto identify
 ---
  drivers/hwmon/Kconfig   |   7 ++
  drivers/hwmon/Makefile  |   1 +
- drivers/hwmon/mct-ocp.c | 291 ++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 299 insertions(+)
+ drivers/hwmon/mct-ocp.c | 290 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 298 insertions(+)
  create mode 100755 drivers/hwmon/mct-ocp.c
 
 diff --git a/drivers/hwmon/Kconfig b/drivers/hwmon/Kconfig
@@ -44,10 +44,10 @@ index 4eab595..68bb6fb 100755
  obj-$(CONFIG_PMBUS)		+= pmbus/
 diff --git a/drivers/hwmon/mct-ocp.c b/drivers/hwmon/mct-ocp.c
 new file mode 100755
-index 0000000..233bccc
+index 0000000..585c6e0
 --- /dev/null
 +++ b/drivers/hwmon/mct-ocp.c
-@@ -0,0 +1,291 @@
+@@ -0,0 +1,290 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +/*
 + * Copyright (C) 2020 MCT Corp.
@@ -152,7 +152,6 @@ index 0000000..233bccc
 +
 +static int get_ocp_device(struct ocp_data *data)
 +{
-+    enum ocp_type kind;
 +    unsigned int manufacturer;
 +    unsigned int device;
 +    int ret;
