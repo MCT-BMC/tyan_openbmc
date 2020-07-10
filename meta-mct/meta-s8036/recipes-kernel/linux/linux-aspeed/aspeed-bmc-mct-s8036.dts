@@ -6,7 +6,7 @@
 #include <dt-bindings/gpio/aspeed-gpio.h>
 
 / {
-    model = "F5i BMC";
+    model = "S8036 BMC";
     compatible = "mct,s8036-bmc", "aspeed,ast2500";
 
     chosen {
