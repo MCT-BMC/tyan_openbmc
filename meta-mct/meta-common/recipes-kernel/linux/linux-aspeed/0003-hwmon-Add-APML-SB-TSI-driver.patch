@@ -1,4 +1,4 @@
-From c4ecefc17e79860159f4bfec8d3a5bfde9dcde4d Mon Sep 17 00:00:00 2001
+From d4101d349a4935091249d6aa63164c8d9c959d6a Mon Sep 17 00:00:00 2001
 From: John Chung <john.chung@mic.com.tw>
 Date: Tue, 16 Jun 2020 18:05:08 +0800
 Subject: [PATCH] hwmon: Add APML SB-TSI driver
@@ -8,8 +8,8 @@ This providing temperature, offset and update rate reading or setting.
 ---
  drivers/hwmon/Kconfig       |   7 ++
  drivers/hwmon/Makefile      |   1 +
- drivers/hwmon/apml-sb-tsi.c | 275 ++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 283 insertions(+)
+ drivers/hwmon/apml-sb-tsi.c | 273 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 281 insertions(+)
  mode change 100644 => 100755 drivers/hwmon/Kconfig
  mode change 100644 => 100755 drivers/hwmon/Makefile
  create mode 100755 drivers/hwmon/apml-sb-tsi.c
@@ -50,10 +50,10 @@ index 1c7ab36..4eab595
  obj-$(CONFIG_PMBUS)		+= pmbus/
 diff --git a/drivers/hwmon/apml-sb-tsi.c b/drivers/hwmon/apml-sb-tsi.c
 new file mode 100755
-index 0000000..a332446
+index 0000000..71ad7b8
 --- /dev/null
 +++ b/drivers/hwmon/apml-sb-tsi.c
-@@ -0,0 +1,275 @@
+@@ -0,0 +1,273 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +/*
 + * Copyright (C) 2020 MCT Corp.
@@ -189,8 +189,6 @@ index 0000000..a332446
 +static int sb_tsi_read_string(struct device *dev, enum hwmon_sensor_types type,
 +            u32 attr, int channel, const char **str)
 +{
-+	struct peci_cputemp *priv = dev_get_drvdata(dev);
-+
 +	if (attr != hwmon_temp_label)
 +		return -EOPNOTSUPP;
 +
@@ -307,7 +305,7 @@ index 0000000..a332446
 +    i2c_set_clientdata(client, regmap);
 +
 +    hwmon_dev = devm_hwmon_device_register_with_info(dev,
-+                             client->name,
++                             "sb_tsi",
 +                             regmap,
 +                             &sb_tsi_chip_info,
 +                             NULL);
