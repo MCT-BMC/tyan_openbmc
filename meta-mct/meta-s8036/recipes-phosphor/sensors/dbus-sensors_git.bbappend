@@ -30,6 +30,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0037-Fix-cpu-sensor-hang-and-get-power-status-error.patch \
             file://0038-Add-watchdog2-and-power-control-event-sensor.patch \
             file://0039-Add-DCMI-power-event-sensor.patch \
+            file://0040-Support-Dimm-temperature-sensor.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"
@@ -39,4 +40,4 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mnvmesensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mostempsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.hostmemoryeccsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.eventsensor.service"
-
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.dimmtempsensor.service"
