@@ -5,15 +5,8 @@ set -e
 POWER_CMD="/usr/bin/obmcutil"
 GPIO_SET_CMD="/usr/bin/gpioset"
 IMAGE_FILE=$1
-GPIOJ0=72
-GPIOJ1=73
+GPIOG0=48
 
-IPMB_OBJ="xyz.openbmc_project.Ipmi.Channel.Ipmb"
-IPMB_PATH="/xyz/openbmc_project/Ipmi/Channel/Ipmb"
-IPMB_INTF="org.openbmc.Ipmb"
-IPMB_CALL="sendRequest yyyyay"
-ME_CMD_RECOVER="1 0x2e 0 0xdf 4 0x57 0x01 0x00 0x01"
-ME_CMD_RESET="1 6 0 0x2 0"
 SPI_DEV="1e630000.spi"
 SPI_PATH="/sys/bus/platform/drivers/aspeed-smc"
 
@@ -28,18 +21,16 @@ set_gpio_to_bmc()
 {
     echo "switch bios GPIO to bmc"
 
-    set_gpio_value $GPIOJ0 0
-    set_gpio_value $GPIOJ1 1
+    set_gpio_value $GPIOG0 1
 
     return 0
 }
 
 set_gpio_to_pch()
 {
-    echo "switch bios GPIO to pch"
+    echo "switch bios GPIO to default"
 
-    set_gpio_value $GPIOJ0 1
-    set_gpio_value $GPIOJ1 0
+    set_gpio_value $GPIOG0 0
 
     return 0
 }
@@ -65,11 +56,6 @@ then
     exit -1
 fi
 echo "Host server powered off"
-
-#Set ME to recovery mode
-echo "Set ME to recovery mode"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RECOVER
-sleep 5
 
 #Flip GPIO to access SPI flash used by host.
 echo "Set GPIO to access SPI flash from BMC used by host"
@@ -110,11 +96,6 @@ sleep 10
 echo "Set GPIO $GPIO back for host to access SPI flash"
 set_gpio_to_pch
 sleep 5
-
-#Reset ME to boot from new bios
-echo "Reset ME to boot from new bios"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RESET
-sleep 10
 
 #Power on server
 echo "Power on server"
