@@ -22,13 +22,6 @@ DOWNLOAD_INTF = 'org.openbmc.managers.Download'
 HOST_DBUS_NAME = 'xyz.openbmc_project.State.Host'
 HOST_OBJ_NAME =  '/xyz/openbmc_project/state/host0'
 
-IPMB_OBJ="xyz.openbmc_project.Ipmi.Channel.Ipmb"
-IPMB_PATH="/xyz/openbmc_project/Ipmi/Channel/Ipmb"
-IPMB_INTF="org.openbmc.Ipmb"
-IPMB_CALL="sendRequest yyyyay"
-ME_CMD_RECOVER="1 0x2e 0 0xdf 4 0x57 0x01 0x00 0x01"
-ME_CMD_RESET="1 6 0 0x2 0"
-
 UPDATE_PATH = '/run/initramfs'
 
 def doExtract(members, files):
@@ -246,8 +239,7 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         #subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
         
         # connect BMC to SPI Flash 
-        subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
-        subprocess.Popen('gpioset gpiochip0 73=1', shell=True)
+        subprocess.Popen('gpioset gpiochip0 48=1', shell=True)
 
         # Load the ASpeed SMC driver
         subprocess.Popen('echo 1e630000.spi > /sys/bus/platform/drivers/aspeed-smc/bind', shell=True)
@@ -261,8 +253,7 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         subprocess.Popen('echo 1e630000.spi > /sys/bus/platform/drivers/aspeed-smc/unbind', shell=True)
         
         # connect PCH to SPI Flash 
-        subprocess.Popen('gpioget gpiochip0 72', shell=True)
-        subprocess.Popen('gpioget gpiochip0 73', shell=True)
+        subprocess.Popen('gpioget gpiochip0 48', shell=True)
 
         #self.update_process = None
         if self.update_process:
@@ -278,17 +269,15 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         DBUS_NAME, in_signature='', out_signature='')
     def SetMERecoveryMode(self):
         #Set ME to recovery mode
-        subprocess.Popen('busctl call %s %s %s %s %s' %(IPMB_OBJ,IPMB_PATH,IPMB_INTF,IPMB_CALL,ME_CMD_RECOVER), shell=True)
 
-        self.Set(DBUS_NAME, "status", "Set Intel ME To Recovery Mode")
+        self.Set(DBUS_NAME, "status", "")
 
     @dbus.service.method(
         DBUS_NAME, in_signature='', out_signature='')
     def SetMEReset(self):
         #Reset ME to boot from new bios
-        subprocess.Popen('busctl call %s %s %s %s %s' %(IPMB_OBJ,IPMB_PATH,IPMB_INTF,IPMB_CALL,ME_CMD_RESET), shell=True)
 
-        self.Set(DBUS_NAME, "status", "Set Intel ME To Reset")
+        self.Set(DBUS_NAME, "status", "")
 
 if __name__ == '__main__':
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
