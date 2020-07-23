@@ -299,22 +299,6 @@ void timeoutHandle(Power currentPower,PowerStore& powerStore)
             std::cerr << "Action for power limit: Generate SEL event" << "\n";
             generateSELEvent(bus,powerlimitSensorPath,powerlimitEventData);
         }
-
-        switch(PowerLimit::convertActionFromString(powerStore.exceptionAction))
-        {
-            case PowerLimit::Action::None:
-                std::cerr << "TEST-1"<< "\n";
-                break;
-            case PowerLimit::Action::OffAndLog:
-                std::cerr << "TEST-2"<< "\n";
-                break;
-            case PowerLimit::Action::Log:
-                std::cerr << "TEST-3"<< "\n";
-                break;
-            default:
-                std::cerr << "TEST-4"<< "\n";
-                break;
-        }
     }
 
     if(currentPower.value > powerStore.powerCap &&  powerStore.powerCapEnable)

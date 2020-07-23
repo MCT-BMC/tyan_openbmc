@@ -30,7 +30,7 @@ constexpr auto IPMI_SEL_Add_Interface = "xyz.openbmc_project.Logging.IPMI";
 constexpr auto HOST_STATE_PATH ="/xyz/openbmc_project/state/host0";
 constexpr auto HOST_INTERFACE = "xyz.openbmc_project.State.Host";
 constexpr auto PROP_INTERFACE = "org.freedesktop.DBus.Properties";
-constexpr auto METHOD_GET = "Set";
+constexpr auto METHOD_SET = "Set";
 constexpr auto METHOD_GET_ALL = "GetAll";
 
 
@@ -203,7 +203,7 @@ void hostPowerControl(std::shared_ptr<sdbusplus::asio::connection>& bus, std::st
         auto service = getService(bus, HOST_INTERFACE, HOST_STATE_PATH);
         
         auto method =  bus->new_method_call(
-            service.c_str(), HOST_STATE_PATH, PROP_INTERFACE, METHOD_GET);
+            service.c_str(), HOST_STATE_PATH, PROP_INTERFACE, METHOD_SET);
         method.append(HOST_INTERFACE, "RequestedHostTransition", sdbusplus::message::variant<std::string>(control));
 
         bus->call(method);
