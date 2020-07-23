@@ -19,6 +19,7 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_SetService = 0x0D,
     IPMI_CMD_GetService = 0x0E,
     IPMI_CMD_GetFirmwareString = 0x10,
+    IPMI_CMD_SetAmdSmbusOwner = 0x24,
     IPMI_CMD_ConfigEccLeakyBucket = 0x1A,
     IPMI_CMD_ClearCmos = 0x3A,
     IPMI_CMD_gpioStatus = 0x41,
