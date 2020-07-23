@@ -31,6 +31,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0038-Add-watchdog2-and-power-control-event-sensor.patch \
             file://0039-Add-DCMI-power-event-sensor.patch \
             file://0040-Support-Dimm-temperature-sensor.patch \
+            file://0041-Fix-the-dimm-sensor-issue-for-power-reset.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"

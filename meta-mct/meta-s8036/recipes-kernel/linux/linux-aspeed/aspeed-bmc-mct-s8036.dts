@@ -446,6 +446,17 @@
         kcs_addr = <0xca2>;
         status = "okay";
     };
+
+    interrupt {
+        status = "okay";
+        compatible = "aspeed,bmc-misc";
+        interrupts-extended = <&scu_ic 4>;
+        lpc-rst {
+            offset = <0x08>;
+            bit-mask = <1>;
+            bit-shift = <6>;
+        };
+    };
 };
 
 &hbled {

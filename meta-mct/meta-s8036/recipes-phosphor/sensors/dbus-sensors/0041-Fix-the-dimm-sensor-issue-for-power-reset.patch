@@ -1,0 +1,156 @@
+From 7b689920fd25ab6c5c646a1b763bedfd6cac6723 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 22 Jul 2020 17:35:48 +0800
+Subject: [PATCH] Fix the dimm sensor issue for power reset
+
+Create hook for smbus owner flag in DBUS.
+Modify dimm sensor enable checking wiht smbus owner flag.
+---
+ include/Utils.hpp      | 10 +++++++++
+ src/DIMMTempSensor.cpp |  6 ++++++
+ src/Utils.cpp          | 58 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 74 insertions(+)
+
+diff --git a/include/Utils.hpp b/include/Utils.hpp
+index 92efbe3..8bebb7e 100755
+--- a/include/Utils.hpp
++++ b/include/Utils.hpp
+@@ -46,8 +46,11 @@ bool findFiles(const std::filesystem::path dirPath,
+                unsigned int symlinkDepth = 1);
+ bool isPowerOn(void);
+ bool hasBiosPost(void);
++void setOwnerStatus(uint32_t status);
++uint32_t getOwnerStatus(void);
+ bool getPowerStatus(const std::shared_ptr<sdbusplus::asio::connection>& conn);
+ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn);
++void setupOwnerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn);
+ bool getSensorConfiguration(
+     const std::string& type,
+     const std::shared_ptr<sdbusplus::asio::connection>& dbusConnection,
+@@ -98,6 +101,13 @@ const static constexpr char* interface =
+ const static constexpr char* path = "/xyz/openbmc_project/state/os";
+ const static constexpr char* property = "OperatingSystemState";
+ } // namespace post
++namespace status
++{
++const static constexpr char* busname = "xyz.openbmc_project.Settings";
++const static constexpr char* interface = "xyz.openbmc_project.OEM.SensorStatus";
++const static constexpr char* path = "/xyz/openbmc_project/oem/SensorStatus";
++const static constexpr char* property = "DIMMSensorStatus";
++} // namespace status
+ 
+ namespace association
+ {
+diff --git a/src/DIMMTempSensor.cpp b/src/DIMMTempSensor.cpp
+index 62a0a26..e0c0e9a 100755
+--- a/src/DIMMTempSensor.cpp
++++ b/src/DIMMTempSensor.cpp
+@@ -91,6 +91,7 @@ DIMMTempSensor::DIMMTempSensor(std::shared_ptr<sdbusplus::asio::connection>& con
+     PowerDelayCounter = delayTime;
+ 
+     setupPowerMatch(conn);
++    setupOwnerMatch(conn);
+ }
+ 
+ DIMMTempSensor::~DIMMTempSensor()
+@@ -202,6 +203,11 @@ void DIMMTempSensor::read(void)
+ 
+         if (!isPowerOn())
+         {
++            setOwnerStatus(0x00);
++        }
++
++        if (getOwnerStatus() == 0x00)
++        {
+             updateValueInvalid(true);
+             PowerDelayCounter = 0;
+             read();
+diff --git a/src/Utils.cpp b/src/Utils.cpp
+index 9e54185..6f4903d 100755
+--- a/src/Utils.cpp
++++ b/src/Utils.cpp
+@@ -35,9 +35,11 @@ namespace fs = std::filesystem;
+ 
+ static bool powerStatusOn = false;
+ static bool biosHasPost = false;
++static uint32_t ownerStatus = 0x00;
+ 
+ static std::unique_ptr<sdbusplus::bus::match::match> powerMatch = nullptr;
+ static std::unique_ptr<sdbusplus::bus::match::match> postMatch = nullptr;
++static std::unique_ptr<sdbusplus::bus::match::match> ownerMatch = nullptr;
+ 
+ bool getSensorConfiguration(
+     const std::string& type,
+@@ -136,6 +138,20 @@ bool hasBiosPost(void)
+     return biosHasPost;
+ }
+ 
++void setOwnerStatus(uint32_t status)
++{
++    ownerStatus = status;
++}
++
++uint32_t getOwnerStatus(void)
++{
++    if (!ownerMatch)
++    {
++        throw std::runtime_error("Owner Match Not Created");
++    }
++    return ownerStatus;
++}
++
+ bool getPowerStatus(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+ {
+     conn->async_method_call(
+@@ -251,6 +267,48 @@ void setupPowerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+         post::interface, post::property);
+ }
+ 
++void setupOwnerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
++{
++    static boost::asio::steady_timer timer(conn->get_io_context());
++
++    if (ownerMatch)
++    {
++        return;
++    }
++
++    ownerMatch = std::make_unique<sdbusplus::bus::match::match>(
++        static_cast<sdbusplus::bus::bus&>(*conn),
++        "type='signal',interface='" + std::string(properties::interface) +
++            "',path='" + std::string(status::path) + "',arg0='" +
++            std::string(status::interface) + "'",
++        [](sdbusplus::message::message& message) {
++            std::string objectName;
++            boost::container::flat_map<std::string, std::variant<uint32_t>>
++                values;
++            message.read(objectName, values);
++            auto findState = values.find(status::property);
++            if (findState != values.end())
++            {
++                ownerStatus = std::get<uint32_t>(findState->second);
++            }
++        });
++
++    conn->async_method_call(
++        [](boost::system::error_code ec,
++           const std::variant<uint32_t>& state) {
++            if (ec)
++            {
++                // we commonly come up before power control, we'll capture the
++                // property change later
++                std::cerr << "Get owner method error" << ec.message() << std::endl;
++                return;
++            }
++            ownerStatus = std::get<uint32_t>(state);
++        },
++        status::busname, status::path, properties::interface, properties::get,
++        status::interface, status::property);
++}
++
+ // replaces limits if MinReading and MaxReading are found.
+ void findLimits(std::pair<double, double>& limits,
+                 const SensorBaseConfiguration* data)
+-- 
+2.7.4
+
