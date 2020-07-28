@@ -9,6 +9,7 @@ inherit obmc-phosphor-ipmiprovider-symlink
 inherit pythonnative
 inherit systemd
 inherit obmc-phosphor-systemd
+inherit obmc-phosphor-dbus-service
 
 
 S = "${WORKDIR}"
