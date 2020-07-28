@@ -16,7 +16,10 @@
 #include "mct-dcmi-power.hpp"
 
 #include <iostream>
+#include <xyz/openbmc_project/Control/Power/Cap/server.hpp>
 #include "utils.hpp"
+
+using PowerLimit = sdbusplus::xyz::openbmc_project::Control::Power::server::Cap;
 
 static constexpr bool DEBUG = false;
 

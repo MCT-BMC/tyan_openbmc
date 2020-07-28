@@ -1,6 +1,6 @@
 # Initialization
 AC_PREREQ([2.69])
-AC_INIT([cpudimm-temp-sensor], [1.0])
+AC_INIT([mct-dcmi-power], [1.0])
 AC_LANG([C++])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign dist-xz])
@@ -16,6 +16,8 @@ AC_PROG_MAKE_SET
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221])
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,\
                   AC_MSG_ERROR(["Requires sdbusplus package."]))
+PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 AX_CXX_COMPILE_STDCXX_17([noext])
 
 # Checks for header files.

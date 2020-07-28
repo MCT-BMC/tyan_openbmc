@@ -117,6 +117,12 @@ void dbusServiceInitialize(PowerStore& powerStore);
  */
 std::string findPowerPath();
 
+/**
+ * @brief Handle the DCMI power action
+ *
+ * @param[in] io - io context.
+ * @param[in] delay - Delay time in micro second.
+ */
 void powerHandler(boost::asio::io_context& io,PowerStore& powerStore,double delay);
 
 /** @brief Handle the correction timeout for power limit.
