@@ -32,6 +32,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0039-Add-DCMI-power-event-sensor.patch \
             file://0040-s8030-not-connected-fio-board-show-no-reading.patch \
             file://0041-add-tmp411-to-sensor-types.patch \
+            file://0042-Support-Dimm-temperature-sensor.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"
@@ -41,4 +42,5 @@ SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mnvmesensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.mostempsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.hostmemoryeccsensor.service"
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.eventsensor.service"
+SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.dimmtempsensor.service"
 

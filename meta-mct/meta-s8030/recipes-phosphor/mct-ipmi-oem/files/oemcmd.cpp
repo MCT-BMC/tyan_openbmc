@@ -1291,6 +1291,45 @@ ipmi::RspType<> ipmi_setSELTime(uint32_t selTime)
     return ipmi::responseSuccess();
 }
 
+//===============================================================
+/* Set AMD SmBus Owner
+NetFun: 0x2E
+Cmd : 0x24
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+    Byte 4 : Status; 0x00-BIOS , 0x01-BMC
+                (Return current status only if this byte is not present)
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+    Byte 5 : Current Status; 0x00-BIOS , 0x01-BMC
+*/
+
+ipmi::RspType<uint8_t> ipmi_setAmdSmbusOwner(uint8_t status)
+{
+	constexpr auto service = "xyz.openbmc_project.Settings";
+    constexpr auto path = "/xyz/openbmc_project/oem/SensorStatus";
+    constexpr auto interface = "xyz.openbmc_project.OEM.SensorStatus";
+    constexpr auto properties = "DIMMSensorStatus";
+	auto bus = sdbusplus::bus::new_default();
+	
+	try
+    {
+        auto method = bus.new_method_call(service, path, PROPERTY_INTERFACE, "Set");
+        method.append(interface, properties, sdbusplus::message::variant<uint32_t>((uint32_t)status));
+        bus.call_noreply(method);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Error in setAmdSmbusOwner Set",entry("ERROR=%s", e.what()));
+        return ipmi::responseParmOutOfRange();
+    }
+
+    return ipmi::responseSuccess(status);
+}
+
+//===============================================================
+
 void register_netfn_mct_oem()
 {
     ipmi_register_callback(NETFUN_TWITTER_OEM, IPMI_CMD_ClearCmos, NULL, ipmiOpmaClearCmos, PRIVILEGE_ADMIN);
@@ -1303,6 +1342,7 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetFruField, ipmi::Privilege::Admin, ipmi_setFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFirmwareString, ipmi::Privilege::Admin, ipmi_getFirmwareString);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetAmdSmbusOwner, ipmi::Privilege::Admin, ipmi_setAmdSmbusOwner);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);

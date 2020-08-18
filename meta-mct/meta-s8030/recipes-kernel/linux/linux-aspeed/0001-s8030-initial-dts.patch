@@ -1,19 +1,19 @@
-From b405b4b9d07679f1f728b6c8760eb13b8779c83b Mon Sep 17 00:00:00 2001
+From 9380cf965508485643ceaaaec330ab84321f3147 Mon Sep 17 00:00:00 2001
 From: "wendy.shi" <wendy.shi@mic.com.tw>
 Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 329 +++++++++++++++++++++++++++++
- 1 file changed, 329 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 341 +++++++++++++++++++++++++++++
+ 1 file changed, 341 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 new file mode 100755
-index 0000000..615be40
+index 0000000..cbaceb2
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,329 @@
+@@ -0,0 +1,341 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -215,6 +215,7 @@ index 0000000..615be40
 +
 +&i2c7 {
 +    status = "okay";
++    multi-master;
 +};
 +&gfx {
 +       status = "okay";
@@ -302,6 +303,17 @@ index 0000000..615be40
 +        kcs_chan = <3>;
 +        kcs_addr = <0xca2>;
 +        status = "okay";
++    };
++
++    interrupt {
++        status = "okay";
++        compatible = "aspeed,bmc-misc";
++        interrupts-extended = <&scu_ic 4>;
++        lpc-rst {
++            offset = <0x08>;
++            bit-mask = <1>;
++            bit-shift = <6>;
++        };
 +    };
 +};
 +

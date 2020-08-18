@@ -26,6 +26,7 @@ enum ipmi_net_fns_oem_cmds
     IPMI_CMD_RamdomDelayACRestorePowerON = 0x18,
     IPMI_CMD_GetPostCode = 0x10,
     IPMI_CMD_RelinkLan = 0x12,
+    IPMI_CMD_SetAmdSmbusOwner = 0x24,
 };
 
 struct PnmGetReadingRequest
