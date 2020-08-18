@@ -16,6 +16,32 @@
             "Type": "TMP75"
         },
         {
+            "Class": "MUX",
+            "Name": "PCA9544",
+            "Bus": 7,
+            "Address": "0x70",
+            "DimmSlotNum": 16,
+            "DimmGroupCounter": 2,
+            "DelayTime": 0,
+            "Name0": "P0_UMC0_CH_A",
+            "Name1": "P0_UMC0_CH_B",
+            "Name2": "P0_UMC0_CH_C",
+            "Name3": "P0_UMC0_CH_D",
+            "Name4": "P0_UMC0_CH_E",
+            "Name5": "P0_UMC0_CH_F",
+            "Name6": "P0_UMC0_CH_G",
+            "Name7": "P0_UMC0_CH_H",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 85
+                }
+            ],
+            "Type": "DIMMTempSensor"
+        },
+        {
             "Index": 0,
             "Name": "VDD_5_DUAL",
             "PowerState": "Always",

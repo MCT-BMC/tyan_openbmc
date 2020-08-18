@@ -28,6 +28,7 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s8030 = " libgpiod \
                                           phosphor-host-postd \
                                           ethtool \
                                           mct-dcmi-power \
+                                          mct-register-monitor \
                                         "
 OBMC_IMAGE_EXTRA_INSTALL_remove = " sync-pch-rtc \
                                     "

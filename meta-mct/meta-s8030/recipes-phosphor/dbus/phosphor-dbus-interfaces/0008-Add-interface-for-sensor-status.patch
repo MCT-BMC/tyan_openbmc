@@ -1,0 +1,25 @@
+From 1fe49221ad8b1f74abe6da657e869a09510b85a7 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 23 Jul 2020 10:09:56 +0800
+Subject: [PATCH] Add-interface-for-sensor-status
+
+---
+ xyz/openbmc_project/OEM/SensorStatus.interface.yaml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+ create mode 100644 xyz/openbmc_project/OEM/SensorStatus.interface.yaml
+
+diff --git a/xyz/openbmc_project/OEM/SensorStatus.interface.yaml b/xyz/openbmc_project/OEM/SensorStatus.interface.yaml
+new file mode 100644
+index 0000000..0d3464c
+--- /dev/null
++++ b/xyz/openbmc_project/OEM/SensorStatus.interface.yaml
+@@ -0,0 +1,9 @@
++description: >
++    Implement to provide status attributes for specified sensor service.
++
++properties:
++    - name: DIMMSensorStatus
++      type: uint32
++      description: >
++         Setting of DIMM sensor status 
++# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
