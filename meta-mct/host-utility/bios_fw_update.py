@@ -18,7 +18,7 @@ import tarfile
 from subprocess import check_output,CalledProcessError
 from time import sleep
 
-utilityVersion = '0.01'
+utilityVersion = '0.02'
 
 prepareProcessing = 'Wating System Power off'
 prepareFinish = 'System status is Off , Switch SPI interface'
@@ -199,6 +199,7 @@ def update(bin):
             sleep(1)
 
     timer = 0
+    sleep(15)
     while 1 :
         status = getUpdateJsonData()
 
