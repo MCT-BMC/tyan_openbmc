@@ -1,0 +1,114 @@
+From a504354246756fab801723a7bc5f6eec27a434a6 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 10 Aug 2020 09:36:45 +0800
+Subject: [PATCH] Add the mutex lock for aspeed misc driver
+
+To fix the kenrel panic issue when using sysfs in irq
+---
+ drivers/soc/aspeed/aspeed-bmc-misc.c | 41 ++++++++++++++++++++++++++----------
+ 1 file changed, 30 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/soc/aspeed/aspeed-bmc-misc.c b/drivers/soc/aspeed/aspeed-bmc-misc.c
+index 84ba2eb..d2508c4 100755
+--- a/drivers/soc/aspeed/aspeed-bmc-misc.c
++++ b/drivers/soc/aspeed/aspeed-bmc-misc.c
+@@ -12,6 +12,7 @@
+ #include <linux/irqchip/chained_irq.h>
+ #include <linux/of_irq.h>
+ #include <linux/of_platform.h>
++#include <linux/mutex.h>
+ 
+ #define DEVICE_NAME "aspeed-bmc-misc"
+ 
+@@ -29,6 +30,8 @@ struct aspeed_bmc_misc {
+ 	struct regmap *map;
+ 	struct aspeed_bmc_ctrl *ctrls;
+ 	int nr_ctrls;
++	struct mutex irq_lock;
++	struct kernfs_node *kn;
+ };
+ 
+ static int irq;
+@@ -174,12 +177,6 @@ static int aspeed_bmc_misc_populate_sysfs(struct aspeed_bmc_misc *bmc)
+ 			return rc;
+ 	}
+ 
+-	if(irq){
+-		static struct kobj_attribute interrupt_attribute =
+-			__ATTR(interrupt, 0664, interrupt_show, interrupt_store);
+-		sysfs_create_file(&bmc->dev->kobj,&interrupt_attribute.attr);
+-	}
+-
+ 	return 0;
+ }
+ 
+@@ -187,10 +184,14 @@ static irqreturn_t aspeed_misc_irq(int irq, void *arg)
+ {
+ 	struct aspeed_bmc_misc *bmc = arg;
+ 
++	mutex_lock(&bmc->irq_lock);
++
+ 	dev_dbg(bmc->dev, "Aspeed BMC MISC IRQ\n");
+ 
+ 	irq_status = 1;
+-	sysfs_notify(&bmc->dev->kobj,NULL, "interrupt");
++	sysfs_notify_dirent(bmc->kn);
++
++	mutex_unlock(&bmc->irq_lock);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -213,21 +214,38 @@ static int aspeed_bmc_misc_probe(struct platform_device *pdev)
+ 	if (rc < 0)
+ 		return rc;
+ 
+-	irq = irq_of_parse_and_map(pdev->dev.of_node, 0);
++	mutex_init(&bmc->irq_lock);
++
++	irq = platform_get_irq(pdev, 0);
+ 	if (irq) {
+ 		irq_status=0;
+-		rc = devm_request_irq(&pdev->dev, irq, aspeed_misc_irq, IRQF_ONESHOT,
+-			      DEVICE_NAME, bmc);
++
++		static struct kobj_attribute interrupt_attribute =
++			__ATTR(interrupt, 0664, interrupt_show, interrupt_store);
++		rc = sysfs_create_file(&bmc->dev->kobj,&interrupt_attribute.attr);
++		if (rc < 0)
++			return rc;
++
++		bmc->kn =sysfs_get_dirent(bmc->dev->kobj.sd, "interrupt");
++
++		rc = request_irq(irq, aspeed_misc_irq, 0, DEVICE_NAME, bmc);
+ 		if (rc < 0) {
+ 			dev_err(bmc->dev, "Unable to request IRQ %d\n", irq);
+ 			return rc;
+ 		}
+ 	}
+ 
+-
+ 	return aspeed_bmc_misc_populate_sysfs(bmc);
+ }
+ 
++static int aspeed_bmc_misc_remove(struct platform_device *pdev)
++{
++	if (irq) {
++		free_irq(irq, pdev);
++	}
++	return 0;
++}
++
+ static const struct of_device_id aspeed_bmc_misc_match[] = {
+ 	{ .compatible = "aspeed,bmc-misc" },
+ 	{ },
+@@ -239,6 +257,7 @@ static struct platform_driver aspeed_bmc_misc = {
+ 		.of_match_table = aspeed_bmc_misc_match,
+ 	},
+ 	.probe = aspeed_bmc_misc_probe,
++	.remove = aspeed_bmc_misc_remove,
+ };
+ 
+ module_platform_driver(aspeed_bmc_misc);
+-- 
+2.7.4
+
