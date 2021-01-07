@@ -11,5 +11,5 @@ ExecStart=/usr/bin/env initFruFlag.sh
 SyslogIdentifier=initFruFlag
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=basic.target
 

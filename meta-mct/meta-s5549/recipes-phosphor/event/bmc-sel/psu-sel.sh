@@ -13,7 +13,7 @@ METHOD="IpmiSelAdd"
 
 while true; do
 
-    StatusWord=`i2cget -f -y 3 0x58 0x79 w`
+    StatusWord=`i2cget -f -y 7 0x58 0x79 w`
 
     #check VOUT fault or warning
     if [ $(((StatusWord & 0x8000) >> 15)) -eq 1 ]; then
