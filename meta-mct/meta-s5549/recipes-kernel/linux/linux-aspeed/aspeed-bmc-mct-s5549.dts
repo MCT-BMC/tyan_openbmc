@@ -23,6 +23,12 @@
         #size-cells = <1>;
         ranges;
 
+		gfx_memory: framebuffer@97000000 {
+			no-map;
+			compatible = "shared-dma-pool";
+			reg = <0x97000000 0x01000000>; /* 16M */
+        };
+
         flash_memory: region@98000000 {
             no-map;
             reg = <0x98000000 0x02000000>; /* 32M */
@@ -37,7 +43,7 @@
 			max-reason = <3>; /* KMSG_DUMP_EMERG */
 		};
 
-		gfx_memory: framebuffer@9f000000 {
+		vga_memory: framebuffer@9f000000 {
 			no-map;
 			compatible = "shared-dma-pool";
 			reg = <0x9f000000 0x01000000>; /* 16M */
