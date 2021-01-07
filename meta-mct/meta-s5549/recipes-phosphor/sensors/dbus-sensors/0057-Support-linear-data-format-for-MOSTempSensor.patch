@@ -1,0 +1,115 @@
+From 2d7c6825433c9b9c66eef8a586b3f69cb9bfcd23 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 25 Dec 2020 16:46:37 +0800
+Subject: [PATCH] Support linear data format for MOSTempSensor
+
+---
+ include/MOSTempSensor.hpp |  5 ++++-
+ src/MOSTempSensor.cpp     | 33 ++++++++++++++++++++++++++++++---
+ 2 files changed, 34 insertions(+), 4 deletions(-)
+
+diff --git a/include/MOSTempSensor.hpp b/include/MOSTempSensor.hpp
+index 6932bd6..13d61cb 100755
+--- a/include/MOSTempSensor.hpp
++++ b/include/MOSTempSensor.hpp
+@@ -14,7 +14,8 @@ struct MOSTempSensor : public Sensor
+                   const std::string& sensorConfiguration,
+                   sdbusplus::asio::object_server& objectServer,
+                   std::vector<thresholds::Threshold>&& thresholds,
+-                  uint8_t busId, uint8_t mcuAddress, uint8_t tempReg);
++                  uint8_t busId, uint8_t mcuAddress, uint8_t tempReg,
++                  std::string sensorClass);
+     ~MOSTempSensor();
+ 
+     void checkThresholds(void) override;
+@@ -24,8 +25,10 @@ struct MOSTempSensor : public Sensor
+     uint8_t busId;
+     uint8_t address;
+     uint8_t tempReg;
++    std::string sensorClass;
+ 
+   private:
++    long pmbusRegTodataLinear(int16_t pu16data);
+     int getMOSRegsInfoWord(uint8_t regs, int16_t* pu16data);
+     sdbusplus::asio::object_server& objectServer;
+     std::shared_ptr<sdbusplus::asio::connection> dbusConnection;
+diff --git a/src/MOSTempSensor.cpp b/src/MOSTempSensor.cpp
+index 140fc25..6b7a220 100755
+--- a/src/MOSTempSensor.cpp
++++ b/src/MOSTempSensor.cpp
+@@ -28,6 +28,9 @@ constexpr const char* configInterface =
+ static constexpr double TempMaxReading = 0xFF;
+ static constexpr double TempMinReading = 0;
+ 
++constexpr const char* generalClass = "MOSTemp";
++constexpr const char* linearClass = "MOSTempLinear";
++
+ boost::container::flat_map<std::string, std::unique_ptr<MOSTempSensor>> sensors;
+ 
+ MOSTempSensor::MOSTempSensor(std::shared_ptr<sdbusplus::asio::connection>& conn,
+@@ -37,13 +40,13 @@ MOSTempSensor::MOSTempSensor(std::shared_ptr<sdbusplus::asio::connection>& conn,
+                              sdbusplus::asio::object_server& objectServer,
+                              std::vector<thresholds::Threshold>&& thresholdData,
+                              uint8_t busId, uint8_t address,
+-                             uint8_t tempReg) :
++                             uint8_t tempReg, std::string sensorClass) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(thresholdData), sensorConfiguration,
+            "xyz.openbmc_project.Configuration.MosTemp", TempMaxReading,
+            TempMinReading),
+     objectServer(objectServer), dbusConnection(conn), waitTimer(io),
+-    busId(busId), address(address), tempReg(tempReg)
++    busId(busId), address(address), tempReg(tempReg),sensorClass(sensorClass)
+ {
+     sensorInterface = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/temperature/" + name,
+@@ -86,6 +89,25 @@ void MOSTempSensor::checkThresholds(void)
+     thresholds::checkThresholds(this);
+ }
+ 
++long MOSTempSensor::pmbusRegTodataLinear(int16_t pu16data)
++{
++    int16_t exponent;
++    int32_t mantissa;
++    long val;
++
++    exponent = ((int16_t)pu16data) >> 11;
++    mantissa = ((int16_t)((pu16data & 0x7ff) << 5)) >> 5;
++
++    val = mantissa;
++
++    if (exponent >= 0)
++        val <<= exponent;
++    else
++        val >>= -exponent;
++
++    return val;
++}
++
+ int MOSTempSensor::getMOSRegsInfoWord(uint8_t regs, int16_t* pu16data)
+ {
+     std::string i2cBus = "/dev/i2c-" + std::to_string(busId);
+@@ -124,6 +146,11 @@ int MOSTempSensor::getMOSRegsInfoWord(uint8_t regs, int16_t* pu16data)
+     *pu16data = i2c_smbus_read_word_data(fd, regs);
+     close(fd);
+ 
++    if(sensorClass == linearClass)
++    {
++        *pu16data = pmbusRegTodataLinear(*pu16data);
++    }
++
+     if (*pu16data < 0)
+     {
+         if constexpr (debug)
+@@ -253,7 +280,7 @@ void createSensors(
+                     sensor = std::make_unique<MOSTempSensor>(
+                         dbusConnection, io, name, pathPair.first, objectServer,
+                         std::move(sensorThresholds), busId, address,
+-                        tempReg);
++                        tempReg,sensorClass);
+ 
+                     sensor->init();
+                 }
+-- 
+2.7.4
+
