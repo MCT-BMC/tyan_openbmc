@@ -762,7 +762,7 @@ index 0000000..3ed8468
 +    }
 +
 +    // check FAN sensors reading
-+    for (size_t z = 1; z <= 5; z++)
++    for (size_t z = 1; z <= 6; z++)
 +    {
 +        memset(Object,0,sizeof(Object));
 +        snprintf(Object,sizeof(Object),"%s%d",FAN_OBJECTPATH,z);
