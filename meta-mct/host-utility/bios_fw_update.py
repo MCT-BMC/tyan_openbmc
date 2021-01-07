@@ -18,7 +18,7 @@ import tarfile
 from subprocess import check_output,CalledProcessError
 from time import sleep
 
-utilityVersion = '0.02'
+utilityVersion = '0.03'
 
 prepareProcessing = 'Wating System Power off'
 prepareFinish = 'System status is Off , Switch SPI interface'
@@ -108,10 +108,11 @@ def getBIOSUpdateProgress():
     return getJsonData
 
 def controlChassisAction(method):
-    url = DestUrl+'/org/openbmc/control/chassis0/action/'+method
+
+    url = DestUrl+'/redfish/v1/Systems/system/Actions/ComputerSystem.Reset'
     cmds = ['curl', '-s', '-b', 'cjar', '-k', '-X', 'POST', '-H',
             'Content-Type: application/json', '-d',
-            '{"data": []}', url]
+            '{"ResetType": "' + method + '"}', url]
     try:
         output = subprocess.check_output(cmds, stderr=FNULL)
     except CalledProcessError as e:
@@ -246,7 +247,7 @@ def update(bin):
             status = getUpdateJsonData()
             print(status[jsonStatus])
             sleep(5)
-            controlChassisAction('powerOn')
+            controlChassisAction('On')
             print('Starting to power on server')
             break
         if(timer > updateTimeout):
