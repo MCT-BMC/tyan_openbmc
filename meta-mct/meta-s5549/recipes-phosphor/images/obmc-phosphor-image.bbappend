@@ -26,7 +26,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           mct-dcmi-power \
                                           gdb \
                                           mct-register-monitor \
-                                          pattern-matching \
                                           state-manager-recheck \
                                           srvcfg-manager \
                                         "
