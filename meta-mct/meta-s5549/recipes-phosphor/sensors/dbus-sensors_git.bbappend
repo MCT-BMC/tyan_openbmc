@@ -12,7 +12,6 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0007-add-necessary-event-sensors-in-dbus.patch \
             file://0013-add-ipmi-power-status-sensor.patch \
             file://0015-hidden-peci-core-temperature-sensor.patch \
-            file://0018-change-power-match-to-pgood-event.patch \
             file://0020-Add-prochot-sensor.patch \
             file://0021-Add-Invalid-Value-property-for-power-on-sensors.patch \
             file://0022-Add-type-sensors-to-support-the-invalid-value-proper.patch \

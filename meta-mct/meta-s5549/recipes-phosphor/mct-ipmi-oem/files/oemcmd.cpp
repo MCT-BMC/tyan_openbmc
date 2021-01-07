@@ -33,7 +33,7 @@
 #include <nlohmann/json.hpp>
 
 
-#include "xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp"
+#include "xyz/openbmc_project/Control/Power/RestoreDelay/server.hpp"
 
 #define FSC_SERVICE "xyz.openbmc_project.EntityManager"
 #define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s5549_Baseboard/Pid_"
@@ -1165,8 +1165,8 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t> ipmi_tyan_RamdomDelayACRestorePowerON(u
     std::uint8_t opCodeResponse, delayTimeLSBResponse, delayTimeMSBResponse;;
 
     constexpr auto service = "xyz.openbmc_project.Settings";
-    constexpr auto path = "/xyz/openbmc_project/control/host0/power_restore_policy";
-    constexpr auto powerRestoreInterface = "xyz.openbmc_project.Control.Power.RestorePolicy";
+    constexpr auto path = "/xyz/openbmc_project/control/power_restore_delay";
+    constexpr auto powerRestoreInterface = "xyz.openbmc_project.Control.Power.RestoreDelay";
     constexpr auto alwaysOnPolicy = "PowerRestoreAlwaysOnPolicy";
     constexpr auto delay = "PowerRestoreDelay";
 
@@ -1181,7 +1181,7 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t> ipmi_tyan_RamdomDelayACRestorePowerON(u
         try
         {
             auto method = bus.new_method_call(service, path, PROPERTY_INTERFACE,"Set");
-            method.append(powerRestoreInterface, alwaysOnPolicy, sdbusplus::message::variant<std::string>(RestorePolicy::convertAlwaysOnPolicyToString((RestorePolicy::AlwaysOnPolicy)(opCode & 0x7F))));
+            method.append(powerRestoreInterface, alwaysOnPolicy, sdbusplus::message::variant<std::string>(RestoreDelay::convertAlwaysOnPolicyToString((RestoreDelay::AlwaysOnPolicy)(opCode & 0x7F))));
             bus.call_noreply(method);
 
             uint32_t delayValue = delayTimeLSB | (delayTimeMSB << 8);
@@ -1231,7 +1231,7 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t> ipmi_tyan_RamdomDelayACRestorePowerON(u
         }
         auto powerRestoreDelay = sdbusplus::message::variant_ns::get<uint32_t>(resultDelay);
 
-        opCodeResponse = (opCode & 0x80) | (uint8_t)RestorePolicy::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy);
+        opCodeResponse = (opCode & 0x80) | (uint8_t)RestoreDelay::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy);
 
         uint8_t *delayValue = (uint8_t *)&powerRestoreDelay;
         delayTimeLSBResponse = delayValue[0];

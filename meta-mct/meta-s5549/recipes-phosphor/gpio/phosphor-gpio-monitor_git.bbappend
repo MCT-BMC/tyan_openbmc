@@ -4,7 +4,6 @@ SRC_URI += "file://phosphor-multi-gpio-monitor.service"
 SRC_URI += "file://phosphor-gpio-monitor@.service"
 SRC_URI += "file://s5549_gpio.json"
 SRC_URI += "file://0001-Support-GPIO-interrupt.patch \
-            file://0002-init-host-status.patch \
             file://0003-Filter-the-debug-log-and-change-service-enable-metho.patch \
            "
 

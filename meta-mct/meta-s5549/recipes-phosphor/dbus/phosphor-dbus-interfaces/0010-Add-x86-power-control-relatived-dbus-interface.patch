@@ -1,0 +1,65 @@
+From efc9b294813ce7e19457c109f60721bffb382e1f Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 18 Dec 2020 10:44:09 +0800
+Subject: [PATCH] Add x86-power-control relatived dbus interface
+
+%% original patch: 0010-Add-x86-power-control-relatived-dbus-interface.patch
+---
+ xyz/openbmc_project/Common/ACBoot.interface.yaml   |  8 ++++++
+ .../Control/Power/RestoreDelay.interface.yaml      | 29 ++++++++++++++++++++++
+ 2 files changed, 37 insertions(+)
+ create mode 100644 xyz/openbmc_project/Common/ACBoot.interface.yaml
+ create mode 100755 xyz/openbmc_project/Control/Power/RestoreDelay.interface.yaml
+
+diff --git a/xyz/openbmc_project/Common/ACBoot.interface.yaml b/xyz/openbmc_project/Common/ACBoot.interface.yaml
+new file mode 100644
+index 0000000..23cfaa4
+--- /dev/null
++++ b/xyz/openbmc_project/Common/ACBoot.interface.yaml
+@@ -0,0 +1,8 @@
++description: >
++    Implement to provide system AcBoot flag
++properties:
++    - name: ACBoot
++      type: string
++      description: >
++          Flag for system ACBoot.
++
+diff --git a/xyz/openbmc_project/Control/Power/RestoreDelay.interface.yaml b/xyz/openbmc_project/Control/Power/RestoreDelay.interface.yaml
+new file mode 100755
+index 0000000..66e5900
+--- /dev/null
++++ b/xyz/openbmc_project/Control/Power/RestoreDelay.interface.yaml
+@@ -0,0 +1,29 @@
++description: >
++    Implement to specify power transition behavior on a BMC reset.
++
++properties:
++    - name: PowerRestoreDelay
++      type: uint32
++      description: >
++          The delay for setting always-on.
++
++    - name: PowerRestoreAlwaysOnPolicy
++      type: enum[self.AlwaysOnPolicy]
++      description: >
++          The policy to adopt after the BMC reset and using always-on policy.
++
++enumerations:
++    - name: AlwaysOnPolicy
++      description: >
++        Possible power restoration always-on policies.
++      values:
++        - name: Immediately
++          description: >
++            Without delay time for bmc power on
++        - name: Random
++          description: >
++            Set a random delay time for bmc power on.
++        - name: Fixed
++          description: >
++            Set a fixed delay time for bmc power on.
++
+-- 
+2.7.4
+

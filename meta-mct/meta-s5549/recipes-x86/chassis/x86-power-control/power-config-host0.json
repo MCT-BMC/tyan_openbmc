@@ -1,0 +1,11 @@
+{
+  "IdButton": "ID_BUTTON",
+  "NMIButton": "NMI_BUTTON",
+  "PostComplete": "POST_COMPLETE",
+  "PwrButton": "POWER_BUTTON",
+  "PwrOK": "PS_PWROK",
+  "PwrOut": "PWRBTN_OUT",
+  "RstButton": "RESET_BUTTON",
+  "RstOut": "RSTBTN_OUT"
+}
+

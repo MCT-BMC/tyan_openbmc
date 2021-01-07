@@ -2,7 +2,6 @@
 OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           gpio-initial \
                                           hbled-ctrl \
-                                          mct-powerctrl \
                                           mct-default-action \
                                           cpu-state \ 
                                           phosphor-ipmi-ipmb \
@@ -20,7 +19,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           bmc-sel \
                                           mct-ipmi-oem \
                                           crashdump-bin \
-                                          button-monitor \
                                           entity-rescan \
                                           phosphor-post-code-manager \
                                           phosphor-host-postd \
@@ -31,6 +29,4 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           pattern-matching \
                                           state-manager-recheck \
                                           srvcfg-manager \
-                                          button-state \
-                                          power-state \
                                         "
