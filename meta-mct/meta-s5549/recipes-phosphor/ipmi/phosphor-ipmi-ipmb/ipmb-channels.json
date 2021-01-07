@@ -2,7 +2,7 @@
   "channels": [
     {
       "type": "me",
-      "slave-path": "/dev/ipmb-1",
+      "slave-path": "/dev/ipmb-5",
       "bmc-addr": 32,
       "remote-addr": 44
     }
