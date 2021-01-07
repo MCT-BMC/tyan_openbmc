@@ -371,7 +371,7 @@
                 ]
             },
             "Index": 0,
-            "Name": "CPU_FAN_0",
+            "Name": "SYS_FAN_1",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -391,7 +391,7 @@
                 ]
             },
             "Index": 1,
-            "Name": "SYS_FAN_0",
+            "Name": "SYS_FAN_2",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -411,7 +411,7 @@
                 ]
             },
             "Index": 2,
-            "Name": "SYS_FAN_1",
+            "Name": "SYS_FAN_3",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -431,7 +431,7 @@
                 ]
             },
             "Index": 3,
-            "Name": "SYS_FAN_2",
+            "Name": "SYS_FAN_4",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -451,7 +451,7 @@
                 ]
             },
             "Index": 4,
-            "Name": "SYS_FAN_3",
+            "Name": "SYS_FAN_5",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -471,7 +471,7 @@
                 ]
             },
             "Index": 5,
-            "Name": "SYS_FAN_4",
+            "Name": "SYS_FAN_6",
             "Thresholds": [
                 {
                     "Direction": "less than",
@@ -622,8 +622,8 @@
             "OutLimitMax": 70,
             "NegativeHysteresis": 0,
             "Output": [
-                25.0,
-                30.0
+                40.0,
+                50.0
             ],
             "PositiveHysteresis": 0,
             "Reading": [
@@ -648,7 +648,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "CPU_FAN_0"
+                "SYS_FAN_1"
             ],
             "Name": "FSC_SYS_FAN_1",
             "OutLimitMax": 100.0,
@@ -672,7 +672,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN_0"
+                "SYS_FAN_2"
             ],
             "Name": "FSC_SYS_FAN_2",
             "OutLimitMax": 100.0,
@@ -696,7 +696,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN_1"
+                "SYS_FAN_3"
             ],
             "Name": "FSC_SYS_FAN_3",
             "OutLimitMax": 100.0,
@@ -720,7 +720,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN_2"
+                "SYS_FAN_4"
             ],
             "Name": "FSC_SYS_FAN_4",
             "OutLimitMax": 100.0,
@@ -744,7 +744,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN_3"
+                "SYS_FAN_5"
             ],
             "Name": "FSC_SYS_FAN_5",
             "OutLimitMax": 100.0,
@@ -768,7 +768,7 @@
             "ILimitMax": 0.0,
             "ILimitMin": 0.0,
             "Inputs": [
-                "SYS_FAN_4"
+                "SYS_FAN_6"
             ],
             "Name": "FSC_SYS_FAN_6",
             "OutLimitMax": 100.0,
@@ -797,7 +797,7 @@
         "BoardMfg": "$BOARD_MANUFACTURER",
         "BoardProduct": "$BOARD_PRODUCT_NAME",
         "BoardSerial": "$BOARD_SERIAL_NUMBER",
-        "BoardPartNumber": "$BOARD_PRODUCT_NAME",
+        "BoardPartNumber": "$BOARD_PART_NUMBER",
         "ProductName": "$PRODUCT_PRODUCT_NAME",
         "ProductPartNumber": "$PRODUCT_PART_NUMBER",
         "ProductVersion": "$PRODUCT_VERSION",
