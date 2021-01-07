@@ -8,6 +8,18 @@ if [ "$event" == "prochot" ]; then
    offset=0x0A
 elif [ "$event" == "thermtrip" ]; then
    offset=0x01
+
+   SERVICE=" xyz.openbmc_project.State.Host"
+   OBJECT="/xyz/openbmc_project/state/host0"
+   INTERFACE="xyz.openbmc_project.State.Host"
+   POWER_STATE="Running"
+
+   powerState=$(busctl get-property $SERVICE $OBJECT $INTERFACE CurrentHostState)
+   echo $powerState
+   if [[ "$powerState" != *"$POWER_STATE"* ]]; then
+      echo "Filter out $event event"
+      exit
+   fi
 fi
 
 SERVICE="xyz.openbmc_project.Logging.IPMI"
