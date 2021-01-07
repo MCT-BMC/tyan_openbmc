@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=43c09494f6b77f344027eea0a1c22830"
 SRCREV = "wht-1.0"
 
 S = "${WORKDIR}/"
-SRC_URI = "file://crashdump-1.0.tgz \
+SRC_URI = "file://crashdump-1.0.4.1.tgz \
            file://bafi-1.05.tgz \
            file://LICENSE  \
           "
