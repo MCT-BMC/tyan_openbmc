@@ -6,6 +6,7 @@
 #include <peci.h>
 #include <systemd/sd-journal.h>
 #include <iostream>
+#include <variant>
 
 
 #define CATERR_OBJECTPATH_BASE "/xyz/openbmc_project/control/processor"
@@ -27,6 +28,10 @@ static constexpr char const* caterrSensorPath = "/xyz/openbmc_project/sensors/pr
 static constexpr char const* cpu0SensorPath = "/xyz/openbmc_project/sensors/processor/CPU0_State";
 static constexpr char const* cpu1SensorPath = "/xyz/openbmc_project/sensors/processor/CPU1_State";
 
+static constexpr char const* powerService = "xyz.openbmc_project.State.Host";
+static constexpr char const* powerPath = "/xyz/openbmc_project/state/host0";
+static constexpr char const* powerInterface = "xyz.openbmc_project.State.Host";
+
 static const std::string ipmiSELAddMessage = "SEL Entry";
 static constexpr size_t selEvtDataMaxSize = 3;
 static const uint32_t intenalErrMask = 0x10100000; //internal CATERR or MSMI
@@ -44,6 +49,31 @@ int main()
     method.append(CATERR_INTERFACE,"ProcessorStatus", sdbusplus::message::variant<std::string>(state));
     bus.call_noreply(method);
 #endif 
+
+#ifdef CATERR_ENABLE_POWER_FILTER
+    auto method = bus.new_method_call(powerService, powerPath, PROPERTY_INTERFACE,"Get");
+    method.append(powerInterface, "CurrentHostState");
+
+    std::variant<std::string> result;
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(result);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "ERROR=" << e.what() << "\n";
+        return 0;
+    }
+
+    std::string powerState = std::get<std::string>(result);
+    if (powerState.find("Running") == std::string::npos)
+    {
+        std::cerr << "Filter out CATERR event\n";
+        return 0;
+    }
+#endif
+
     //log SEL
     uint16_t genId = 0x20;
     bool assert=1;

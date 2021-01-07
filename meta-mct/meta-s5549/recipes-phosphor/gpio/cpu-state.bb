@@ -20,12 +20,10 @@ SRC_URI += " \
             file://CMakeLists.txt\
             file://LICENSE \
             file://caterrHandler.cpp \
-            file://prochot_thermtrip_update.sh \
+            file://prochotThermtripHandler.cpp \
             file://xyz.openbmc_project.caterr.service \
             file://xyz.openbmc_project.prochot0.service \
             file://xyz.openbmc_project.prochot0_deassert.service \
-            file://xyz.openbmc_project.prochot1.service \
-            file://xyz.openbmc_project.prochot1_deassert.service \
             file://xyz.openbmc_project.thermtrip.service \
             "
 
@@ -33,6 +31,14 @@ DEPENDS += "sdbusplus sdbusplus-native"
 DEPENDS += "phosphor-logging"
 DEPENDS += "phosphor-dbus-interfaces phosphor-dbus-interfaces-native"
 DEPENDS += "sdbus++-native"
+DEPENDS += "libgpiod"
+DEPENDS += "obmc-libmisc"
+
+RDEPENDS_${PN} += "obmc-libmisc"
+
+EXTRA_OECMAKE += "-DCATERR_ENABLE_POWER_FILTER=ON"
+EXTRA_OECMAKE += "-DTHERMTRIP_ENABLE_POWER_FILTER=ON"
+EXTRA_OECMAKE += "-DPROCHOT_ENABLE_POWER_FILTER=ON"
 
 do_install_append() {
     install -d ${D}/usr/sbin
@@ -42,8 +48,6 @@ do_install_append() {
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.caterr.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0_deassert.service"
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1.service"
-SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot1_deassert.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.thermtrip.service"
 
 # linux-libc-headers guides this way to include custom uapi headers
