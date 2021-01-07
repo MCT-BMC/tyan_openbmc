@@ -1,19 +1,23 @@
-From 8ebd78f9a9ab4403e63b7284d09531049e50bf0e Mon Sep 17 00:00:00 2001
+From 7d12aa6e43ae6b16fb8afc684b87da753d27fe42 Mon Sep 17 00:00:00 2001
 From: John Chung <john.chung@mic.com.tw>
-Date: Wed, 20 May 2020 17:37:21 +0800
+Date: Wed, 30 Dec 2020 11:58:20 +0800
 Subject: [PATCH] Implement add SEL feature for watchdog timeout
 
 ---
  watchdog.cpp | 70 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  watchdog.hpp |  3 +++
  2 files changed, 73 insertions(+)
+ mode change 100644 => 100755 watchdog.cpp
+ mode change 100644 => 100755 watchdog.hpp
 
 diff --git a/watchdog.cpp b/watchdog.cpp
-index daf98a1..3483127 100755
+old mode 100644
+new mode 100755
+index 079d88e..c715f37
 --- a/watchdog.cpp
 +++ b/watchdog.cpp
-@@ -148,6 +148,8 @@ void Watchdog::timeOutHandler()
- 
+@@ -339,6 +339,8 @@ void Watchdog::timeOutHandler()
+         }
      }
  
 +    addWatchdogSEL(action,expiredTimerUse());
@@ -21,7 +25,7 @@ index daf98a1..3483127 100755
      tryFallbackOrDisable();
  }
  
-@@ -174,6 +176,74 @@ void Watchdog::tryFallbackOrDisable()
+@@ -365,5 +367,73 @@ void Watchdog::tryFallbackOrDisable()
      WatchdogInherits::enabled(false);
  }
  
@@ -93,20 +97,24 @@ index daf98a1..3483127 100755
 +    }
 +}
 +
- std::string Watchdog::getService(const std::string& path, const std::string& interface)
- {
-     constexpr auto mapperObjPath = "/xyz/openbmc_project/object_mapper";
+ } // namespace watchdog
+ } // namespace phosphor
 diff --git a/watchdog.hpp b/watchdog.hpp
-index 9f3b650..f4c8e72 100755
+old mode 100644
+new mode 100755
+index b004b7a..7bc6f61
 --- a/watchdog.hpp
 +++ b/watchdog.hpp
-@@ -173,6 +173,9 @@ class Watchdog : public WatchdogInherits
+@@ -191,6 +191,9 @@ class Watchdog : public WatchdogInherits
+ 
      /** @brief Attempt to enter the fallback watchdog or disables it */
      void tryFallbackOrDisable();
- 
++
 +    /** @brief Add a watchdog SEL to SEL list  */
 +    void addWatchdogSEL(Base::Watchdog::Action action,Base::Watchdog::TimerUse timeUse);
-+
-     /** @brief Calls into Object Mapper to get Dbus object service */
-     std::string getService(const std::string& path, const std::string& interface);
+ };
  
+ } // namespace watchdog
+-- 
+2.7.4
+

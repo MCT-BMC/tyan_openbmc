@@ -1,0 +1,84 @@
+From c470d9ff71e7950a0ec3afd051a7a05b22c02596 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 30 Dec 2020 11:13:05 +0800
+Subject: [PATCH] Add watchdog property for intel modified phosphor-watchdog
+
+[PATCH] Add the pre-timeout interrupt defined in IPMI spec
+
+The IPMI watchdog pre-timeout interrupt is used to set the different
+pre-timeout interrupt source. Add them as a dbus property,
+IPMI set/get watchdog commands will use it.
+
+[PATCH] Add PreInterruptFlag properity in DBUS.
+
+PreTimeoutInterruptOccurFlag in DBUS would be set 'true'
+when watchdog pre-timeout interrupt occurred.
+
+Tested:
+Enable command(raw 0x06 0x31) that get message flag
+can set right bit about watchdog,
+need record PreTimeoutInterruptOccurFlag
+at xyz.openbmmc_project.State.Watchdog when watchdog
+pre-timeout interrupt occurred.
+---
+ xyz/openbmc_project/State/Watchdog.interface.yaml | 27 +++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+ mode change 100644 => 100755 xyz/openbmc_project/State/Watchdog.interface.yaml
+
+diff --git a/xyz/openbmc_project/State/Watchdog.interface.yaml b/xyz/openbmc_project/State/Watchdog.interface.yaml
+old mode 100644
+new mode 100755
+index 27c192e..e7c429f
+--- a/xyz/openbmc_project/State/Watchdog.interface.yaml
++++ b/xyz/openbmc_project/State/Watchdog.interface.yaml
+@@ -33,6 +33,11 @@ properties:
+       description: >
+           The action the watchdog should perform when it expires.
+       default: 'None'
++    - name: PreTimeoutInterrupt
++      type: enum[self.PreTimeoutInterruptAction]
++      description: >
++          The BMC generates the selected interrupt before the timer expires.
++      default: 'None'
+     - name: Interval
+       type: uint64
+       description: >
+@@ -54,6 +59,11 @@ properties:
+       description: >
+           The timer user at the time of expiration.
+       default: 'Reserved'
++    - name: PreTimeoutInterruptOccurFlag
++      type: boolean
++      description: >
++          PreTimeoutInterruptOccurFlag that preTimeoutInterrupt action occurred.
++      default: false
+ 
+ enumerations:
+    - name: Action
+@@ -73,6 +83,23 @@ enumerations:
+          description: >
+            Perform a power cycle of the system.
+ 
++   - name: PreTimeoutInterruptAction
++     description: >
++       The type of PreTimeout Interrupt.
++     values:
++       - name: 'None'
++         description: >
++           Do nothing.
++       - name: 'SMI'
++         description: >
++           SMI.
++       - name: 'NMI'
++         description: >
++           NMI / Diagnostic Interrupt.
++       - name: 'MI'
++         description: >
++           Messaging Interrupt.
++
+    - name: TimerUse
+      description: >
+        The type of timer use.
+-- 
+2.7.4
+
