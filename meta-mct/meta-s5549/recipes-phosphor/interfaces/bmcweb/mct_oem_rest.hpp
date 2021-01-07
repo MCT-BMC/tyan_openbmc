@@ -79,7 +79,7 @@ inline void crashdumpsHandler(const crow::Request& req, crow::Response& res)
 {
     std::vector<std::string> crashdumpslist;
     nlohmann::json crashdumpslistData;
-    std::string path = "/tmp/crashdump/output";
+    std::string path = "/var/lib/crashdump/output";
 
     if(std::filesystem::exists(std::filesystem::path(path))){
         for (const auto & entry : std::filesystem::directory_iterator(path))

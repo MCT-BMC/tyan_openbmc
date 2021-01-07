@@ -13,5 +13,7 @@ SRC_URI += "file://s5549.cfg \
             file://0012-Enable-GPIOE0-and-GPIOE2-pass-through-by-default.patch \
             file://0013-Allow-monitoring-of-power-control-input-GPIOs.patch \
             file://0014-Clear-the-i2c-slave-state-when-a-bmc-i2c-master-cmd-.patch \
+            file://0015-misc-Add-clock-control-logic-into-Aspeed-LPC-SNOOP-d.patch \
+            file://0016-media-aspeed-fix-clock-handling-logic.patch \
             "
 

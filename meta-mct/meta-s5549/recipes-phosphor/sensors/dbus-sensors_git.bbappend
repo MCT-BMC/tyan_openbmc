@@ -47,6 +47,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0055-Add-the-debug-log-for-dimm-sensor.patch \
             file://0056-create-bmc-reset-flag.patch \
             file://0057-Support-linear-data-format-for-MOSTempSensor.patch \
+            file://0058-Add-Fast-Prochot-event-only-sensor.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"

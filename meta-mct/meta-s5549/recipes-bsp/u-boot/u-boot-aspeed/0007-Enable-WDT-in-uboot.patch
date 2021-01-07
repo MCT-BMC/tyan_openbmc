@@ -1,0 +1,52 @@
+From 050a9afdde853884fe86d92d714e51157fbfecbf Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 4 Jan 2021 16:34:34 +0800
+Subject: [PATCH] Enable WDT in uboot
+
+---
+ board/aspeed/ast-g5/ast-g5.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/board/aspeed/ast-g5/ast-g5.c b/board/aspeed/ast-g5/ast-g5.c
+index d81f41b..eebd4a7 100755
+--- a/board/aspeed/ast-g5/ast-g5.c
++++ b/board/aspeed/ast-g5/ast-g5.c
+@@ -85,6 +85,18 @@ void Set_Default_GPIO_Pass_Through(void)
+     }
+ }
+ 
++/*--------------------------------------------------------------------
++ * @fn Set_HW_Watchdog
++ * @brief Set the default hardware watchdog setting
++ *--------------------------------------------------------------------*/
++void Set_HW_Watchdog(void)
++{
++    puts("Set the default hardware watchdog setting\n");
++    //set timeout to 180 second
++    writel(0xABA9500, AST_WDT2_BASE + 0x04);
++    writel(0x4755, AST_WDT2_BASE + 0x08);
++    writel(0x13, AST_WDT2_BASE + 0x0c);
++}
+ 
+ int board_init(void)
+ {
+@@ -94,6 +106,7 @@ int board_init(void)
+ 	Light_BMC_Heartbeat_LED();
+     Set_Default_UART_Route();
+ 	Set_Default_GPIO_Pass_Through();
++	Set_HW_Watchdog();
+     
+ 	return 0;
+ }
+@@ -126,7 +139,7 @@ int board_eth_init(bd_t *bd)
+ void hw_watchdog_reset(void)
+ {
+ 	/* Restart WD2 timer */
+-	writel(0x4755, AST_WDT2_BASE + 0x08);
++	//writel(0x4755, AST_WDT2_BASE + 0x08);
+ }
+ #endif /* CONFIG_WATCHDOG */
+ #if defined(CONFIG_SYS_I2C_MAC_OFFSET)
+-- 
+2.7.4
+
