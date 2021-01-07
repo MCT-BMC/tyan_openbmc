@@ -2,11 +2,16 @@
 
 set -e
 
-POWER_CMD="/usr/bin/obmcutil"
+BUS_CMD="/usr/bin/busctl"
 GPIO_SET_CMD="/usr/bin/gpioset"
 IMAGE_FILE=$1
-GPIOJ0=72
-GPIOJ1=73
+
+POWER_OBJ="xyz.openbmc_project.State.Host"
+POWER_PATH="/xyz/openbmc_project/state/host0"
+POWER_INTF="xyz.openbmc_project.State.Host"
+POWER_PROPERTY="RequestedHostTransition"
+POWER_ON="xyz.openbmc_project.State.Host.Transition.On"
+POWER_OFF="xyz.openbmc_project.State.Host.Transition.Off"
 
 IPMB_OBJ="xyz.openbmc_project.Ipmi.Channel.Ipmb"
 IPMB_PATH="/xyz/openbmc_project/Ipmi/Channel/Ipmb"
@@ -14,22 +19,17 @@ IPMB_INTF="org.openbmc.Ipmb"
 IPMB_CALL="sendRequest yyyyay"
 ME_CMD_RECOVER="1 0x2e 0 0xdf 4 0x57 0x01 0x00 0x01"
 ME_CMD_RESET="1 6 0 0x2 0"
+
 SPI_DEV="1e630000.spi"
 SPI_PATH="/sys/bus/platform/drivers/aspeed-smc"
 
 MTD_MAX=10
 
-set_gpio_value()
-{
-    $GPIO_SET_CMD gpiochip0 $1=$2
-}
-
 set_gpio_to_bmc()
 {
     echo "switch bios GPIO to bmc"
 
-    set_gpio_value $GPIOJ0 0
-    set_gpio_value $GPIOJ1 1
+    $GPIO_SET_CMD `gpiofind BIOS_SPI_SW `=1
 
     return 0
 }
@@ -38,8 +38,7 @@ set_gpio_to_pch()
 {
     echo "switch bios GPIO to pch"
 
-    set_gpio_value $GPIOJ0 1
-    set_gpio_value $GPIOJ1 0
+    $GPIO_SET_CMD `gpiofind BIOS_SPI_SW `=0
 
     return 0
 }
@@ -56,9 +55,9 @@ fi
 
 #Power off host server.
 echo "Power off host server"
-$POWER_CMD poweroff
+$BUS_CMD set-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY s $POWER_OFF
 sleep 15
-if [ $($POWER_CMD hoststate|awk 'NR==1 {print $3}'|cut -d . -f 6) != "Off" ];
+if [ $($BUS_CMD get-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY|awk 'NR==1 {print $2}'|cut -d . -f 6|cut -d \" -f 0) != "Off" ];
 then
     echo "Host server didn't power off"
     echo "Bios upgrade failed"
@@ -68,7 +67,7 @@ echo "Host server powered off"
 
 #Set ME to recovery mode
 echo "Set ME to recovery mode"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RECOVER
+$BUS_CMD call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RECOVER
 sleep 5
 
 #Flip GPIO to access SPI flash used by host.
@@ -113,18 +112,18 @@ sleep 5
 
 #Reset ME to boot from new bios
 echo "Reset ME to boot from new bios"
-busctl call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RESET
+$BUS_CMD call $IPMB_OBJ $IPMB_PATH $IPMB_INTF $IPMB_CALL $ME_CMD_RESET
 sleep 10
 
 #Power on server
 echo "Power on server"
-$POWER_CMD chassison
+$BUS_CMD set-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY s $POWER_ON
 sleep 5
 
 # Retry to power on once again if server didn't powered on
-if [ $($POWER_CMD hoststate|awk 'NR==1 {print $3}'|cut -d . -f 6) != "Running" ];
+if [ $($BUS_CMD get-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY|awk 'NR==1 {print $2}'|cut -d . -f 6|cut -d \" -f 0) != "On" ];
 then
     sleep 5
     echo "Powering on server again"
-    $POWER_CMD chassison
+    $BUS_CMD set-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY s $POWER_ON
 fi
