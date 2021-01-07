@@ -1,13 +1,13 @@
-From 986804831c2a2cf2d0bc734a688fa88c5c790b1a Mon Sep 17 00:00:00 2001
-From: Ray Lue <ray.lue@mic.com.tw>
-Date: Thu, 12 Mar 2020 10:46:57 +0800
-Subject: [PATCH 1/1] support ipmi ACPI sensor
+From f5a325cae5b93fed853561dd690f313ed6067b30 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 21 Dec 2020 19:12:23 +0800
+Subject: [PATCH] support ipmi ACPI sensor
 
 ---
- CMakeLists.txt                                |  14 ++
- .../xyz.openbmc_project.acpisensor.service    |  12 ++
- src/AcpiSensorMain.cpp                        | 133 ++++++++++++++++++
- 3 files changed, 159 insertions(+)
+ CMakeLists.txt                                     |  14 +++
+ .../xyz.openbmc_project.acpisensor.service         |  12 ++
+ src/AcpiSensorMain.cpp                             | 129 +++++++++++++++++++++
+ 3 files changed, 155 insertions(+)
  create mode 100644 service_files/xyz.openbmc_project.acpisensor.service
  create mode 100755 src/AcpiSensorMain.cpp
 
@@ -74,10 +74,10 @@ index 0000000..f3e83c6
 +WantedBy=multi-user.target
 diff --git a/src/AcpiSensorMain.cpp b/src/AcpiSensorMain.cpp
 new file mode 100755
-index 0000000..6cd8285
+index 0000000..8c78420
 --- /dev/null
 +++ b/src/AcpiSensorMain.cpp
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,129 @@
 +/*
 +// Copyright (c) 2018 Intel Corporation
 +//
@@ -152,7 +152,7 @@ index 0000000..6cd8285
 +    
 +    auto PgoodEventMatcherCallback =
 +        [systemBus](sdbusplus::message::message& message) {
-+            boost::container::flat_map<std::string, std::variant<int>> propertiesChanged;
++            boost::container::flat_map<std::string, std::variant<std::string>> values;
 +            std::string objectName;
 +            if (message.is_method_error())
 +            {
@@ -164,23 +164,18 @@ index 0000000..6cd8285
 +            {
 +                std::cout << message.get_path() << " is changed\n";
 +            }
-+            message.read(objectName, propertiesChanged);
-+            std::string event = propertiesChanged.begin()->first;
-+            int *pgood = std::get_if<int>(&propertiesChanged.begin()->second);
++            message.read(objectName, values);
++            auto findState = values.find(power::property);
++            if (findState != values.end())
++            {
++                bool on = boost::ends_with(
++                    std::get<std::string>(findState->second), "Running");
 +
-+            if (!pgood)
-+            {
-+                std::cerr << "event has invalid type\n";
-+                return;
-+            }
-+           
-+            if (event == "pgood")
-+            {
 +                //log SEL
 +                uint16_t genid = 0x20;
 +                bool assert=1;
 +                std::vector<uint8_t> eventData(selEvtDataMaxSize, 0xFF);
-+                eventData[0] = (*pgood == 1) ? 0:5;
++                eventData[0] = (on) ? 0:5;
 +                       
 +                sdbusplus::message::message writeSEL = systemBus->new_method_call(
 +                            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
@@ -203,8 +198,9 @@ index 0000000..6cd8285
 +    //event trigger, this can move to poll the gpio service.
 +    sdbusplus::bus::match::match caterrEventMatcher(
 +        static_cast<sdbusplus::bus::bus&>(*systemBus),
-+        "type='signal',interface='org.freedesktop.DBus.Properties',member='"
-+        "PropertiesChanged',arg0namespace='org.openbmc.control.Power'",
++        "type='signal',interface='" + std::string(properties::interface) +
++            "',path='" + std::string(power::path) + "',arg0='" +
++            std::string(power::interface) + "'",
 +        std::move(PgoodEventMatcherCallback));
 +
 +    io.run();
@@ -212,5 +208,5 @@ index 0000000..6cd8285
 +    return 0;
 +}
 -- 
-2.22.0
+2.7.4
 

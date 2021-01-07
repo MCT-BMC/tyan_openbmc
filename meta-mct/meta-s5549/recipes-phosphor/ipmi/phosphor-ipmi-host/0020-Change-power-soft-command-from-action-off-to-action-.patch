@@ -1,0 +1,25 @@
+From 0128e355f06cb0b487015d54e519c5bf7b3eccfe Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 22 Dec 2020 10:20:53 +0800
+Subject: [PATCH] Change power soft command from action off to action soft
+
+---
+ chassishandler.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+index 269a690..8e7a617 100755
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -1297,7 +1297,7 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+         case CMD_SOFT_OFF_VIA_OVER_TEMP:
+             // Request Host State Manager to do a soft power off
+             generateSELEvent(fruStatePowerSoft,powerControlEventData);
+-            rc = initiate_state_transition(State::Host::Transition::Off);
++            rc = initiate_state_transition(State::Host::Transition::gracefulOff);
+             break;
+ 
+         case CMD_PULSE_DIAGNOSTIC_INTR:
+-- 
+2.7.4
+

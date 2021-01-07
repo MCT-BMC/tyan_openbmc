@@ -342,12 +342,17 @@
 
 &gpio {
     status = "okay";
+
+    pinctrl-names = "pass-through";
+    pinctrl-0 = <&pinctrl_gpie0_default
+            &pinctrl_gpie2_default>;
+
     gpio-line-names =
     /*A0-A7*/   "","","BMC_EUP_LOT6","","","","","",
     /*B0-B7*/   "","","","","","","PROCHOT","",
     /*C0-C7*/   "","","","","","","","",
     /*D0-D7*/   "","","","","","PHY_RST","","CLR_CMOS",
-    /*E0-E7*/   "","RSTBTN_OUT","","","","","","",
+    /*E0-E7*/   "RESET_BUTTON","RSTBTN_OUT","POWER_BUTTON","PWRBTN_OUT","NMI_BUTTON","","","",
     /*F0-F7*/   "PCH_NMI","","","","","","","",
     /*G0-G7*/   "","CATERR","","","BAT_MON","","","BIOS_SPI_SW",
     /*H0-H7*/   "","","","SYS_FAULT1","","","SYS_FAULT2","",
@@ -368,8 +373,8 @@
     /*W0-W7*/   "","","","","","","","",
     /*X0-X7*/   "","","","","","","","",
     /*Y0-Y7*/   "","","","","","","","",
-    /*Z0-Z7*/   "","","PWRBTN_OUT","PCH_SCI_LPC","","","","",
-    /*AA0-AA7*/ "","","","","","","","",
+    /*Z0-Z7*/   "","","","PCH_SCI_LPC","","","","",
+    /*AA0-AA7*/ "","","","","","POST_COMPLETE","","",
     /*AB0-AB7*/ "","","","","","","","",
     /*AC0-AC7*/ "","","","","","","","";
 };

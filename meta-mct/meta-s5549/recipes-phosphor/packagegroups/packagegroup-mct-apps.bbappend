@@ -1,4 +1,4 @@
-RDEPENDS_${PN}-chassis += " \
-                            obmc-phosphor-buttons-signals \
-                            obmc-phosphor-buttons-handler \
-                            "
+RDEPENDS_${PN}-chassis_remove += " \
+                                    obmc-control-chassis \
+                                    obmc-op-control-power \
+                                  "

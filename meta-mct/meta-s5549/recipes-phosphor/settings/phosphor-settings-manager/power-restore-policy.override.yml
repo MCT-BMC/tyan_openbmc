@@ -4,7 +4,3 @@
       Properties:
           PowerRestorePolicy:
               Default: RestorePolicy::Policy::AlwaysOn
-          PowerRestoreDelay:
-              Default: 0
-          PowerRestoreAlwaysOnPolicy:
-              Default: RestorePolicy::AlwaysOnPolicy::Immediately

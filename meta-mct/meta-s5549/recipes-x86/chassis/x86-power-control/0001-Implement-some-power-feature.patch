@@ -1,0 +1,313 @@
+From 3faba21cb4847665aec9a087c82757bc4485b648 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 23 Dec 2020 10:11:44 +0800
+Subject: [PATCH] Implement some power feature
+
+Implement power off action in host transition
+Implement random power on delay for AC power on policy
+Implement button SEL for button press action
+Implement power off handling for some power action
+
+%% original patch: 0001-Implement-some-power-feature.patch
+
+%% original patch: 0001-Implement-some-power-feature.patch
+---
+ power-control-x86/CMakeLists.txt        |   7 ++
+ power-control-x86/src/power_control.cpp | 141 +++++++++++++++++++++++++++-----
+ 2 files changed, 127 insertions(+), 21 deletions(-)
+ mode change 100644 => 100755 power-control-x86/CMakeLists.txt
+ mode change 100644 => 100755 power-control-x86/src/power_control.cpp
+
+diff --git a/power-control-x86/CMakeLists.txt b/power-control-x86/CMakeLists.txt
+old mode 100644
+new mode 100755
+index 2a94f78..65143f3
+--- a/power-control-x86/CMakeLists.txt
++++ b/power-control-x86/CMakeLists.txt
+@@ -19,6 +19,12 @@ add_definitions(-DBOOST_ASIO_DISABLE_THREADS)
+ 
+ set(SRC_FILES src/power_control.cpp)
+ 
++# phosphor-dbus-interfaces
++find_package(PkgConfig REQUIRED)
++pkg_check_modules(DBUSINTERFACE phosphor-dbus-interfaces REQUIRED)
++include_directories(${DBUSINTERFACE_INCLUDE_DIRS})
++link_directories(${DBUSINTERFACE_LIBRARY_DIRS})
++
+ add_executable(${PROJECT_NAME} ${SRC_FILES})
+ target_link_libraries(${PROJECT_NAME} -lstdc++fs)
+ target_link_libraries(${PROJECT_NAME} chassisi2c)
+@@ -26,6 +32,7 @@ target_link_libraries(${PROJECT_NAME} i2c)
+ target_link_libraries(${PROJECT_NAME} gpiodcxx)
+ target_link_libraries(${PROJECT_NAME} systemd)
+ target_link_libraries(${PROJECT_NAME} sdbusplus)
++target_link_libraries(${PROJECT_NAME} ${DBUSINTERFACE_LIBRARIES})
+ 
+ target_compile_definitions (
+     ${PROJECT_NAME} PRIVATE $<$<BOOL:${CHASSIS_SYSTEM_RESET}>:
+diff --git a/power-control-x86/src/power_control.cpp b/power-control-x86/src/power_control.cpp
+old mode 100644
+new mode 100755
+index ab704d8..5dec4c2
+--- a/power-control-x86/src/power_control.cpp
++++ b/power-control-x86/src/power_control.cpp
+@@ -32,6 +32,10 @@
+ #include <fstream>
+ #include <iostream>
+ #include <string_view>
++#include <chrono>
++#include <random>
++
++#include "xyz/openbmc_project/Control/Power/RestoreDelay/server.hpp"
+ 
+ namespace power_control
+ {
+@@ -592,6 +596,30 @@ static void setRestartCause()
+     setRestartCauseProperty(restartCause);
+ }
+ 
++static void logSELEvent(std::string enrty, std::string path ,
++                     uint8_t eventData0, uint8_t eventData1, uint8_t eventData2)
++{
++    std::vector<uint8_t> eventData(3, 0xFF);
++    eventData[0] = eventData0;
++    eventData[1] = eventData1;
++    eventData[2] = eventData2;
++    uint16_t genid = 0x20;
++    bool assert = 1;
++
++    sdbusplus::message::message writeSEL = conn->new_method_call(
++        "xyz.openbmc_project.Logging.IPMI", "/xyz/openbmc_project/Logging/IPMI",
++        "xyz.openbmc_project.Logging.IPMI", "IpmiSelAdd");
++    writeSEL.append(enrty, path, eventData, true, (uint16_t)genid);
++    try
++    {
++        conn->call(writeSEL);
++    }
++    catch (std::exception& e)
++    {
++        std::cerr << "Failed to log the button event:" << e.what() << "\n";
++    }
++}
++
+ static void systemPowerGoodFailedLog()
+ {
+     sd_journal_send(
+@@ -622,6 +650,7 @@ static void powerButtonPressLog()
+     sd_journal_send("MESSAGE=PowerControl: power button pressed", "PRIORITY=%i",
+                     LOG_INFO, "REDFISH_MESSAGE_ID=%s",
+                     "OpenBMC.0.1.PowerButtonPressed", NULL);
++    logSELEvent("Power Button SEL Entry","/xyz/openbmc_project/sensors/pwr_button/BUTTON",0x00,0xFF,0xFF);
+ }
+ 
+ static void resetButtonPressLog()
+@@ -629,6 +658,7 @@ static void resetButtonPressLog()
+     sd_journal_send("MESSAGE=PowerControl: reset button pressed", "PRIORITY=%i",
+                     LOG_INFO, "REDFISH_MESSAGE_ID=%s",
+                     "OpenBMC.0.1.ResetButtonPressed", NULL);
++    logSELEvent("Reset Button SEL Entry","/xyz/openbmc_project/sensors/pwr_button/BUTTON",0x02,0xFF,0xFF);
+ }
+ 
+ static void nmiButtonPressLog()
+@@ -718,8 +748,45 @@ static void invokePowerRestorePolicy(const std::string& policy)
+     savePowerState(powerState);
+ }
+ 
+-static void powerRestorePolicyDelay(int delay)
++void randomPowerDelay(uint32_t& delay)
++{
++    using namespace sdbusplus::xyz::openbmc_project::Control::Power::server;
++
++    auto bus = sdbusplus::bus::new_default();
++
++    auto method = bus.new_method_call(
++       "xyz.openbmc_project.Settings", "/xyz/openbmc_project/control/power_restore_delay",
++        "org.freedesktop.DBus.Properties", "Get");
++    method.append("xyz.openbmc_project.Control.Power.RestoreDelay", "PowerRestoreAlwaysOnPolicy");
++
++    sdbusplus::message::variant<std::string> result;
++    try
++    {
++        auto reply = bus.call(method);
++        reply.read(result);
++    }
++    catch (std::exception& e)
++    {
++        std::cerr << "Error in PowerRestoreAlwaysOnPolicy Get " << "ERROR=%s" << e.what() << "\n";
++        return;
++    }
++
++    auto powerAlwaysOnPolicy = sdbusplus::message::variant_ns::get<std::string>(result);
++
++    if (RestoreDelay::AlwaysOnPolicy::Random ==
++        RestoreDelay::convertAlwaysOnPolicyFromString(powerAlwaysOnPolicy))
++    {
++        std::random_device rd;
++        std::default_random_engine gen = std::default_random_engine(rd());
++        std::uniform_int_distribution<int> dis(0,delay);
++        delay = dis(gen);
++    }
++}
++
++static void powerRestorePolicyDelay(uint32_t delayInput)
+ {
++    uint32_t delay = delayInput;
++
+     // Async events may call this twice, but we only want to run once
+     static bool delayStarted = false;
+     if (delayStarted)
+@@ -727,18 +794,8 @@ static void powerRestorePolicyDelay(int delay)
+         return;
+     }
+     delayStarted = true;
+-    // Calculate the delay from now to meet the requested delay
+-    // Subtract the approximate uboot time
+-    static constexpr const int ubootSeconds = 20;
+-    delay -= ubootSeconds;
+-    // Subtract the time since boot
+-    struct sysinfo info = {};
+-    if (sysinfo(&info) == 0)
+-    {
+-        delay -= info.uptime;
+-    }
+-    // 0 is the minimum delay
+-    delay = std::max(delay, 0);
++
++    randomPowerDelay(delay);
+ 
+     static boost::asio::steady_timer powerRestorePolicyTimer(io);
+     powerRestorePolicyTimer.expires_after(std::chrono::seconds(delay));
+@@ -828,14 +885,14 @@ static void powerRestorePolicyStart()
+             "Power.RestoreDelay'",
+             [](sdbusplus::message::message& msg) {
+                 std::string interfaceName;
+-                boost::container::flat_map<std::string, std::variant<uint16_t>>
++                boost::container::flat_map<std::string, std::variant<uint32_t>>
+                     propertiesChanged;
+-                int delay = 0;
++                uint32_t delay = 0;
+                 try
+                 {
+                     msg.read(interfaceName, propertiesChanged);
+                     delay =
+-                        std::get<uint16_t>(propertiesChanged.begin()->second);
++                        std::get<uint32_t>(propertiesChanged.begin()->second);
+                 }
+                 catch (std::exception& e)
+                 {
+@@ -850,13 +907,13 @@ static void powerRestorePolicyStart()
+     // Check if it's already on DBus
+     conn->async_method_call(
+         [](boost::system::error_code ec,
+-           const std::variant<uint16_t>& delayProperty) {
++           const std::variant<uint32_t>& delayProperty) {
+             if (ec)
+             {
+                 return;
+             }
+             powerRestoreDelayMatch.reset();
+-            const uint16_t* delay = std::get_if<uint16_t>(&delayProperty);
++            const uint32_t* delay = std::get_if<uint32_t>(&delayProperty);
+             if (delay == nullptr)
+             {
+                 std::cerr << "Unable to read power restore delay value\n";
+@@ -1369,7 +1426,8 @@ static void currentHostStateMonitor()
+ 
+                 // Set the restart cause set for this restart
+                 setRestartCause();
+-                resetACBootProperty();
++                //Never set AC boot property except external command
++                // resetACBootProperty();
+                 sd_journal_send("MESSAGE=Host system DC power is off",
+                                 "PRIORITY=%i", LOG_INFO,
+                                 "REDFISH_MESSAGE_ID=%s",
+@@ -1581,6 +1639,27 @@ static void powerStateGracefulTransitionToOff(const Event event)
+         case Event::gracefulPowerOffTimerExpired:
+             setPowerState(PowerState::on);
+             break;
++        case Event::powerOffRequest:
++            setPowerState(PowerState::transitionToOff);
++            forcePowerOff();
++            break;
++        case Event::gracefulPowerOffRequest:
++            setPowerState(PowerState::gracefulTransitionToOff);
++            gracefulPowerOffTimerStart();
++            gracefulPowerOff();
++            break;
++        case Event::powerCycleRequest:
++            setPowerState(PowerState::transitionToCycleOff);
++            forcePowerOff();
++            break;
++        case Event::gracefulPowerCycleRequest:
++            setPowerState(PowerState::gracefulTransitionToCycleOff);
++            gracefulPowerOffTimerStart();
++            gracefulPowerOff();
++            break;
++        case Event::resetRequest:
++            reset();
++            break;
+         default:
+             phosphor::logging::log<phosphor::logging::level::INFO>(
+                 "No action taken.");
+@@ -1620,6 +1699,10 @@ static void powerStateCycleOff(const Event event)
+             setPowerState(PowerState::waitForPSPowerOK);
+             powerOn();
+             break;
++        case Event::powerOffRequest:
++            setPowerState(PowerState::transitionToOff);
++            forcePowerOff();
++            break;
+         default:
+             phosphor::logging::log<phosphor::logging::level::INFO>(
+                 "No action taken.");
+@@ -1638,6 +1721,10 @@ static void powerStateTransitionToCycleOff(const Event event)
+             setPowerState(PowerState::cycleOff);
+             powerCycleTimerStart();
+             break;
++        case Event::powerOffRequest:
++            setPowerState(PowerState::transitionToOff);
++            forcePowerOff();
++            break;
+         default:
+             phosphor::logging::log<phosphor::logging::level::INFO>(
+                 "No action taken.");
+@@ -1658,6 +1745,10 @@ static void powerStateGracefulTransitionToCycleOff(const Event event)
+         case Event::gracefulPowerOffTimerExpired:
+             setPowerState(PowerState::on);
+             break;
++        case Event::powerOffRequest:
++            setPowerState(PowerState::transitionToOff);
++            forcePowerOff();
++            break;
+         default:
+             phosphor::logging::log<phosphor::logging::level::INFO>(
+                 "No action taken.");
+@@ -1683,6 +1774,10 @@ static void powerStateCheckForWarmReset(const Event event)
+             // DC power is unexpectedly lost, beep
+             beep(beepPowerFail);
+             break;
++        case Event::powerOffRequest:
++            setPowerState(PowerState::transitionToOff);
++            forcePowerOff();
++            break;
+         default:
+             phosphor::logging::log<phosphor::logging::level::INFO>(
+                 "No action taken.");
+@@ -2353,8 +2448,12 @@ int main(int argc, char* argv[])
+         [](const std::string& requested, std::string& resp) {
+             if (requested == "xyz.openbmc_project.State.Host.Transition.Off")
+             {
+-                sendPowerControlEvent(
+-                    power_control::Event::gracefulPowerOffRequest);
++                sendPowerControlEvent(power_control::Event::powerOffRequest);
++                addRestartCause(power_control::RestartCause::command);
++            }
++            else if (requested == "xyz.openbmc_project.State.Host.Transition.gracefulOff")
++            {
++                sendPowerControlEvent(power_control::Event::gracefulPowerOffRequest);
+                 addRestartCause(power_control::RestartCause::command);
+             }
+             else if (requested ==
+-- 
+2.7.4
+

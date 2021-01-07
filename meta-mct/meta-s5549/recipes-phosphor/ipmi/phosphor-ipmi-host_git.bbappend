@@ -11,11 +11,10 @@ SRC_URI += "file://0004-Implement-NMI-command-in-Chassis-Control-command.patch \
             file://0012-Fix-expiration-flags-unexpected-status-in-get-watchd.patch \
             file://0013-Implement-power-control-SEL-generated-in-chassis-con.patch \
             file://0014-Implement-the-DCMI-power-reading-and-power-limit-com.patch \
-            file://0015-Add-debug-message-for-watchdog-reset.patch \
             file://0016-rewrite-Get-Session-Info-to-use-new-yielding-D-Bus-A.patch \
             file://0017-Fix-the-wrong-field-value-for-session-info-commnad.patch \
             file://0018-Add-the-detect-for-firmare-revision.patch \
-            file://0019-block-power-control-until-pervious-action-completed.patch \
+            file://0020-Change-power-soft-command-from-action-off-to-action-.patch \
             "
 EXTRA_OECONF += "--disable-i2c-whitelist-check"
 

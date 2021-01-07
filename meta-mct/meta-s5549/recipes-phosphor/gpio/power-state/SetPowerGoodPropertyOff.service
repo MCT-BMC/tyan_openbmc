@@ -1,6 +1,0 @@
-[Unit]
-Description=Set Power Good Property Off
-
-[Service]
-Type=oneshot
-ExecStart=/usr/sbin/setPowerProperty.sh off

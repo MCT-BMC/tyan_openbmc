@@ -1,20 +1,5 @@
  [
     {
-        "Name": "PowerGood",
-        "LineName": "PS_PWROK",
-        "EventMon": "BOTH",
-        "Continue": true,
-        "Target":
-        {
-            "FALLING": [
-                "SetPowerGoodPropertyOff.service"
-            ],
-            "RISING": [
-                "SetPowerGoodPropertyOn.service"
-            ]
-        }
-    },
-    {
         "Name": "ThermalTrip",
         "LineName": "THERMTRIP",
         "EventMon": "FALLING",
@@ -35,18 +20,6 @@
         {
             "FALLING": [
                 "xyz.openbmc_project.caterr.service"
-            ]
-        }
-    },
-    {
-        "Name": "IdButton",
-        "LineName": "ID_BUTTON",
-        "EventMon": "FALLING",
-        "Continue": true,
-        "Target":
-        {
-            "FALLING": [
-                "id-button-pressed.service"
             ]
         }
     },
