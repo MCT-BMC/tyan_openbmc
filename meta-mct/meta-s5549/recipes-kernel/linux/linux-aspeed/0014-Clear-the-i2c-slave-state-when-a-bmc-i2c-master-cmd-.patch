@@ -1,0 +1,43 @@
+From d25c7f7f00a80337a500f1c945c276f50a7e4cc8 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 31 Dec 2020 16:53:56 +0800
+Subject: [PATCH] Clear the i2c slave state when a bmc i2c master cmd times out
+
+---
+ drivers/i2c/busses/i2c-aspeed.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+ mode change 100644 => 100755 drivers/i2c/busses/i2c-aspeed.c
+
+diff --git a/drivers/i2c/busses/i2c-aspeed.c b/drivers/i2c/busses/i2c-aspeed.c
+old mode 100644
+new mode 100755
+index b63ecc2..ec5ca22
+--- a/drivers/i2c/busses/i2c-aspeed.c
++++ b/drivers/i2c/busses/i2c-aspeed.c
+@@ -711,9 +711,23 @@ static int aspeed_i2c_master_xfer(struct i2c_adapter *adap,
+ 		 * If timed out and the state is still pending, drop the pending
+ 		 * master command.
+ 		 */
++		dev_err(bus->dev, "[M-%d][S-%d] I2C Master Timeout!\n",
++						   bus->master_state, bus->slave_state);
++
+ 		spin_lock_irqsave(&bus->lock, flags);
+ 		if (bus->master_state == ASPEED_I2C_MASTER_PENDING)
+ 			bus->master_state = ASPEED_I2C_MASTER_INACTIVE;
++
++		if (bus->multi_master)
++		{
++			/* Clear the slave state when BMC master command times out.
++			 * In order to avoid ME master command drops in power-off state.
++			 */
++			if (bus->slave_state != ASPEED_I2C_SLAVE_INACTIVE)
++			{
++				bus->slave_state = ASPEED_I2C_SLAVE_INACTIVE;
++			}
++		}
+ 		spin_unlock_irqrestore(&bus->lock, flags);
+ 
+ 		return -ETIMEDOUT;
+-- 
+2.7.4
+

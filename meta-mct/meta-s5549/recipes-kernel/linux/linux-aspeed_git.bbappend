@@ -12,5 +12,6 @@ SRC_URI += "file://s5549.cfg \
             file://0011-Enable-pass-through-on-GPIOE1-and-GPIOE3-free.patch \
             file://0012-Enable-GPIOE0-and-GPIOE2-pass-through-by-default.patch \
             file://0013-Allow-monitoring-of-power-control-input-GPIOs.patch \
+            file://0014-Clear-the-i2c-slave-state-when-a-bmc-i2c-master-cmd-.patch \
             "
 
