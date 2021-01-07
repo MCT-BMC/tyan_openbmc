@@ -9,5 +9,6 @@ SRC_URI += "file://0002-Add-interface-for-caterr-logging.patch \
             file://0009-Add-the-version-ID-parameter-to-software-version-int.patch \
             file://0010-Add-x86-power-control-relatived-dbus-interface.patch \
             file://0011-Add-property-for-power-soft-action.patch \
+            file://0012-Add-watchdog-property-for-intel-modified-phosphor-wa.patch \
             "
 
