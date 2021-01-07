@@ -15,7 +15,7 @@ S = "${WORKDIR}/"
 SRC_URI = "file://LICENSE  \
           "
 
-# SRC_URI += "file://crashdump-1.0.tgz \
+# SRC_URI += "file://crashdump-1.0.4.1.tgz \
 #             file://bafi-1.05.tgz \
 #            "
 
