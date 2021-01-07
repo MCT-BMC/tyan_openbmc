@@ -1,0 +1,74 @@
+From 0fb966d84258af8115caba6aa3a8125cf92f4b47 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 26 Aug 2020 14:10:26 +0800
+Subject: [PATCH] Implement the average mode for fan tech value
+
+---
+ include/TachSensor.hpp |  4 ++++
+ src/TachSensor.cpp     | 21 ++++++++++++++++++++-
+ 2 files changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/include/TachSensor.hpp b/include/TachSensor.hpp
+index 379bf17..d6910cb 100755
+--- a/include/TachSensor.hpp
++++ b/include/TachSensor.hpp
+@@ -14,6 +14,9 @@
+ #include <utility>
+ #include <vector>
+ 
++constexpr auto MAX_COLLECTION_VALUE_SIZE = 10;
++constexpr auto DEFAULT_TACH_VALUE= 6000;
++
+ class PresenceSensor
+ {
+   public:
+@@ -88,6 +91,7 @@ class TachSensor : public Sensor
+     void handleResponse(const boost::system::error_code& err);
+     void checkThresholds(void) override;
+     thresholds::ThresholdTimer thresholdTimer;
++    std::vector<double> collectedValue;
+ };
+ 
+ inline void logFanInserted(const std::string& device)
+diff --git a/src/TachSensor.cpp b/src/TachSensor.cpp
+index 2cdbff3..006de65 100755
+--- a/src/TachSensor.cpp
++++ b/src/TachSensor.cpp
+@@ -94,6 +94,7 @@ TachSensor::TachSensor(const std::string& path, const std::string& objectType,
+                  "/xyz/openbmc_project/sensors/fan_tach/" + name}});
+         itemAssoc->initialize();
+     }
++    collectedValue.assign(MAX_COLLECTION_VALUE_SIZE,DEFAULT_TACH_VALUE);
+     setInitialProperties(conn);
+     setupPowerMatch(conn);
+     setupRead();
+@@ -184,7 +185,25 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+                 responseStream.clear();
+                 if (static_cast<double>(nvalue) != value)
+                 {
+-                    updateValue(nvalue);
++                    double averageCount = 0;
++                    double average =0;
++
++                    if(collectedValue.size() >= MAX_COLLECTION_VALUE_SIZE){
++                        collectedValue.erase(collectedValue.begin());
++                        collectedValue.push_back(nvalue);
++                    }
++                    else{
++                        collectedValue.push_back(nvalue);
++                    }
++                    for (auto it = collectedValue.begin(); it != collectedValue.end(); it++)
++                    {
++                        average = average + *it;
++                        averageCount++;
++                    }
++                    if(averageCount){
++                        average = average/averageCount;
++                    }
++                    updateValue(average);
+                 }
+                 errCount = 0;
+                 updateValueInvalid(false);
+-- 
+2.7.4
+

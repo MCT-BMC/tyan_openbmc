@@ -1,0 +1,30 @@
+From f62fe8ed92fc69dfcfaf7e0ab366e6413eb7b2b4 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 May 2020 17:32:19 +0800
+Subject: [PATCH] Add watchdog2 and power control event sensor
+
+---
+ src/eventSensor.cpp | 3 ++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index b99396d..7946cd5 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -41,7 +41,12 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
+         {"BMC_FW_UPDATE","versionchange"}, 
+         {"BMC_Reboot","mgtsubsyshealth"},    
+         {"PSU_STATUS","power_supply"}, 
+-        {"IPMI_POWER_CYCLE","fru_state"}    
++        {"IPMI_POWER_CYCLE","fru_state"},
++        {"IPMI_POWER_ON","fru_state"},
++        {"IPMI_POWER_OFF","fru_state"},
++        {"IPMI_POWER_SOFT","fru_state"},
++        {"IPMI_POWER_RESET","fru_state"},
++        {"WATCHDOG2","watchdog2"}
+     };
+ 
+ struct eventSensor 
+-- 
+2.7.4
+

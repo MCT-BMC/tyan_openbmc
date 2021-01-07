@@ -1,0 +1,24 @@
+From 368d64f3eff8e72d4f8cdea28235abc13742975c Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Mon, 20 Jan 2020 10:55:50 +0800
+Subject: [PATCH] fix-fsc-to-settable-interface
+
+---
+ src/EntityManager.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/EntityManager.cpp b/src/EntityManager.cpp
+index 53a34bc..0a363a8 100644
+--- a/src/EntityManager.cpp
++++ b/src/EntityManager.cpp
+@@ -73,8 +73,8 @@ const static boost::container::flat_map<const char*, probe_type_codes, cmp_str>
+                  {"FOUND", probe_type_codes::FOUND},
+                  {"MATCH_ONE", probe_type_codes::MATCH_ONE}}};
+ 
+-static constexpr std::array<const char*, 5> settableInterfaces = {
+-    "FanProfile", "Pid", "Pid.Zone", "Stepwise", "Thresholds"};
++static constexpr std::array<const char*, 6> settableInterfaces = {
++    "FanProfile", "Pid", "Pid.Zone", "Stepwise", "Fsc", "Thresholds"};
+ using JsonVariantType =
+     std::variant<std::vector<std::string>, std::vector<double>, std::string,
+                  int64_t, uint64_t, double, int32_t, uint32_t, int16_t,

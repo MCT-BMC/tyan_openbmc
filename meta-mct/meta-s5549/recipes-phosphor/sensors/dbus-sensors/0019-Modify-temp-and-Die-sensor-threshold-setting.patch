@@ -1,0 +1,119 @@
+From 6f40f2210ef2116fb3c28538cc4644896dbd73d0 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 18 Dec 2019 15:29:38 +0800
+Subject: [PATCH] Modify temp and Die sensor threshold setting
+
+---
+ src/CPUSensor.cpp     | 25 +++++--------------------
+ src/HwmonTempMain.cpp | 29 ++++++++++++++++++++++-------
+ 2 files changed, 27 insertions(+), 27 deletions(-)
+ mode change 100644 => 100755 src/CPUSensor.cpp
+
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+old mode 100644
+new mode 100755
+index 27c9c38..9c5c37e
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -137,26 +137,11 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+                 if (!thresholds.empty())
+                 {
+-                    std::vector<thresholds::Threshold> newThresholds;
+-                    if (parseThresholdsFromAttr(newThresholds, path,
+-                                                CPUSensor::sensorScaleFactor,
+-                                                dtsOffset))
+-                    {
+-                        if (!std::equal(thresholds.begin(), thresholds.end(),
+-                                        newThresholds.begin(),
+-                                        newThresholds.end()))
+-                        {
+-                            thresholds = newThresholds;
+-                            if (show)
+-                            {
+-                                thresholds::updateThresholds(this);
+-                            }
+-                        }
+-                    }
+-                    else
+-                    {
+-                        std::cerr << "Failure to update thresholds for " << name
+-                                  << "\n";
++
++                	if (show)
++                	{
++                		thresholds::updateThresholds(this);
++
+                     }
+                 }
+             }
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 10c29f2..99fe199 100755
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -197,13 +197,22 @@ void createSensors(
+                         continue;
+                     }
+                 }
+-                std::vector<thresholds::Threshold> sensorThresholds;
+-                if (!parseThresholdsFromConfig(*sensorData, sensorThresholds))
++                std::vector<thresholds::Threshold> sensorThresholds_temp1;
++				std::string label = "temp1";
++				if (!parseThresholdsFromConfig(*sensorData, sensorThresholds_temp1, &label))
+                 {
+                     std::cerr << "error populating thresholds for "
+                               << sensorName << "\n";
+                 }
+-                std::vector<thresholds::Threshold> t = sensorThresholds;
++				
++                std::vector<thresholds::Threshold> sensorThresholds_temp2;
++				label = "temp2";
++				if (!parseThresholdsFromConfig(*sensorData, sensorThresholds_temp2, &label))
++				{
++					std::cerr << "error populating thresholds for "
++                	              << sensorName << "\n";
++				}
++
+                 if (deviceName != "14-001f")
+                 {
+                     auto& sensor1 = sensors[sensorName];
+@@ -211,7 +220,7 @@ void createSensors(
+                     sensor1 = std::make_unique<HwmonTempSensor>(
+                         directory.string() + "/temp1_input", sensorType,
+                         objectServer, dbusConnection, io, sensorName,
+-                        std::move(sensorThresholds), *interfacePath);
++                        std::move(sensorThresholds_temp1), *interfacePath);
+                 }
+                 auto findSecondName = baseConfiguration->second.find("Name1");
+                 if (findSecondName == baseConfiguration->second.end())
+@@ -220,13 +229,19 @@ void createSensors(
+                 }
+                 sensorName = std::get<std::string>(findSecondName->second);
+                 
+-                std::vector<thresholds::Threshold> t1 = t;
++                std::vector<thresholds::Threshold> sensorThresholds_temp3;
++				label = "temp3";
++				if (!parseThresholdsFromConfig(*sensorData, sensorThresholds_temp3, &label))
++				{
++					std::cerr << "error populating thresholds for "
++                	              << sensorName << "\n";
++				}
+                 auto& sensor2 = sensors[sensorName];
+                 sensor2 = nullptr;
+                 sensor2 = std::make_unique<HwmonTempSensor>(
+                     directory.string() + "/temp2_input", sensorType,
+                     objectServer, dbusConnection, io, sensorName,
+-                    std::move(t), *interfacePath); 
++                    std::move(sensorThresholds_temp2), *interfacePath); 
+ 
+                 auto findThirddName = baseConfiguration->second.find("Name2"); 
+                 if (findThirddName == baseConfiguration->second.end())
+@@ -239,7 +254,7 @@ void createSensors(
+                 sensor3 = std::make_unique<HwmonTempSensor>(
+                     directory.string() + "/temp3_input", sensorType, 
+                     objectServer, dbusConnection, io, sensorName, 
+-                    std::move(t1), *interfacePath);
++                    std::move(sensorThresholds_temp3), *interfacePath);
+             }
+         }));
+     getter->getConfiguration(

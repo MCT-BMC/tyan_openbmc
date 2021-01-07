@@ -1,0 +1,28 @@
+From 78ce469465cecf834c1dcdddc04078eeb99b30d8 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 9 Apr 2020 15:43:30 +0800
+Subject: [PATCH] Add interface for setting specified service status
+
+---
+ xyz/openbmc_project/OEM/ServiceStatus.interface.yaml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+ create mode 100755 xyz/openbmc_project/OEM/ServiceStatus.interface.yaml
+
+diff --git a/xyz/openbmc_project/OEM/ServiceStatus.interface.yaml b/xyz/openbmc_project/OEM/ServiceStatus.interface.yaml
+new file mode 100755
+index 0000000..cbb4559
+--- /dev/null
++++ b/xyz/openbmc_project/OEM/ServiceStatus.interface.yaml
+@@ -0,0 +1,9 @@
++description: >
++    Implement to provide status attributes for specified service.
++
++properties:
++    - name: WebService
++      type: boolean
++      description: >
++         Setting of bmc web 
++# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+-- 
+2.7.4
+

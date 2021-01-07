@@ -1,0 +1,24 @@
+From a7dd1ad04be08c9330e25d55055a4c5d3ff1ddec Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 6 Apr 2020 09:39:34 +0800
+Subject: [PATCH] Set the EntityManager service booting after FruDevice service
+
+---
+ service_files/xyz.openbmc_project.EntityManager.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/service_files/xyz.openbmc_project.EntityManager.service b/service_files/xyz.openbmc_project.EntityManager.service
+index 651b0f2..1bcc9f4 100644
+--- a/service_files/xyz.openbmc_project.EntityManager.service
++++ b/service_files/xyz.openbmc_project.EntityManager.service
+@@ -1,6 +1,6 @@
+ [Unit]
+ Description=Entity Manager
+-After=dbus.service
++After=dbus.service xyz.openbmc_project.FruDevice.service
+ 
+ [Service]
+ ExecStartPre=/bin/mkdir -p /var/configuration
+-- 
+2.7.4
+

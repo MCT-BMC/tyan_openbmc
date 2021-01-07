@@ -1,0 +1,25 @@
+From 9c6ab1853f1a3ea051ca2f222ad1b888affa5630 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 14 Dec 2020 15:45:48 +0800
+Subject: [PATCH] Force baseboard FRU to ID0
+
+---
+ src/storagecommands.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index 4345e0b..ca6e56b 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -266,7 +266,7 @@ ipmi_ret_t replaceCacheFru(uint8_t devId)
+         uint8_t fruHash = 0;
+         //if (fruBus != 0 || fruAddr != 0)
+         //force basebaord fru id to 0. TODO: move baseboard FRU config to Json 
+-        if (fruBus != 2)
++        if (fruBus != 6)
+         {
+             fruHash = hasher(fru.first.str);
+             // can't be 0xFF based on spec, and 0 is reserved for baseboard
+-- 
+2.7.4
+

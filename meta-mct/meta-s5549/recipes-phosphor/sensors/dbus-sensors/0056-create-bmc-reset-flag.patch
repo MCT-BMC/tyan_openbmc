@@ -1,0 +1,34 @@
+From d1feb419768c55cb1ed8934986d32f77b115dc3f Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 7 Oct 2020 19:45:13 +0800
+Subject: [PATCH] create bmc reset flag
+
+---
+ src/AcLostSensor.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ mode change 100644 => 100755 src/AcLostSensor.cpp
+
+diff --git a/src/AcLostSensor.cpp b/src/AcLostSensor.cpp
+old mode 100644
+new mode 100755
+index b459f7b..c7fa3cc
+--- a/src/AcLostSensor.cpp
++++ b/src/AcLostSensor.cpp
+@@ -126,6 +126,17 @@ int main()
+             std::cerr << "set SCU3C register failed\n";
+         }
+     }
++    else
++    {
++        memset(command, 0, sizeof(command));
++        sprintf(command, "touch /run/bmcRebootFlag");
++        std::cerr << "create bmcRebootFlag flag" << '\n';
++        rc = system(command);
++        if (rc != 0)
++        {
++            std::cerr << "touch /run/bmcRebootFlag file failed\n";
++        }
++    }
+ 
+     io.run();
+ 

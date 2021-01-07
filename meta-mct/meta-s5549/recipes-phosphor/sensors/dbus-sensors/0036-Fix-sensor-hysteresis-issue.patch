@@ -1,0 +1,124 @@
+From d51b4ccbb23b64610d913e54c9ca77fa4384401e Mon Sep 17 00:00:00 2001
+From: Varun Sampat <vsampat@twitter.com>
+Date: Tue, 12 May 2020 20:24:34 -0400
+Subject: [PATCH] Fix sensor hysteresis issue
+
+---
+ include/HwmonTempSensor.hpp |  4 +++-
+ include/sensor.hpp          |  8 +++++++-
+ src/HwmonTempMain.cpp       | 13 +++++++++++--
+ src/HwmonTempSensor.cpp     |  5 +++--
+ 4 files changed, 24 insertions(+), 6 deletions(-)
+
+diff --git a/include/HwmonTempSensor.hpp b/include/HwmonTempSensor.hpp
+index a91a82d..a34cd5c 100755
+--- a/include/HwmonTempSensor.hpp
++++ b/include/HwmonTempSensor.hpp
+@@ -16,7 +16,8 @@ class HwmonTempSensor : public Sensor
+                     boost::asio::io_service& io, const std::string& fanName,
+                     std::vector<thresholds::Threshold>&& thresholds,
+                     const std::string& sensorConfiguration,
+-                    const PowerState powerState);
++                    const PowerState powerState,
++                    const double hysteresisVal);
+     ~HwmonTempSensor();
+ 
+   private:
+@@ -26,6 +27,7 @@ class HwmonTempSensor : public Sensor
+     boost::asio::streambuf readBuf;
+     std::string path;
+     PowerState readState;
++    double hysteresisVal;
+     thresholds::ThresholdTimer thresholdTimer;
+     size_t errCount;
+     void setupRead(void);
+diff --git a/include/sensor.hpp b/include/sensor.hpp
+index 68ae108..1e41525 100755
+--- a/include/sensor.hpp
++++ b/include/sensor.hpp
+@@ -20,7 +20,7 @@ struct Sensor
+         name(name),
+         configurationPath(configurationPath), objectType(objectType),
+         maxValue(max), minValue(min), thresholds(std::move(thresholdData)),
+-        hysteresisTrigger((max - min) * 0.01),
++        hysteresisTrigger(0),
+         hysteresisPublish((max - min) * 0.0001)
+     {
+     }
+@@ -228,4 +228,10 @@ struct Sensor
+             sensorInterface->set_property("InvalidValue", newState);
+         }
+     }
++
++    void updateHysteresis(const double& HysteresisValue)
++    {
++       hysteresisTrigger = HysteresisValue;
++    }
++
+ };
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 1472b4e..0e9b2cb 100755
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -210,6 +210,15 @@ void createSensors(
+                         VariantToStringVisitor(), findPowerOn->second);
+                     setReadState(powerState, readState);
+                 }
++                
++                float hysteresisVal = 0;
++                auto findHysteresisVal =
++                    baseConfiguration->second.find("HysteresisVal");
++                if (findHysteresisVal != baseConfiguration->second.end())
++                {
++                    hysteresisVal = std::visit(VariantToFloatVisitor(),
++                                             findHysteresisVal->second);
++                }
+ 
+                 if (deviceName != "14-001f"){
+                     auto& sensor = sensors[sensorName];
+@@ -217,7 +226,7 @@ void createSensors(
+                     sensor = std::make_unique<HwmonTempSensor>(
+                             directory.string() + "/temp1_input", sensorType,
+                             objectServer, dbusConnection, io, sensorName,
+-                            std::move(sensorThresholds), *interfacePath, readState);
++                            std::move(sensorThresholds), *interfacePath, readState, hysteresisVal);
+                 }
+ 
+                 // Looking for keys like "Name1" for temp2_input,
+@@ -249,7 +258,7 @@ void createSensors(
+                             "_input",
+                         sensorType, objectServer, dbusConnection, io,
+                         sensorName, std::move(sensorThresholds),
+-                        *interfacePath, readState);
++                        *interfacePath, readState, hysteresisVal);
+                 }
+             }
+         }));
+diff --git a/src/HwmonTempSensor.cpp b/src/HwmonTempSensor.cpp
+index 2af0ba4..f322a6c 100755
+--- a/src/HwmonTempSensor.cpp
++++ b/src/HwmonTempSensor.cpp
+@@ -43,13 +43,13 @@ HwmonTempSensor::HwmonTempSensor(
+     std::shared_ptr<sdbusplus::asio::connection>& conn,
+     boost::asio::io_service& io, const std::string& sensorName,
+     std::vector<thresholds::Threshold>&& _thresholds,
+-    const std::string& sensorConfiguration, PowerState readState) :
++    const std::string& sensorConfiguration, PowerState readState, const double hysteresisVal) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(_thresholds), sensorConfiguration, objectType, maxReading,
+            minReading),
+     objServer(objectServer), inputDev(io, open(path.c_str(), O_RDONLY)),
+     waitTimer(io), path(path), errCount(0), readState(std::move(readState)),
+-    thresholdTimer(io, this)
++    thresholdTimer(io, this), hysteresisVal(hysteresisVal)
+ {
+     sensorInterface = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/temperature/" + name,
+@@ -73,6 +73,7 @@ HwmonTempSensor::HwmonTempSensor(
+     setInitialProperties(conn);
+     setupPowerMatch(conn);
+     setupRead();
++    updateHysteresis(hysteresisVal);
+ }
+ 
+ HwmonTempSensor::~HwmonTempSensor()

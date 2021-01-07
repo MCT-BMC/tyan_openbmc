@@ -1,0 +1,84 @@
+From 7b782f66b67d67b6f20c14ce452aae2d635b2164 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 22 Oct 2020 20:06:46 +0800
+Subject: [PATCH] Implement the average mode for PSU fan sensor value
+
+---
+ include/PSUSensor.hpp |  4 ++++
+ src/PSUSensor.cpp     | 30 +++++++++++++++++++++++++++++-
+ 2 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/include/PSUSensor.hpp b/include/PSUSensor.hpp
+index 8414e78..4a78838 100755
+--- a/include/PSUSensor.hpp
++++ b/include/PSUSensor.hpp
+@@ -8,6 +8,9 @@
+ #include <sdbusplus/asio/object_server.hpp>
+ #include <string>
+ 
++constexpr auto MAX_COLLECTION_VALUE_SIZE = 10;
++constexpr auto DEFAULT_TACH_VALUE= 6000;
++
+ class PSUSensor : public Sensor
+ {
+   public:
+@@ -27,6 +30,7 @@ class PSUSensor : public Sensor
+     boost::asio::steady_timer waitTimer;
+     boost::asio::streambuf readBuf;
+     std::string path;
++    std::vector<double> collectedValue;
+     size_t errCount;
+     unsigned int sensorFactor;
+     void setupRead(void);
+diff --git a/src/PSUSensor.cpp b/src/PSUSensor.cpp
+index 75fa4db..8e1ac88 100755
+--- a/src/PSUSensor.cpp
++++ b/src/PSUSensor.cpp
+@@ -86,6 +86,10 @@ PSUSensor::PSUSensor(const std::string& path, const std::string& objectType,
+     // register and initialize "Associations" property.
+     setInitialProperties(conn);
+ 
++    if(path.find("fan")!= std::string::npos){
++        collectedValue.assign(MAX_COLLECTION_VALUE_SIZE,DEFAULT_TACH_VALUE);
++    }
++
+     association = objectServer.add_interface(dbusPath, association::interface);
+ 
+     createInventoryAssoc(conn, association, configurationPath);
+@@ -182,8 +186,32 @@ void PSUSensor::handleResponse(const boost::system::error_code& err)
+                     std::cerr << "Update " << path << " from " << value
+                               << " to " << nvalue << "\n";
+                 }
++                if(path.find("fan")!= std::string::npos)
++                {
++                    double averageCount = 0;
++                    double average =0;
+ 
+-                updateValue(nvalue);
++                    if(collectedValue.size() >= MAX_COLLECTION_VALUE_SIZE){
++                        collectedValue.erase(collectedValue.begin());
++                        collectedValue.push_back(nvalue);
++                    }
++                    else{
++                        collectedValue.push_back(nvalue);
++                    }
++                    for (auto it = collectedValue.begin(); it != collectedValue.end(); it++)
++                    {
++                        average = average + *it;
++                        averageCount++;
++                    }
++                    if(averageCount){
++                        average = average/averageCount;
++                    }
++                    updateValue(average);
++                }
++                else
++                {
++                    updateValue(nvalue);
++                }
+             }
+ 
+             updateValueInvalid(false);
+-- 
+2.7.4
+

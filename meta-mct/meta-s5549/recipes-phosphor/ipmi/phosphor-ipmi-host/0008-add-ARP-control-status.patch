@@ -1,0 +1,45 @@
+From 19a4ee948fdf45160eb162e24f4d210ec4f917c0 Mon Sep 17 00:00:00 2001
+From: "terry.chang" <terry.chang@mic.com.tw>
+Date: Thu, 13 Feb 2020 15:06:35 +0800
+Subject: [PATCH] add ARP control status
+
+---
+ transporthandler.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/transporthandler.cpp b/transporthandler.cpp
+index 4e4ad52..add8519 100755
+--- a/transporthandler.cpp
++++ b/transporthandler.cpp
+@@ -180,6 +180,7 @@ enum class LanParam : uint8_t
+     IPSrc = 4,
+     MAC = 5,
+     SubnetMask = 6,
++    ARPControl = 10,
+     Gateway1 = 12,
+     Gateway1MAC = 13,
+     VLANId = 20,
+@@ -1475,6 +1476,10 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
+             channelCall<reconfigureVLAN>(channel, vlanData & VLAN_VALUE_MASK);
+             return responseSuccess();
+         }
++        case LanParam::ARPControl:
++        {
++            return responseInvalidFieldRequest();
++        }
+         case LanParam::CiphersuiteSupport:
+         case LanParam::CiphersuiteEntries:
+         case LanParam::IPFamilySupport:
+@@ -1750,6 +1755,12 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
+             ret.pack(vlan);
+             return responseSuccess(std::move(ret));
+         }
++        case LanParam::ARPControl:
++        {
++            uint8_t arpCtrl = 0x2;
++            ret.pack(arpCtrl);
++            return responseSuccess(std::move(ret));
++        }
+         case LanParam::CiphersuiteSupport:
+         {
+             if (!listInit)

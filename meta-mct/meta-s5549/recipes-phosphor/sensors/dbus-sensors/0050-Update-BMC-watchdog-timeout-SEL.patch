@@ -1,0 +1,44 @@
+From c82b20780bcf65d61f4ef63f75ab8cb963a89e86 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 13 Aug 2020 17:37:57 +0800
+Subject: [PATCH] Update BMC watchdog timeout SEL
+
+---
+ src/eventSensor.cpp | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index 18b5289..7872062 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -42,7 +42,8 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
+         {"SYSTEM_RESTART", "restart"}, //system restart sensor
+         {"BUTTON","pwr_button"},  
+         {"BMC_FW_UPDATE","versionchange"}, 
+-        {"BMC_Reboot","mgtsubsyshealth"},    
++        {"BMC_Reboot","mgtsubsyshealth"},
++        {"WATCHDOG_REBOOT","mgtsubsyshealth"},
+         {"PSU_STATUS","power_supply"},
+         {"DCMI_POWER_LIMIT","power_supply"},
+         {"IPMI_POWER_CYCLE","fru_state"},
+@@ -142,7 +143,7 @@ int main()
+     static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
+     static const std::string ipmiSELAddMessage = "SEL Entry";
+     static constexpr size_t selEvtDataMaxSize = 3;
+-    std::string sensorPath = "/xyz/openbmc_project/sensors/mgtsubsyshealth/BMC_Reboot";
++    std::string sensorPath = "/xyz/openbmc_project/sensors/mgtsubsyshealth/WATCHDOG_REBOOT";
+     
+     if (read_register(0x1e6e203c, &scu3c) < 0)
+     {
+@@ -156,7 +157,7 @@ int main()
+         std::vector<uint8_t> eventData(3, 0xFF);
+         bool assert = true;
+ 
+-        eventData[0] = 0x1;
++        eventData[0] = 0x2;
+         sdbusplus::message::message writeSEL = systemBus->new_method_call(
+             ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
+         
+-- 
+2.7.4
+

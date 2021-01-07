@@ -1,0 +1,310 @@
+From a8dca95e6754ed42c50c8ef197ed805e477c0768 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 30 Sep 2020 16:05:26 +0800
+Subject: [PATCH] Fix the issue for update bmcweb recipe
+
+---
+ CMakeLists.txt                              |  6 +--
+ http/logging.h                              |  8 ++--
+ http/routing.h                              | 64 -----------------------------
+ include/obmc_console.hpp                    |  6 +--
+ redfish-core/include/node.hpp               | 17 ++------
+ redfish-core/include/server_sent_events.hpp |  4 +-
+ redfish-core/lib/account_service.hpp        | 16 --------
+ redfish-core/lib/redfish_sessions.hpp       |  4 +-
+ 8 files changed, 18 insertions(+), 107 deletions(-)
+ mode change 100644 => 100755 CMakeLists.txt
+ mode change 100644 => 100755 http/routing.h
+ mode change 100644 => 100755 include/obmc_console.hpp
+ mode change 100644 => 100755 redfish-core/include/node.hpp
+ mode change 100644 => 100755 redfish-core/include/server_sent_events.hpp
+ mode change 100644 => 100755 redfish-core/lib/account_service.hpp
+ mode change 100644 => 100755 redfish-core/lib/redfish_sessions.hpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+old mode 100644
+new mode 100755
+index 98ccb28..5266c5d
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -210,7 +210,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+             -Wdouble-promotion \
+             -Wformat=2 \
+             -Wno-stringop-overflow \
+-            -Wunused-parameter \
++            -Wno-unused-parameter \
+         "
+         )
+     endif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+@@ -233,7 +233,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+             -Wno-weak-vtables \
+             -Wno-documentation \
+             -Wno-padded \
+-            -Wunused-parameter \
++            -Wno-unused-parameter \
+             -Wcovered-switch-default \
+             -Wcomma \
+             -Wextra-semi \
+@@ -300,7 +300,7 @@ if (NOT ${YOCTO_DEPENDENCIES}) # Download and unpack googletest at configure
+     set (CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/prefix ${CMAKE_PREFIX_PATH})
+ endif ()
+ 
+-find_package (Boost 1.73 REQUIRED)
++find_package (Boost 1.71 REQUIRED)
+ message (BOOST_VERSION = ${Boost_VERSION})
+ include_directories (SYSTEM ${BOOST_SRC_DIR})
+ 
+diff --git a/http/logging.h b/http/logging.h
+index 4498c3d..524396f 100644
+--- a/http/logging.h
++++ b/http/logging.h
+@@ -40,9 +40,9 @@ class logger
+     }
+ 
+   public:
+-    logger([[maybe_unused]] const std::string& prefix,
+-           [[maybe_unused]] const std::string& filename,
+-           [[maybe_unused]] const size_t line, LogLevel levelIn) :
++    logger( const std::string& prefix,
++            const std::string& filename,
++            const size_t line, LogLevel levelIn) :
+         level(levelIn)
+     {
+ #ifdef BMCWEB_ENABLE_LOGGING
+@@ -64,7 +64,7 @@ class logger
+ 
+     //
+     template <typename T>
+-    logger& operator<<([[maybe_unused]] T const& value)
++    logger& operator<<( T const& value)
+     {
+         if (level >= get_current_log_level())
+         {
+diff --git a/http/routing.h b/http/routing.h
+old mode 100644
+new mode 100755
+index 1af1b2b..e43399a
+--- a/http/routing.h
++++ b/http/routing.h
+@@ -1296,77 +1296,13 @@ class Router
+                                      << " userRole = " << *userRolePtr;
+                 }
+ 
+-                bool* remoteUserPtr = nullptr;
+-                auto remoteUserIter = userInfo.find("RemoteUser");
+-                if (remoteUserIter != userInfo.end())
+-                {
+-                    remoteUserPtr = std::get_if<bool>(&remoteUserIter->second);
+-                }
+-                if (remoteUserPtr == nullptr)
+-                {
+-                    BMCWEB_LOG_ERROR
+-                        << "RemoteUser property missing or wrong type";
+-                    res.result(
+-                        boost::beast::http::status::internal_server_error);
+-                    res.end();
+-                    return;
+-                }
+-                bool remoteUser = *remoteUserPtr;
+-
+-                bool passwordExpired = false; // default for remote user
+-                if (!remoteUser)
+-                {
+-                    bool* passwordExpiredPtr = nullptr;
+-                    auto passwordExpiredIter =
+-                        userInfo.find("UserPasswordExpired");
+-                    if (passwordExpiredIter != userInfo.end())
+-                    {
+-                        passwordExpiredPtr =
+-                            std::get_if<bool>(&passwordExpiredIter->second);
+-                    }
+-                    if (passwordExpiredPtr != nullptr)
+-                    {
+-                        passwordExpired = *passwordExpiredPtr;
+-                    }
+-                    else
+-                    {
+-                        BMCWEB_LOG_ERROR
+-                            << "UserPasswordExpired property is expected for"
+-                               " local user but is missing or wrong type";
+-                        res.result(
+-                            boost::beast::http::status::internal_server_error);
+-                        res.end();
+-                        return;
+-                    }
+-                }
+-
+                 // Get the userprivileges from the role
+                 redfish::Privileges userPrivileges =
+                     redfish::getUserPrivileges(userRole);
+ 
+-                // Set isConfigureSelfOnly based on D-Bus results.  This
+-                // ignores the results from both pamAuthenticateUser and the
+-                // value from any previous use of this session.
+-                req.session->isConfigureSelfOnly = passwordExpired;
+-
+-                // Modifyprivileges if isConfigureSelfOnly.
+-                if (req.session->isConfigureSelfOnly)
+-                {
+-                    // Remove allprivileges except ConfigureSelf
+-                    userPrivileges = userPrivileges.intersection(
+-                        redfish::Privileges{"ConfigureSelf"});
+-                    BMCWEB_LOG_DEBUG << "Operation limited to ConfigureSelf";
+-                }
+-
+                 if (!rules[ruleIndex]->checkPrivileges(userPrivileges))
+                 {
+                     res.result(boost::beast::http::status::forbidden);
+-                    if (req.session->isConfigureSelfOnly)
+-                    {
+-                        redfish::messages::passwordChangeRequired(
+-                            res, "/redfish/v1/AccountService/Accounts/" +
+-                                     req.session->username);
+-                    }
+                     res.end();
+                     return;
+                 }
+diff --git a/include/obmc_console.hpp b/include/obmc_console.hpp
+old mode 100644
+new mode 100755
+index 29efbef..de5d0a5
+--- a/include/obmc_console.hpp
++++ b/include/obmc_console.hpp
+@@ -124,7 +124,7 @@ inline void requestRoutes(App& app)
+             }
+         })
+         .onclose([](crow::websocket::Connection& conn,
+-                    [[maybe_unused]] const std::string& reason) {
++                     const std::string& reason) {
+             sessions.erase(&conn);
+             if (sessions.empty())
+             {
+@@ -133,9 +133,9 @@ inline void requestRoutes(App& app)
+                 inputBuffer.shrink_to_fit();
+             }
+         })
+-        .onmessage([]([[maybe_unused]] crow::websocket::Connection& conn,
++        .onmessage([]( crow::websocket::Connection& conn,
+                       const std::string& data,
+-                      [[maybe_unused]] bool is_binary) {
++                       bool is_binary) {
+             inputBuffer += data;
+             doWrite();
+         });
+diff --git a/redfish-core/include/node.hpp b/redfish-core/include/node.hpp
+old mode 100644
+new mode 100755
+index 797160d..4ff3500
+--- a/redfish-core/include/node.hpp
++++ b/redfish-core/include/node.hpp
+@@ -53,7 +53,7 @@ class Node
+ {
+   public:
+     template <typename... Params>
+-    Node(App& app, std::string&& entityUrl, [[maybe_unused]] Params... paramsIn)
++    Node(App& app, std::string&& entityUrl,  Params... paramsIn)
+     {
+         crow::DynamicRule& get = app.routeDynamic(entityUrl.c_str());
+         getRule = &get;
+@@ -204,18 +204,9 @@ class Node
+         const std::string& userRole = req.userRole;
+         BMCWEB_LOG_DEBUG << "isAllowedWithoutConfigureSelf for the role "
+                          << req.userRole;
+-        Privileges effectiveUserPrivileges;
+-        if (req.session && req.session->isConfigureSelfOnly)
+-        {
+-            // The session has no privileges because it is limited to
+-            // configureSelfOnly and we are disregarding that privilege.
+-            // Note that some operations do not require any privilege.
+-        }
+-        else
+-        {
+-            effectiveUserPrivileges = redfish::getUserPrivileges(userRole);
+-            effectiveUserPrivileges.resetSinglePrivilege("ConfigureSelf");
+-        }
++        Privileges effectiveUserPrivileges =
++            redfish::getUserPrivileges(userRole);
++        effectiveUserPrivileges.resetSinglePrivilege("ConfigureSelf");
+         const auto& requiredPrivilegesIt = entityPrivileges.find(req.method());
+         return (requiredPrivilegesIt != entityPrivileges.end()) &&
+                isOperationAllowedWithPrivileges(requiredPrivilegesIt->second,
+diff --git a/redfish-core/include/server_sent_events.hpp b/redfish-core/include/server_sent_events.hpp
+old mode 100644
+new mode 100755
+index 26fc675..fac1e72
+--- a/redfish-core/include/server_sent_events.hpp
++++ b/redfish-core/include/server_sent_events.hpp
+@@ -109,7 +109,7 @@ class ServerSentEvents : public std::enable_shared_from_this<ServerSentEvents>
+             boost::asio::buffer(outBuffer.data(), outBuffer.size()),
+             [self(shared_from_this())](
+                 boost::beast::error_code ec,
+-                [[maybe_unused]] const std::size_t& bytesTransferred) {
++                 const std::size_t& bytesTransferred) {
+                 self->outBuffer.erase(0, bytesTransferred);
+ 
+                 if (ec == boost::asio::error::eof)
+@@ -166,7 +166,7 @@ class ServerSentEvents : public std::enable_shared_from_this<ServerSentEvents>
+             *sseConn, *serializer,
+             [this, response,
+              serializer](const boost::beast::error_code& ec,
+-                         [[maybe_unused]] const std::size_t& bytesTransferred) {
++                          const std::size_t& bytesTransferred) {
+                 if (ec)
+                 {
+                     BMCWEB_LOG_ERROR << "Error sending header" << ec;
+diff --git a/redfish-core/lib/account_service.hpp b/redfish-core/lib/account_service.hpp
+old mode 100644
+new mode 100755
+index fae181c..b3beccf
+--- a/redfish-core/lib/account_service.hpp
++++ b/redfish-core/lib/account_service.hpp
+@@ -1651,22 +1651,6 @@ class ManagerAccount : public Node
+                                                   "Roles/" +
+                                                       role}};
+                             }
+-                            else if (property.first == "UserPasswordExpired")
+-                            {
+-                                const bool* userPasswordExpired =
+-                                    std::get_if<bool>(&property.second);
+-                                if (userPasswordExpired == nullptr)
+-                                {
+-                                    BMCWEB_LOG_ERROR << "UserPassword"
+-                                                        "Expired "
+-                                                        "wasn't a bool";
+-                                    messages::internalError(asyncResp->res);
+-                                    return;
+-                                }
+-                                asyncResp->res
+-                                    .jsonValue["PasswordChangeRequired"] =
+-                                    *userPasswordExpired;
+-                            }
+                         }
+                     }
+                 }
+diff --git a/redfish-core/lib/redfish_sessions.hpp b/redfish-core/lib/redfish_sessions.hpp
+old mode 100644
+new mode 100755
+index fbbffcb..075071e
+--- a/redfish-core/lib/redfish_sessions.hpp
++++ b/redfish-core/lib/redfish_sessions.hpp
+@@ -201,7 +201,7 @@ class SessionCollection : public Node
+ 
+         int pamrc = pamAuthenticateUser(username, password);
+         bool isConfigureSelfOnly = pamrc == PAM_NEW_AUTHTOK_REQD;
+-        if ((pamrc != PAM_SUCCESS) && !isConfigureSelfOnly)
++        if ((pamrc != PAM_SUCCESS))
+         {
+             messages::resourceAtUriUnauthorized(res, std::string(req.url),
+                                                 "Invalid username or password");
+@@ -236,7 +236,7 @@ class SessionCollection : public Node
+         res.addHeader("Location", "/redfish/v1/SessionService/Sessions/" +
+                                       session->uniqueId);
+         res.result(boost::beast::http::status::created);
+-        if (session->isConfigureSelfOnly)
++        if (session->isConfigureSelfOnly || true)
+         {
+             messages::passwordChangeRequired(
+                 res,
+-- 
+2.7.4
+

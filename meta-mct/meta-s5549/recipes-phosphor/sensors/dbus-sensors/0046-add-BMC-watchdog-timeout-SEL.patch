@@ -1,0 +1,90 @@
+From 01928720a02da2b29e66cac918f3a9c91b6d2273 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 24 Jul 2020 18:09:23 +0800
+Subject: [PATCH 1/1] add BMC watchdog timeout SEL
+
+---
+ CMakeLists.txt      |  2 +-
+ src/eventSensor.cpp | 43 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 44 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 093a393..2cff7fa 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -222,7 +222,7 @@ target_link_libraries (acpisensor ${SENSOR_LINK_LIBS})
+ 
+ add_executable (eventsensor src/eventSensor.cpp)
+ add_dependencies (eventsensor sdbusplus-project)
+-target_link_libraries (eventsensor ${SENSOR_LINK_LIBS})
++target_link_libraries (eventsensor -lobmcmisc ${SENSOR_LINK_LIBS})
+ 
+ add_executable (aclostsensor src/AcLostSensor.cpp)
+ add_dependencies (aclostsensor sdbusplus-project)
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index da34f2a..6f95c27 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -29,9 +29,12 @@
+ #include <sdbusplus/timer.hpp>
+ #include <sensor.hpp>
+ #include <systemd/sd-journal.h>
++#include <openbmc/libmisc.h>
++
+ 
+ static constexpr bool DEBUG = false;
+ 
++
+ //{sensor name, sensor type}
+ const static boost::container::flat_map<std::string, std::string>eventsensors
+     {
+@@ -130,6 +133,46 @@ int main()
+         createSensors(io, objServer, systemBus,sensors);
+     });
+ 
++    // BMC WDT timeout log, move to indivaual sensor object
++    uint32_t scu3c = 0;
++    uint32_t wdt2Flag = 0x08; //bit #3
++    static constexpr char const* ipmiSELService =    "xyz.openbmc_project.Logging.IPMI";
++    static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
++    static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
++    static const std::string ipmiSELAddMessage = "SEL Entry";
++    static constexpr size_t selEvtDataMaxSize = 3;
++    std::string sensorPath = "/xyz/openbmc_project/sensors/mgtsubsyshealth/BMC_Reboot";
++    
++    if (read_register(0x1e6e203c, &scu3c) < 0)
++    {
++        std::cerr<<"failed to read register WDT10 \n";
++    }
++
++    if(scu3c & wdt2Flag)
++    {
++        //log sel
++        uint16_t genId = 0x20;
++        std::vector<uint8_t> eventData(3, 0xFF);
++        bool assert = true;
++
++        eventData[0] = 0x1;
++        sdbusplus::message::message writeSEL = systemBus->new_method_call(
++            ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
++        
++        writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert, genId);
++        try
++        {
++            systemBus->call_noreply(writeSEL);
++        }
++        catch (sdbusplus::exception_t& e)
++        {
++            std::cerr<<"failed to log BMC Reboot SEL\n";
++        }
++
++        //clear register         
++        scu3c &= ~(1UL << 3);
++        write_register(0x1e6e203c, scu3c);
++    }
+     //auto work = std::make_shared<boost::asio::io_service::work>(io);
+     io.run();
+     return 0;
+-- 
+2.26.2
+

@@ -1,0 +1,34 @@
+{
+    "Exposes": [
+        {
+            "Address": "0x51",
+            "Bus": "17",
+            "Name": "Intel XL710 NIC",
+            "Type": "EEPROM"
+        },
+        {
+            "Address": "0x1f",
+            "Bus": 17,
+            "Name": "NIC_Temp",
+            "Thresholds": [
+                {
+                    "Direction": "greater than",
+                    "Label": "temp1",
+                    "Name": "upper critical",
+                    "Severity": 1,
+                    "Value": 105
+                }
+            ],
+            "Type": "TMP75"
+        }
+    ],
+    "Name": "Intel V710 NIC",
+    "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': '.*XL710*'})",
+    "Type": "Board",
+    "xyz.openbmc_project.Inventory.Decorator.Asset": {
+        "Manufacturer": "$PRODUCT_MANUFACTURER",
+        "Model": "$PRODUCT_PRODUCT_NAME",
+        "PartNumber": "$PRODUCT_PART_NUMBER",
+        "SerialNumber": "$PRODUCT_SERIAL_NUMBER"
+    }
+}

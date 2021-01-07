@@ -1,0 +1,118 @@
+From fe1e1cd8578250d547319809a486497c89b76226 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Wed, 17 Jun 2020 10:07:36 +0800
+Subject: [PATCH] add offset value for E810 OCP card
+
+---
+ include/HwmonTempSensor.hpp |  4 +++-
+ src/HwmonTempMain.cpp       | 12 ++++++++++--
+ src/HwmonTempSensor.cpp     | 26 ++++++++++++++++++++++++--
+ 3 files changed, 37 insertions(+), 5 deletions(-)
+
+diff --git a/include/HwmonTempSensor.hpp b/include/HwmonTempSensor.hpp
+index a34cd5c..0f159bc 100755
+--- a/include/HwmonTempSensor.hpp
++++ b/include/HwmonTempSensor.hpp
+@@ -17,7 +17,8 @@ class HwmonTempSensor : public Sensor
+                     std::vector<thresholds::Threshold>&& thresholds,
+                     const std::string& sensorConfiguration,
+                     const PowerState powerState,
+-                    const double hysteresisVal);
++                    const double hysteresisVal,
++                    const double offsetValue);
+     ~HwmonTempSensor();
+ 
+   private:
+@@ -28,6 +29,7 @@ class HwmonTempSensor : public Sensor
+     std::string path;
+     PowerState readState;
+     double hysteresisVal;
++    double offsetValue;
+     thresholds::ThresholdTimer thresholdTimer;
+     size_t errCount;
+     void setupRead(void);
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 0e9b2cb..353803d 100755
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -220,13 +220,21 @@ void createSensors(
+                                              findHysteresisVal->second);
+                 }
+ 
++                float offsetValue = 0;
++                auto findOffsetValue = baseConfiguration->second.find("OffsetValue");
++                if (findOffsetValue != baseConfiguration->second.end())
++                {
++                    offsetValue = std::visit(VariantToFloatVisitor(),
++                                             findOffsetValue->second);
++                }
++
+                 if (deviceName != "14-001f"){
+                     auto& sensor = sensors[sensorName];
+                     sensor = nullptr;
+                     sensor = std::make_unique<HwmonTempSensor>(
+                             directory.string() + "/temp1_input", sensorType,
+                             objectServer, dbusConnection, io, sensorName,
+-                            std::move(sensorThresholds), *interfacePath, readState, hysteresisVal);
++                            std::move(sensorThresholds), *interfacePath, readState, hysteresisVal, offsetValue);
+                 }
+ 
+                 // Looking for keys like "Name1" for temp2_input,
+@@ -258,7 +266,7 @@ void createSensors(
+                             "_input",
+                         sensorType, objectServer, dbusConnection, io,
+                         sensorName, std::move(sensorThresholds),
+-                        *interfacePath, readState, hysteresisVal);
++                        *interfacePath, readState, hysteresisVal, offsetValue);
+                 }
+             }
+         }));
+diff --git a/src/HwmonTempSensor.cpp b/src/HwmonTempSensor.cpp
+index f322a6c..3453fb2 100755
+--- a/src/HwmonTempSensor.cpp
++++ b/src/HwmonTempSensor.cpp
+@@ -43,13 +43,14 @@ HwmonTempSensor::HwmonTempSensor(
+     std::shared_ptr<sdbusplus::asio::connection>& conn,
+     boost::asio::io_service& io, const std::string& sensorName,
+     std::vector<thresholds::Threshold>&& _thresholds,
+-    const std::string& sensorConfiguration, PowerState readState, const double hysteresisVal) :
++    const std::string& sensorConfiguration, PowerState readState, const double hysteresisVal,
++    const double offsetValue) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(_thresholds), sensorConfiguration, objectType, maxReading,
+            minReading),
+     objServer(objectServer), inputDev(io, open(path.c_str(), O_RDONLY)),
+     waitTimer(io), path(path), errCount(0), readState(std::move(readState)),
+-    thresholdTimer(io, this), hysteresisVal(hysteresisVal)
++    thresholdTimer(io, this), hysteresisVal(hysteresisVal), offsetValue(offsetValue)
+ {
+     sensorInterface = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/temperature/" + name,
+@@ -143,6 +144,27 @@ void HwmonTempSensor::handleResponse(const boost::system::error_code& err)
+         {
+             float nvalue = std::stof(response);
+             nvalue /= sensorScaleFactor;
++
++            if (name == "NIC_Temp")
++            {
++                // Check OCP card status
++                char tmp[100];
++                uint8_t currentStatus;
++
++                int fdt, size;
++                char buffer[100];
++                fdt = open("/usr/sbin/ocpCard", O_RDONLY);
++                size = read(fdt, buffer, sizeof(buffer));
++                close(fdt);
++                currentStatus = strtol(buffer,NULL,16);
++
++                if ((int)currentStatus == 1)
++                {
++                    //count OCP temp reading + offset
++                    nvalue = nvalue + offsetValue;
++                }
++            }
++
+             if (static_cast<double>(nvalue) != value)
+             {
+                 updateValue(nvalue);

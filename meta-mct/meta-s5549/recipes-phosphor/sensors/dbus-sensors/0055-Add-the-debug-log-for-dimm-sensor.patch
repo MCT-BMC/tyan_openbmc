@@ -1,0 +1,29 @@
+From ff1a777b049b5ab9584ec5363534739c2b3f1160 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 22 Oct 2020 20:05:12 +0800
+Subject: [PATCH] Add the debug log for dimm sensor
+
+---
+ src/CPUSensor.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 345249a..3b2d3ef 100755
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -160,6 +160,12 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+             double nvalue = std::stof(response);
+             responseStream.clear();
+             nvalue /= CPUSensor::sensorScaleFactor;
++
++            if(path.find("peci-dimmtemp")!= std::string::npos && nvalue > 80)
++            {
++                std::cerr << "path:" << path << ", value:" << nvalue << "\n";
++            }
++
+             if (nvalue == sensorDisable)
+             {
+                 updateValueInvalid(true);
+-- 
+2.7.4
+

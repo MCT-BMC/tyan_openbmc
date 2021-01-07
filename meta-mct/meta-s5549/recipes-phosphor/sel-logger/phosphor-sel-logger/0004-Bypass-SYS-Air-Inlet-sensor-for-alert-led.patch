@@ -1,0 +1,47 @@
+From 5afbdf5d2fffce4a09c89b31c4d03501421e619d Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Thu, 6 Aug 2020 13:17:40 +0800
+Subject: [PATCH] bypass SYS Air Inlet sensor for alert led
+
+---
+ include/threshold_event_monitor.hpp | 23 +++++++++++++----------
+ 1 file changed, 13 insertions(+), 10 deletions(-)
+
+diff --git a/include/threshold_event_monitor.hpp b/include/threshold_event_monitor.hpp
+index e5681ca..026b05a 100755
+--- a/include/threshold_event_monitor.hpp
++++ b/include/threshold_event_monitor.hpp
+@@ -303,20 +303,23 @@ inline static sdbusplus::bus::match::match startThresholdEventMonitor(
+                                ".");
+ 
+         auto bus = sdbusplus::bus::new_default();
+-        if (assert == true)
++        if (std::string(sensorName) != "SYS_Air_Inlet")
+         {
+-            assertCount++;
+-            if (assertCount == 1)
++            if (assert == true)
+             {
+-                setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.On",LED_SERVICE);
++                assertCount++;
++                if (assertCount == 1)
++                {
++                    setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.On",LED_SERVICE);
++                }
+             }
+-        }
+-        else
+-        {
+-            assertCount--;
+-            if (assertCount == 0)
++            else
+             {
+-                setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.Off",LED_SERVICE);
++                assertCount--;
++                if (assertCount == 0)
++                {
++                    setProperty(bus, LED_OBJECTPATH_BASE, "State","xyz.openbmc_project.Led.Physical.Action.Off",LED_SERVICE);
++                }
+             }
+         }
+ 

@@ -1,0 +1,26 @@
+From ff0f4fe644a004cd551aacad8c02e631372d9bf6 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 23 Jul 2020 16:22:04 +0800
+Subject: [PATCH] Add event disabled event sensor
+
+---
+ src/eventSensor.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index da34f2a..28f5943 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -47,7 +47,8 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
+         {"IPMI_POWER_OFF","fru_state"},
+         {"IPMI_POWER_SOFT","fru_state"},
+         {"IPMI_POWER_RESET","fru_state"},
+-        {"WATCHDOG2","watchdog2"}
++        {"WATCHDOG2","watchdog2"},
++        {"EVENT_CLEARED","event_disabled"}
+     };
+ 
+ struct eventSensor 
+-- 
+2.7.4
+

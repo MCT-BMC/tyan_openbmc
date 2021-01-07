@@ -1,0 +1,25 @@
+From e71c50359eb846650e4437ebca874e6ad0b67ebe Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 21 Jul 2020 18:35:45 +0800
+Subject: [PATCH 1/1] fix Tjmax change don't take effect issue
+
+---
+ pid/fsccontroller.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
+index 3ed8468..9a92bb5 100755
+--- a/pid/fsccontroller.cpp
++++ b/pid/fsccontroller.cpp
+@@ -118,6 +118,8 @@ void FscController::process(void)
+                         //calculate CPU Thigh(Tcontrol -5) and Tlow(Tcontrol -10) and update property
+                         info.setPointH = (value-5000)/1000;
+                         info.setPointL = (value-10000)/1000;
++                        _fsc_info.setPointH = info.setPointH;
++                        _fsc_info.setPointL = info.setPointL; 
+                         setProperty(bus,Object,"SetPointH",info.setPointH);
+                         setProperty(bus,Object,"SetPointL",info.setPointL);
+                         tcontrol = value;
+-- 
+2.26.2
+

@@ -1,0 +1,56 @@
+[
+    {
+        "LineName": "BMC_EUP_LOT6",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOA2"
+    },
+    {
+        "LineName": "PHY_RST",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOD5"
+    },
+    {
+        "LineName": "CLR_CMOS",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOD7"
+    },
+    {
+        "LineName": "PCH_NMI",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOF0"
+    },
+    {
+        "LineName": "BAT_MON",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG4"
+    },
+    {
+        "LineName": "BIOS_SPI_SW",
+        "Direction": "Output",
+        "Value":0,
+        "PIN":"GPIOG7"
+    },
+    {
+        "LineName": "SYS_FAULT1",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOH3"
+    },
+    {
+        "LineName": "SYS_FAULT2",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOH6"
+    },
+    {
+        "LineName": "FLASH_SEC_OVRD",
+        "Direction": "Output",
+        "Value":1,
+        "PIN":"GPIOQ6"
+    }
+]

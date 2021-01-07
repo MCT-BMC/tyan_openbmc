@@ -1,0 +1,76 @@
+From cc0972e39c66f40848ee97308f6a9348f305ee7d Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 29 Jul 2020 10:44:52 +0800
+Subject: [PATCH] Filter out invalidate MOS temperature value and add delay for
+ CPU sensors
+
+---
+ include/CPUSensor.hpp |  1 +
+ src/CPUSensor.cpp     | 10 ++++++++--
+ src/MOSTempSensor.cpp |  9 ++++++++-
+ 3 files changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/include/CPUSensor.hpp b/include/CPUSensor.hpp
+index c27eccf..18a72e8 100755
+--- a/include/CPUSensor.hpp
++++ b/include/CPUSensor.hpp
+@@ -48,6 +48,7 @@ class CPUSensor : public Sensor
+     double dtsOffset;
+     bool show;
+     size_t errCount;
++    thresholds::ThresholdTimer thresholdTimer;
+     void setupRead(void);
+     void handleResponse(const boost::system::error_code& err);
+     void checkThresholds(void) override;
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 9747ce5..fda9028 100755
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -50,7 +50,8 @@ CPUSensor::CPUSensor(const std::string& path, const std::string& objectType,
+     objServer(objectServer), inputDev(io, open(path.c_str(), O_RDONLY)),
+     waitTimer(io), path(path),
+     privTcontrol(std::numeric_limits<double>::quiet_NaN()),
+-    dtsOffset(dtsOffset), show(show), errCount(0)
++    dtsOffset(dtsOffset), show(show), errCount(0),
++    thresholdTimer(io, this)
+ {
+     nameTcontrol = labelTcontrol;
+     nameTcontrol += " CPU" + std::to_string(cpuId);
+@@ -293,8 +294,13 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+ void CPUSensor::checkThresholds(void)
+ {
++    if (!isPowerOn())
++    {
++        return;
++    }
++
+     if (show)
+     {
+-        thresholds::checkThresholds(this);
++        thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
+     }
+ }
+diff --git a/src/MOSTempSensor.cpp b/src/MOSTempSensor.cpp
+index 87939bc..00cde26 100755
+--- a/src/MOSTempSensor.cpp
++++ b/src/MOSTempSensor.cpp
+@@ -163,7 +163,14 @@ void MOSTempSensor::read(void)
+                           << static_cast<int>(temp) << "\n";
+             }
+             updateValueInvalid(false);
+-            updateValue(v);
++            if(v >= 0XFF)
++            {
++                std::cerr << "Invalid mos reading:" <<v << "\n";
++            }
++            else
++            {
++                updateValue(v);
++            }
+         }
+         else
+         {
+-- 
+2.7.4
+

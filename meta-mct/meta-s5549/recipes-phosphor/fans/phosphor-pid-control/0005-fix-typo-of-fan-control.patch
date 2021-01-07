@@ -1,0 +1,53 @@
+From e865d7105d2aa2669e9cb9652094f00262d0a90c Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Tue, 18 Aug 2020 18:35:46 +0800
+Subject: [PATCH] fix typo of fan control
+
+---
+ dbus/dbusconfiguration.cpp | 10 +++++++---
+ pid/buildjson.cpp          |  4 ++--
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/dbus/dbusconfiguration.cpp b/dbus/dbusconfiguration.cpp
+index 7bb2018..97b98f2 100755
+--- a/dbus/dbusconfiguration.cpp
++++ b/dbus/dbusconfiguration.cpp
+@@ -941,8 +941,12 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                         VariantToDoubleVisitor(), findSPL->second);
+                 }
+ 
+-                info.fscInfo.outLimMax =
+-                    std::visit(VariantToDoubleVisitor(), base.at("OutLimitMax"));
++                auto findOutLimitMax = base.find("OutLimitMax");
++                if (findOutLimitMax != base.end())
++                {
++                    info.fscInfo.outLimMax = std::visit(
++                        VariantToDoubleVisitor(), findOutLimitMax->second);
++                }
+ 
+                 auto findPosHyst = base.find("PositiveHysteresis");
+                 auto findNegHyst = base.find("NegativeHysteresis");
+@@ -968,7 +972,7 @@ bool init(sdbusplus::bus::bus& bus, boost::asio::steady_timer& timer)
+                         "Must have one fsc point.");
+                 }
+                 std::copy(readings.begin(), readings.end(),
+-                          info.stepwiseInfo.reading);
++                          info.fscInfo.reading);
+                 if (readings.size() < ec::maxFscPoints)
+                 {
+                     info.fscInfo.reading[readings.size()] =
+diff --git a/pid/buildjson.cpp b/pid/buildjson.cpp
+index b392e2f..9aac20c 100755
+--- a/pid/buildjson.cpp
++++ b/pid/buildjson.cpp
+@@ -109,8 +109,8 @@ void from_json(const json& j, conf::ControllerInfo& c)
+                 }
+             }
+         }
+-        c.stepwiseInfo.positiveHysteresis = positiveHysteresisValue;
+-        c.stepwiseInfo.negativeHysteresis = negativeHysteresisValue;
++        c.fscInfo.positiveHysteresis = positiveHysteresisValue;
++        c.fscInfo.negativeHysteresis = negativeHysteresisValue;
+     }
+     else
+     {

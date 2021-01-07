@@ -1,0 +1,35 @@
+From f8a9a345af8f0f5e662749f7295807f9ee0c623b Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 13 Aug 2020 15:25:16 +0800
+Subject: [PATCH] filter out invalidate sys air inlet value
+
+---
+ src/HwmonTempSensor.cpp | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/src/HwmonTempSensor.cpp b/src/HwmonTempSensor.cpp
+index 3453fb2..9c2ee5f 100755
+--- a/src/HwmonTempSensor.cpp
++++ b/src/HwmonTempSensor.cpp
+@@ -167,7 +167,17 @@ void HwmonTempSensor::handleResponse(const boost::system::error_code& err)
+ 
+             if (static_cast<double>(nvalue) != value)
+             {
+-                updateValue(nvalue);
++                if(name=="SYS_Air_Inlet")
++                {
++                    if(nvalue > -30)
++                    {
++                        updateValue(nvalue);
++                    }
++                }
++                else
++                {
++                    updateValue(nvalue);
++                }
+             }
+             errCount = 0;
+             updateValueInvalid(false);
+-- 
+2.7.4
+

@@ -1,0 +1,36 @@
+From 9618237f380410ea548710ef23fd5fd5856c4966 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 21 Jul 2020 18:29:19 +0800
+Subject: [PATCH 1/1] filter out invalidate ADC value
+
+---
+ src/ADCSensor.cpp | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/src/ADCSensor.cpp b/src/ADCSensor.cpp
+index f941a73..0be500f 100755
+--- a/src/ADCSensor.cpp
++++ b/src/ADCSensor.cpp
+@@ -177,10 +177,17 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
+         {
+             double nvalue = std::stof(response);
+ 
++            //debug only: need to investigate driver if any data exceed 1.8V reported  
++            double rawValue  = nvalue;
++            if(rawValue >= 1790) 
++            {
++                std::cerr << "rawValue:" <<rawValue << "\n";
++            }
++
+             nvalue = (nvalue / sensorScaleFactor) / scaleFactor;
+             nvalue = std::round(nvalue * roundFactor) / roundFactor;
+-
+-            if (nvalue != value)
++                
++            if ((nvalue != value) && (rawValue <= 1790))
+             {
+                 updateValue(nvalue);
+             }
+-- 
+2.26.2
+
