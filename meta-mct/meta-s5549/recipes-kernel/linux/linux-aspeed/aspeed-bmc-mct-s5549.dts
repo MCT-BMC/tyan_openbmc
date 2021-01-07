@@ -23,10 +23,10 @@
         #size-cells = <1>;
         ranges;
 
-		gfx_memory: framebuffer@97000000 {
+		gfx_memory: framebuffer@96000000 {
 			no-map;
 			compatible = "shared-dma-pool";
-			reg = <0x97000000 0x01000000>; /* 16M */
+			reg = <0x96000000 0x02000000>; /* 32M */
         };
 
         flash_memory: region@98000000 {
@@ -49,6 +49,11 @@
 			reg = <0x9f000000 0x01000000>; /* 16M */
         };
 
+    };
+
+    vga-shared-memory {
+        compatible = "aspeed,ast2500-vga-sharedmem";
+        reg = <0x9ff00000 0x100000>;
     };
 
     leds {
