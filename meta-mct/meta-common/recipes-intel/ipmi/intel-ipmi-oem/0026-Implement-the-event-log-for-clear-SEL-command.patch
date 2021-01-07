@@ -1,0 +1,117 @@
+From 8e9df04e04cc448cf4a23682bf7d06180d455456 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 3 Sep 2020 09:57:21 +0800
+Subject: [PATCH 1/2] Implement the event log for clear SEL command
+
+---
+ include/sdrutils.hpp    |  2 ++
+ src/storagecommands.cpp | 52 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+
+diff --git a/include/sdrutils.hpp b/include/sdrutils.hpp
+index 3e4230d..3496c12 100755
+--- a/include/sdrutils.hpp
++++ b/include/sdrutils.hpp
+@@ -164,6 +164,7 @@ enum class SensorTypeCodes : uint8_t
+     processor = 0x07,
+     power_supply = 0x08,
+     power_unit = 0x09,
++    event_disabled = 0x10,
+     pwr_button = 0x14,
+     restart = 0x1d,
+     acpi = 0x22,
+@@ -183,6 +184,7 @@ const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
+                  {"processor", SensorTypeCodes::processor},   
+                  {"power_supply", SensorTypeCodes::power_supply},
+                  {"power_unit", SensorTypeCodes::power_unit},
++                 {"event_disabled", SensorTypeCodes::event_disabled},
+                  {"pwr_button", SensorTypeCodes::pwr_button},   
+                  {"restart", SensorTypeCodes::restart},  
+                  {"acpi", SensorTypeCodes::acpi},     
+diff --git a/src/storagecommands.cpp b/src/storagecommands.cpp
+index 8e75e67..4345e0b 100755
+--- a/src/storagecommands.cpp
++++ b/src/storagecommands.cpp
+@@ -50,6 +50,30 @@ static int getFileTimestamp(const std::filesystem::path& file)
+     return ::ipmi::sel::invalidTimeStamp;
+ }
+ 
++void generateSELEvent(char const* SensorPath,std::vector<uint8_t> eventData)
++{
++    static constexpr auto ipmiBusName = "xyz.openbmc_project.Logging.IPMI";
++    static constexpr auto ipmiObjPath = "/xyz/openbmc_project/Logging/IPMI";
++    static constexpr auto ipmiIntf = "xyz.openbmc_project.Logging.IPMI";
++
++    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
++
++    uint16_t genid = 0x20;
++    bool assert=1;
++
++    sdbusplus::message::message writeSEL = bus.new_method_call(
++                            ipmiBusName, ipmiObjPath, ipmiIntf, "IpmiSelAdd");
++    writeSEL.append("SEL Entry",  std::string(SensorPath), eventData, assert, genid);
++    try
++    {
++        bus.call(writeSEL);
++    }
++    catch (sdbusplus::exception_t& e)
++    {
++        std::cerr << "call IpmiSelAdd failed\n";
++    }
++}
++
+ namespace erase_time
+ {
+ static constexpr const char* selEraseTimestamp = "/var/lib/ipmi/sel_erase_time";
+@@ -1143,6 +1167,26 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
+     return ipmi::responseSuccess(responseID);
+ }
+ 
++static constexpr char const* eventCleared= "/xyz/openbmc_project/sensors/event_disabled/EVENT_CLEARED";
++std::vector<uint8_t> eventData{0x02,0xFF,0xff};
++
++std::unique_ptr<phosphor::Timer> clearSELTimer = nullptr;
++
++bool clearSEL()
++{
++    intel_oem::ipmi::sel::generateSELEvent(eventCleared,eventData);
++    std::cerr << "Clear SEL finish" << std::endl;
++    return true;
++}
++
++void createSELTimer()
++{
++    if (clearSELTimer == nullptr)
++    {
++        clearSELTimer = std::make_unique<phosphor::Timer>(clearSEL);
++    }
++}
++
+ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
+                                            uint16_t reservationID,
+                                            const std::array<uint8_t, 3>& clr,
+@@ -1163,6 +1207,7 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
+     // `erase completed`.
+     if (eraseOperation == ipmi::sel::getEraseStatus)
+     {
++        intel_oem::ipmi::sel::generateSELEvent(eventCleared,eventData);
+         return ipmi::responseSuccess(ipmi::sel::eraseComplete);
+     }
+ 
+@@ -1205,6 +1250,13 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
+         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+     }
+ 
++    createSELTimer();
++    if(!clearSELTimer->isRunning())
++    {
++        std::cerr << "Clear SEL in progress" << std::endl;
++        clearSELTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
++                             std::chrono::seconds(3)));
++    }
+     return ipmi::responseSuccess(ipmi::sel::eraseComplete);
+ }
+ 
+-- 
+2.7.4
+

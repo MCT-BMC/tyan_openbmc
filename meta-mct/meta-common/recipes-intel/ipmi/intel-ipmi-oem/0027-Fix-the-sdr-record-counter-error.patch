@@ -1,0 +1,227 @@
+From 39f086d4c45c37c99a7c3d53fb093eaae8eb664f Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 1 Sep 2020 18:04:19 +0800
+Subject: [PATCH] Fix the sdr record counter error
+
+Redirect the mct sdr function and parameter to top of cpp file
+---
+ src/sensorcommands.cpp | 189 +++++++++++++++++++++++++------------------------
+ 1 file changed, 98 insertions(+), 91 deletions(-)
+
+diff --git a/src/sensorcommands.cpp b/src/sensorcommands.cpp
+index 700cffa..b9a456d 100755
+--- a/src/sensorcommands.cpp
++++ b/src/sensorcommands.cpp
+@@ -263,6 +263,93 @@ static bool getSensorMap(std::string sensorConnection, std::string sensorPath,
+     return true;
+ }
+ 
++//MCT hook for event only SDR
++struct SensorDataEventOnlyRecordBody
++{
++    uint8_t entity_id;
++    uint8_t entity_instance;
++    uint8_t sensor_type;
++    uint8_t event_reading_type;
++    uint8_t sensor_driection[2];          // no macro support
++    uint8_t reserved;
++    uint8_t oem_reserved;
++    uint8_t id_string_info;
++    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
++} __attribute__((packed));
++
++struct SensorDataEventOnlyRecord
++{
++    get_sdr::SensorDataRecordHeader header;
++    get_sdr::SensorDataRecordKey key;
++    SensorDataEventOnlyRecordBody body;
++} __attribute__((packed));
++
++static std::vector<SensorDataEventOnlyRecord> definedSdrlist;
++
++/** @struct SensorDataFruRecord
++ *
++ *  FRU Device Locator Record - SDR Type 03
++ */
++
++static constexpr const char* sdrFile = "/usr/share/ipmi-providers/sdr.json";
++
++static void loadSdr(uint16_t baseID)
++{
++    static bool loaded = false;
++    static uint16_t perviosBase  = baseID;
++
++    if(loaded && (perviosBase == baseID))
++    {
++        return;
++    }
++    loaded = true;
++    perviosBase = baseID;
++    definedSdrlist.clear();
++    SensorDataEventOnlyRecord tmp = {0};
++    tmp.header.sdr_version = ipmiSdrVersion;
++    tmp.header.record_type = 0x03;
++    tmp.header.record_length = sizeof(SensorDataEventOnlyRecord) -
++                                      sizeof(get_sdr::SensorDataRecordHeader);
++    tmp.key.owner_lun = 0x0;
++    tmp.body.entity_id = 0x07;
++    tmp.body.entity_instance = 0x01;
++    tmp.body.event_reading_type = 0x6f;
++
++    std::ifstream sdrStream(sdrFile);
++    if(!sdrStream.is_open())
++    {
++        std::cerr << "NO defined SDR found\n";
++    }
++    else
++    {
++        auto data = nlohmann::json::parse(sdrStream, nullptr, false);
++        if (data.is_discarded())
++        {
++            std::cerr << "syntax error in " << sdrFile << "\n";
++        }
++        else
++        {
++            int idx = 0;
++            while (!data[idx].is_null())
++            {
++                tmp.header.record_id_msb = (baseID+idx) << 8;
++                tmp.header.record_id_lsb = (baseID+idx) & 0xFF;
++                tmp.key.owner_id = std::stoul((std::string)data[idx]["ownerId"], nullptr, 16);
++                tmp.key.sensor_number = std::stoul((std::string)data[idx]["sensorNumber"], nullptr, 16);
++                tmp.body.sensor_type = std::stoul((std::string)data[idx]["sensorType"], nullptr, 16);
++                std::string sensor_name = data[idx]["sensorName"];;
++                tmp.body.id_string_info = sensor_name.size();
++                std::strncpy(tmp.body.id_string, sensor_name.c_str(),
++                sizeof(tmp.body.id_string));
++                definedSdrlist.push_back(tmp);
++                idx++;
++            }
++        }
++        sdrStream.close();
++    }
++    std::cerr << "sdr size:" << definedSdrlist.size() << '\n';
++}
++
+ /* sensor commands */
+ ipmi_ret_t ipmiSensorWildcardHandler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                      ipmi_request_t request,
+@@ -1097,7 +1184,17 @@ ipmi_ret_t ipmiStorageGetSDRRepositoryInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+ 
+     auto resp = static_cast<GetSDRInfoResp *>(response);
+     resp->sdrVersion = ipmiSdrVersion;
+-    uint16_t recordCount = sensorTree.size();
++
++    //MCT add pre-defined SDR
++    loadSdr(sensorTree.size());
++
++    size_t fruCount = 0;
++    ipmi_ret_t ret = ipmi::storage::getFruSdrCount(fruCount);
++    if (ret != IPMI_CC_OK)
++    {
++        return IPMI_CC_RESPONSE_ERROR;
++    }
++    uint16_t recordCount = sensorTree.size() + definedSdrlist.size() + fruCount;
+ 
+     // todo: for now, sdr count is number of sensors
+     resp->recordCountLS = recordCount & 0xFF;
+@@ -1163,96 +1260,6 @@ ipmi::RspType<uint16_t> ipmiStorageReserveSDR()
+     return ipmi::responseSuccess(sdrReservationID);
+ }
+ 
+-//MCT hook for event only SDR
+-struct SensorDataEventOnlyRecordBody
+-{
+-    uint8_t entity_id;
+-    uint8_t entity_instance;
+-    uint8_t sensor_type;
+-    uint8_t event_reading_type;
+-    uint8_t sensor_driection[2];          // no macro support
+-    uint8_t reserved;
+-    uint8_t oem_reserved;
+-    uint8_t id_string_info;
+-    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+-} __attribute__((packed));
+-
+-
+-struct SensorDataEventOnlyRecord
+-{
+-    get_sdr::SensorDataRecordHeader header;
+-    get_sdr::SensorDataRecordKey key;
+-    SensorDataEventOnlyRecordBody body;
+-} __attribute__((packed));
+-
+-/** @struct SensorDataFruRecord
+- *
+- *  FRU Device Locator Record - SDR Type 03
+- */
+-
+-static constexpr const char* sdrFile = "/usr/share/ipmi-providers/sdr.json";
+-
+-static std::vector<SensorDataEventOnlyRecord> definedSdrlist;
+-static void loadSdr(uint16_t baseID)
+-{
+-    static bool loaded = false;
+-    static uint16_t perviosBase  = baseID;
+-        
+-    if(loaded && (perviosBase == baseID))
+-    {
+-        return; 
+-    }
+-    loaded = true; 
+-    perviosBase = baseID;
+-    definedSdrlist.clear();
+-    SensorDataEventOnlyRecord tmp = {0};
+-    tmp.header.sdr_version = ipmiSdrVersion;
+-    tmp.header.record_type = 0x03; 
+-    tmp.header.record_length = sizeof(SensorDataEventOnlyRecord) -
+-                                      sizeof(get_sdr::SensorDataRecordHeader); 
+-    tmp.key.owner_lun = 0x0;
+-    tmp.body.entity_id = 0x07;
+-    tmp.body.entity_instance = 0x01;
+-    tmp.body.event_reading_type = 0x6f;
+-    
+-    std::ifstream sdrStream(sdrFile);
+-    if(!sdrStream.is_open())
+-    {
+-        std::cerr << "NO defined SDR found\n";
+-    }
+-    else
+-    {
+-        auto data = nlohmann::json::parse(sdrStream, nullptr, false);
+-        if (data.is_discarded())
+-        {
+-            std::cerr << "syntax error in " << sdrFile << "\n";
+-        }
+-        else
+-        {
+-            int idx = 0;
+-            while (!data[idx].is_null())
+-            {
+-                tmp.header.record_id_msb = (baseID+idx) << 8;
+-                tmp.header.record_id_lsb = (baseID+idx) & 0xFF;
+-                tmp.key.owner_id = std::stoul((std::string)data[idx]["ownerId"], nullptr, 16);  
+-                tmp.key.sensor_number = std::stoul((std::string)data[idx]["sensorNumber"], nullptr, 16);   
+-                tmp.body.sensor_type = std::stoul((std::string)data[idx]["sensorType"], nullptr, 16);
+-                std::string sensor_name = data[idx]["sensorName"];;
+-                tmp.body.id_string_info = sensor_name.size();
+-                std::strncpy(tmp.body.id_string, sensor_name.c_str(),
+-                sizeof(tmp.body.id_string));
+-                definedSdrlist.push_back(tmp);
+-                idx++;
+-            }
+-        }
+-        sdrStream.close();
+-    }
+-    std::cerr << "sdr size:" << definedSdrlist.size() << '\n';
+-        
+-}
+-    
+-
+-
+ ipmi::RspType<uint16_t,            // next record ID
+               std::vector<uint8_t> // payload
+               >
+-- 
+2.7.4
+

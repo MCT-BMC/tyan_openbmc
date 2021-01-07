@@ -1,0 +1,53 @@
+From a67f5de0e3c5d5e3d441f6450bf07e1b518c4abd Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 11 Jun 2020 17:11:22 +0800
+Subject: [PATCH 1/1] sol pettern sensor support
+
+---
+ include/sdrutils.hpp        | 1 +
+ include/storagecommands.hpp | 1 +
+ src/sensorcommands.cpp      | 1 +
+ 3 files changed, 3 insertions(+)
+ mode change 100644 => 100755 include/storagecommands.hpp
+
+diff --git a/include/sdrutils.hpp b/include/sdrutils.hpp
+index 3d05ac0..3e4230d 100755
+--- a/include/sdrutils.hpp
++++ b/include/sdrutils.hpp
+@@ -190,6 +190,7 @@ const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
+                  {"mgtsubsyshealth", SensorTypeCodes::mgtsubsyshealth}, 
+                  {"versionchange", SensorTypeCodes::versionchange},     
+                  {"fru_state", SensorTypeCodes::fru_state},
++                 {"pattern", SensorTypeCodes::other},
+                  {"power", SensorTypeCodes::other}}};
+ 
+ inline static std::string getSensorTypeStringFromPath(const std::string& path)
+diff --git a/include/storagecommands.hpp b/include/storagecommands.hpp
+old mode 100644
+new mode 100755
+index 1a2d281..3d28f48
+--- a/include/storagecommands.hpp
++++ b/include/storagecommands.hpp
+@@ -97,6 +97,7 @@ enum class SensorUnits : uint8_t
+     amps = 0x5,
+     watts = 0x6,
+     rpm = 0x12,
++    hit = 0x4e,
+ };
+ 
+ enum class IPMINetfnStorageCmds : ipmi_cmd_t
+diff --git a/src/sensorcommands.cpp b/src/sensorcommands.cpp
+index 899f21f..700cffa 100755
+--- a/src/sensorcommands.cpp
++++ b/src/sensorcommands.cpp
+@@ -69,6 +69,7 @@ const static boost::container::flat_map<const char *, SensorUnits, CmpStr>
+                  {"voltage", SensorUnits::volts},
+                  {"current", SensorUnits::amps},
+                  {"fan_tach", SensorUnits::rpm},
++                 {"pattern", SensorUnits::hit},
+                  {"power", SensorUnits::watts}}};
+ 
+ void registerSensorFunctions() __attribute__((constructor));
+-- 
+2.26.2
+
