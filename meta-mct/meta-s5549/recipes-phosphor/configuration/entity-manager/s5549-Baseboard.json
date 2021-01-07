@@ -640,23 +640,6 @@
             "Type": "TMP75"
         },
         {
-            "Address": "0x1f",
-            "Bus": 14,
-            "Name": "OCP_TEMP",
-            "Name1": "NIC_Temp",
-            "OffsetValue": 23,
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Label": "temp2",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 105
-                }
-            ],
-            "Type": "TMP421"
-        },
-        {
             "Address": "0x61",
             "Bus": 4,
             "Reg": "0x8d",
@@ -751,86 +734,6 @@
                 }
             ],
             "Type": "MOSTempSensor"
-        },
-        {
-            "Address": "0x53",
-            "Bus": "22",
-            "Name": "NVMe 0 FRU",
-            "Type": "EEPROM"
-        },
-        {
-            "Address": "0x6A",
-            "Bus": "22",
-            "Name": "NVMe 0 Temp",
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 70
-                }
-            ],
-            "Type": "NVME1000"
-        },
-        {
-            "Address": "0x53",
-            "Bus": "25",
-            "Name": "NVMe 1 FRU",
-            "Type": "EEPROM"
-        },
-        {
-            "Address": "0x6A",
-            "Bus": "25",
-            "Name": "NVMe 1 Temp",
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 70
-                }
-            ],
-            "Type": "NVME1000"
-        },
-        {
-            "Address": "0x53",
-            "Bus": "23",
-            "Name": "NVMe 2 FRU",
-            "Type": "EEPROM"
-        },
-        {
-            "Address": "0x6A",
-            "Bus": "23",
-            "Name": "NVMe 2 Temp",
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 70
-                }
-            ],
-            "Type": "NVME1000"
-        },
-        {
-            "Address": "0x6A",
-            "Bus": "20",
-            "Name": "NVMe 3 Temp",
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 70
-                }
-            ],
-            "Type": "NVME1000"
-        },
-        {
-            "Address": "0x53",
-            "Bus": "20",
-            "Name": "NVMe 3 FRU",
-            "Type": "EEPROM"
         },
         {
             "FailSafePercent": 25,
