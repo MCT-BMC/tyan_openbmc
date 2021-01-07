@@ -247,8 +247,7 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         #subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
         
         # connect BMC to SPI Flash 
-        subprocess.Popen('gpioset gpiochip0 72=0', shell=True)
-        subprocess.Popen('gpioset gpiochip0 73=1', shell=True)
+        subprocess.Popen('gpioset `gpiofind BIOS_SPI_SW `=1', shell=True)
         # Waiting for gpio set
         time.sleep(5)
         # Load the ASpeed SMC driver
@@ -265,8 +264,7 @@ class BiosFlashControl(DbusProperties, DbusObjectManager):
         time.sleep(10)
         
         # connect PCH to SPI Flash 
-        subprocess.Popen('gpioset gpiochip0 72=1', shell=True)
-        subprocess.Popen('gpioset gpiochip0 73=0', shell=True)
+        subprocess.Popen('gpioset `gpiofind BIOS_SPI_SW `=0', shell=True)
 
         #self.update_process = None
         if self.update_process:
