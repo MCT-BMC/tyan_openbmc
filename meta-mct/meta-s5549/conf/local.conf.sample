@@ -85,7 +85,7 @@ MACHINE ?= "s5549"
 # Ultimately when creating custom policy, people will likely end up subclassing
 # these defaults.
 #
-DISTRO ?= "twitter-obmc-s5549"
+DISTRO ?= "MCT-obmc-s5549"
 # As an example of a subclass there is a "bleeding" edge policy configuration
 # where many versions are set to the absolute latest code from the upstream
 # source control systems. This is just mentioned here as an example, its not
