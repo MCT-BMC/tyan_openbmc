@@ -1,0 +1,23 @@
+From 132f33c89a565eeafffd1d3a3cef876343355402 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Fri, 13 Nov 2020 11:41:19 +0800
+Subject: [PATCH] Add Fast Prochot event only sensor
+
+---
+ src/eventSensor.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index 0685eaa..5be6ef9 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -52,7 +52,8 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
+         {"IPMI_POWER_SOFT","fru_state"},
+         {"IPMI_POWER_RESET","fru_state"},
+         {"WATCHDOG2","watchdog2"},
+-        {"EVENT_CLEARED","event_disabled"}
++        {"EVENT_CLEARED","event_disabled"},
++        {"Processor_fail","processor"}
+     };
+ 
+ struct eventSensor 

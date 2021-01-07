@@ -3,6 +3,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRCREV = "c35135d32f9cb84b62de7b72eee3a2e87b4b3d4d"
 SRC_URI += "file://0001-Customize-phosphor-watchdog-for-Intel-platforms.patch \
             file://0002-Implement-add-SEL-feature-for-watchdog-timeout.patch \
+            file://0003-Add-post-code-SEL-for-FRB2-event.patch \
            "
 
 # Remove the override to keep service running after DC cycle
