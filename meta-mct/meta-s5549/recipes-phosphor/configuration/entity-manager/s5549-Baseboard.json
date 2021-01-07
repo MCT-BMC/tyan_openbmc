@@ -25,10 +25,8 @@
                     "Die" : "CPU0_Temp",
                     "DIMM_A1" : "CPU0_MC0_DIMM_A",
                     "DIMM_B1" : "CPU0_MC0_DIMM_B",
-                    "DIMM_C1" : "CPU0_MC0_DIMM_C",
                     "DIMM_D1" : "CPU0_MC1_DIMM_D",
                     "DIMM_E1" : "CPU0_MC1_DIMM_E",
-                    "DIMM_F1" : "CPU0_MC1_DIMM_F",
                     "Tjmax" : "CPU0_DTS_Margin"
                 }
             ],
@@ -49,13 +47,6 @@
                 },
                 {
                     "Direction": "greater than",
-                    "Label": "DIMM_C1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
                     "Label": "DIMM_D1",
                     "Name": "upper critical",
                     "Severity": 1,
@@ -64,13 +55,6 @@
                 {
                     "Direction": "greater than",
                     "Label": "DIMM_E1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_F1",
                     "Name": "upper critical",
                     "Severity": 1,
                     "Value": 85
@@ -85,76 +69,6 @@
             ],
             "Type": "XeonCPU"
         },
-        {
-            "Address": "0x31",
-            "Bus": 0,
-            "CpuID": 2,
-            "Name": "CPU1 Temp",
-            "Labels": [
-                {
-                    "Die" : "CPU1_Temp",
-                    "DIMM_A1" : "CPU1_MC0_DIMM_A",
-                    "DIMM_B1" : "CPU1_MC0_DIMM_B",
-                    "DIMM_C1" : "CPU1_MC0_DIMM_C",
-                    "DIMM_D1" : "CPU1_MC1_DIMM_D",
-                    "DIMM_E1" : "CPU1_MC1_DIMM_E",
-                    "DIMM_F1" : "CPU1_MC1_DIMM_F",
-                    "Tjmax" : "CPU1_DTS_Margin"
-                }
-            ],
-            "Thresholds": [
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_A1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_B1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_C1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_D1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_E1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "DIMM_F1",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 85
-                },
-                {
-                    "Direction": "greater than",
-                    "Label": "Die",
-                    "Name": "upper critical",
-                    "Severity": 1,
-                    "Value": 95
-                }
-            ],
-            "Type": "XeonCPU"
-        },        
         {
             "Index": 0,
             "Name": "VOL_SYS_12V",
@@ -699,7 +613,8 @@
         {
             "Class": "temp",
             "Inputs": [
-                "SYS_Air_Inlet"
+                "SYS_Air_Inlet",
+                "CPU0_Temp"
             ],
             "Name": "FSC_CPU0",
             "SetPointH": 5000,

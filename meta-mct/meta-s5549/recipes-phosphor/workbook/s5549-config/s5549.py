@@ -42,5 +42,5 @@ ID_LOOKUP = {
 }
 
 PCH_CONFIG = {
-    'i2c_bus' : '5'
+    'i2c_bus' : '3'
 }

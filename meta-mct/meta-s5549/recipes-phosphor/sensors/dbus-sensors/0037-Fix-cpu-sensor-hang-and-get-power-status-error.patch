@@ -140,14 +140,14 @@ index a46265c..9e54185 100755
 +{
 +    conn->async_method_call(
 +        [](boost::system::error_code ec,
-+           const std::variant<int>& state) {
++           const std::variant<std::string>& state) {
 +            if (ec)
 +            {
 +                // we commonly come up before power control, we'll capture the
 +                // property change later
 +                return;
 +            }
-+            powerStatusOn = (1 == (std::get<int>(state))) ? true : false;
++            powerStatusOn = boost::ends_with(std::get<std::string>(state), "Running");
 +        },
 +        power::busname, power::path, properties::interface, properties::get,
 +        power::interface, power::property);
