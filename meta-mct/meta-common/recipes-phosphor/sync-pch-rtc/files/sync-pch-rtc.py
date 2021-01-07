@@ -15,15 +15,21 @@ def main():
     print("Sync BMC time with PCH RTC on I2C bus " + pch_bus+ "...")
 
     #print("start i2c access")
-    try: 
-        SEC = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0x9 | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
-    except: 
-        print("access RTC failed")
-        return 1
-    
-    SEC = SEC.strip()
-    MIN = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xa | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
-    MIN = MIN.strip()
+
+    while (1):
+        try:
+            SEC = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0x9 | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
+        except:
+            print("access RTC failed")
+            return 1
+        SEC = SEC.strip()
+        MIN = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xa | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
+        MIN = MIN.strip()
+        if(SEC == '59' and MIN == '59'):
+            time.sleep(1)
+        else:
+            break
+
     HOUR = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xb | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)
     HOUR = HOUR.strip()
     DAY = subprocess.check_output("/usr/sbin/i2cget -f -y " + pch_bus + " 0x44 0xd | awk 'BEGIN{FS=\"x\"}{print $2}'", shell=True)

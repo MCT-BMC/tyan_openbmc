@@ -1,0 +1,72 @@
+From 84f25e53fe594031ec130f920c5aa58ec00ac191 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 26 Oct 2020 17:56:33 +0800
+Subject: [PATCH] Implement the SEL log feature for platform event command
+
+---
+ src/sensorcommands.cpp | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/src/sensorcommands.cpp b/src/sensorcommands.cpp
+index b9a456d..1834d0a 100755
+--- a/src/sensorcommands.cpp
++++ b/src/sensorcommands.cpp
+@@ -362,6 +362,8 @@ ipmi_ret_t ipmiSensorWildcardHandler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+     return IPMI_CC_INVALID;
+ }
+ 
++
++
+ namespace meHealth
+ {
+ constexpr const char *busname = "xyz.openbmc_project.NodeManagerProxy";
+@@ -373,6 +375,12 @@ constexpr const char *warning = "warning";
+ constexpr const char *ok = "ok";
+ } // namespace meHealth
+ 
++static constexpr char const* ipmiSELService = "xyz.openbmc_project.Logging.IPMI";
++static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
++static constexpr char const* ipmiSELAddInterface = "xyz.openbmc_project.Logging.IPMI";
++
++static const std::string ipmiSELAddMessage = "SEL Entry";
++
+ static void setMeStatus(uint8_t eventData2, uint8_t eventData3, bool disable)
+ {
+     constexpr const std::array<uint8_t, 10> critical = {
+@@ -468,6 +476,33 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::message::Payload &p)
+         return ipmi::responseReqDataLenInvalid();
+     }
+ 
++    //MCT: Send this request to the SEL enrty service to log it as a SEL
++    std::vector<uint8_t> eventData(9, 0xFF);
++    uint8_t recordType = 0x02;
++    eventData[0] = generatorID;
++    eventData[1] = 0x00;
++    eventData[2] = evmRev;
++    eventData[3] = sensorType;
++    eventData[4] = sensorNum;
++    eventData[5] = eventType;
++    eventData[6] = eventData1;
++    eventData[7] = *eventData2;
++    eventData[8] = *eventData3;
++
++    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
++    sdbusplus::message::message writeSEL = dbus->new_method_call(
++        ipmiSELService, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAddOem");
++    writeSEL.append(ipmiSELAddMessage,  eventData, recordType);
++
++    try
++    {
++        auto ret = dbus->call(writeSEL);
++    }
++    catch (sdbusplus::exception_t& e)
++    {
++        std::cerr << "call IpmiSelAdd failed\n";
++    }
++
+     // Send this request to the Redfish hooks to log it as a Redfish message
+     // instead.  There is no need to add it to the SEL, so just return success.
+     intel_oem::ipmi::sel::checkRedfishHooks(
+-- 
+2.7.4
+

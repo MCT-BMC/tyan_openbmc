@@ -1,4 +1,4 @@
-From def74adf9b4cc5278933f091f6bbbfeb3a96772d Mon Sep 17 00:00:00 2001
+From 74da9f3e41ce5c40b0323ac41afa972577b63637 Mon Sep 17 00:00:00 2001
 From: "Henbin.Chang" <henbin-chang@mic.com.tw>
 Date: Wed, 6 Nov 2019 09:03:00 +0800
 Subject: [PATCH] Allow force update the same version image
@@ -9,12 +9,20 @@ prevent user from doing such update.
 
 This patch appends a random number after the version ID hash string to
 unblock such limitation.
+
+%% original patch: 0001-Allow-force-update-the-same-version-image.patch
 ---
- image_manager.cpp | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ image_manager.cpp | 10 +++++++++-
+ item_updater.cpp  |  4 ++--
+ version.cpp       |  2 +-
+ version.hpp       |  6 ++++--
+ 4 files changed, 16 insertions(+), 6 deletions(-)
+ mode change 100644 => 100755 item_updater.cpp
+ mode change 100644 => 100755 version.cpp
+ mode change 100644 => 100755 version.hpp
 
 diff --git a/image_manager.cpp b/image_manager.cpp
-index 5b2ff49..db89a07 100644
+index e132465..84c51b3 100644
 --- a/image_manager.cpp
 +++ b/image_manager.cpp
 @@ -9,6 +9,7 @@
@@ -25,7 +33,7 @@ index 5b2ff49..db89a07 100644
  #include <unistd.h>
  
  #include <algorithm>
-@@ -129,6 +130,13 @@ int Manager::processImage(const std::string& tarFilePath)
+@@ -174,6 +175,13 @@ int Manager::processImage(const std::string& tarFilePath)
      // Compute id
      auto id = Version::getId(version);
  
@@ -39,3 +47,80 @@ index 5b2ff49..db89a07 100644
      fs::path imageDirPath = std::string{IMG_UPLOAD_DIR};
      imageDirPath /= id;
  
+@@ -200,7 +208,7 @@ int Manager::processImage(const std::string& tarFilePath)
+     {
+         // Create Version object
+         auto versionPtr = std::make_unique<Version>(
+-            bus, objPath, version, purpose, imageDirPath.string(),
++            bus, objPath, version, id, purpose, imageDirPath.string(),
+             std::bind(&Manager::erase, this, std::placeholders::_1));
+         versionPtr->deleteObject =
+             std::make_unique<phosphor::software::manager::Delete>(bus, objPath,
+diff --git a/item_updater.cpp b/item_updater.cpp
+old mode 100644
+new mode 100755
+index 4f2b833..85836bd
+--- a/item_updater.cpp
++++ b/item_updater.cpp
+@@ -133,7 +133,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& msg)
+                                          activationState, associations)));
+ 
+         auto versionPtr = std::make_unique<VersionClass>(
+-            bus, path, version, purpose, filePath,
++            bus, path, version, versionId , purpose, filePath,
+             std::bind(&ItemUpdater::erase, this, std::placeholders::_1));
+         versionPtr->deleteObject =
+             std::make_unique<phosphor::software::manager::Delete>(bus, path,
+@@ -223,7 +223,7 @@ void ItemUpdater::processBMCImage()
+ 
+             // Create Version instance for this version.
+             auto versionPtr = std::make_unique<VersionClass>(
+-                bus, path, version, purpose, "",
++                bus, path, version, id, purpose, "",
+                 std::bind(&ItemUpdater::erase, this, std::placeholders::_1));
+             auto isVersionFunctional = versionPtr->isFunctional();
+             if (!isVersionFunctional)
+diff --git a/version.cpp b/version.cpp
+old mode 100644
+new mode 100755
+index 91f478b..2d148eb
+--- a/version.cpp
++++ b/version.cpp
+@@ -164,7 +164,7 @@ void Delete::delete_()
+ {
+     if (parent.eraseCallback)
+     {
+-        parent.eraseCallback(parent.getId(parent.version()));
++        parent.eraseCallback(parent.versionId());
+     }
+ }
+ 
+diff --git a/version.hpp b/version.hpp
+old mode 100644
+new mode 100755
+index f04cce2..31361a0
+--- a/version.hpp
++++ b/version.hpp
+@@ -72,8 +72,9 @@ class Version : public VersionInherit
+      * @param[in] callback       - The eraseFunc callback
+      */
+     Version(sdbusplus::bus::bus& bus, const std::string& objPath,
+-            const std::string& versionString, VersionPurpose versionPurpose,
+-            const std::string& filePath, eraseFunc callback) :
++            const std::string& versionString, const std::string& idString,
++            VersionPurpose versionPurpose, const std::string& filePath,
++            eraseFunc callback) :
+         VersionInherit(bus, (objPath).c_str(), true),
+         versionStr(versionString)
+     {
+@@ -82,6 +83,7 @@ class Version : public VersionInherit
+         // Set properties.
+         purpose(versionPurpose);
+         version(versionString);
++        versionId(idString);
+         path(filePath);
+         // Emit deferred signal.
+         emit_object_added();
+-- 
+2.7.4
+
