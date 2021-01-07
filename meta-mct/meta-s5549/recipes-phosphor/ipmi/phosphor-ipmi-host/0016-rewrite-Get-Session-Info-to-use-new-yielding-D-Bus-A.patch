@@ -1,0 +1,380 @@
+From e7e8b8166a1c0e352ee6e0e1daa76abbff228ed6 Mon Sep 17 00:00:00 2001
+From: Vernon Mauery <vernon.mauery@linux.intel.com>
+Date: Mon, 28 Oct 2019 16:00:34 -0700
+Subject: [PATCH] rewrite Get Session Info to use new yielding D-Bus API
+
+The new yielding API does not use try/catch, and has slightly different
+parameters which makes the change look bigger than it is.
+
+Tested:
+  Run ipmitool session info active
+    session handle                : 1
+    slot count                    : 45
+    active sessions               : 1
+    user id                       : 1
+    privilege level               : ADMINISTRATOR
+    session type                  : IPMIv2/RMCP+
+    channel number                : 0x01
+    console ip                    : 0.0.0.0
+    console mac                   : 00:00:00:00:00:00
+    console port                  : 54884
+
+  Console ip is reported as all zero due to a current netipmid bug.
+
+Signed-off-by: Vernon Mauery <vernon.mauery@linux.intel.com>
+Change-Id: Ia6574568c7f8863b3acffcf22e403c8be01d312a
+---
+ apphandler.cpp          | 251 ++++++++++++++++++++++++------------------------
+ include/ipmid/utils.hpp |  27 ++++++
+ 2 files changed, 152 insertions(+), 126 deletions(-)
+
+diff --git a/apphandler.cpp b/apphandler.cpp
+index 2430e8e..fdc2d67 100644
+--- a/apphandler.cpp
++++ b/apphandler.cpp
+@@ -1043,91 +1043,100 @@ uint8_t getSessionInfoRequestData(const ipmi::Context::ptr ctx,
+     return ipmi::ccSuccess;
+ }
+ 
+-uint8_t getSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
+-                        const std::string& service, const std::string& objPath,
+-                        uint8_t& sessionState)
++uint8_t getSessionState(ipmi::Context::ptr ctx, const std::string& service,
++                        const std::string& objPath, uint8_t& sessionState)
+ {
+-    try
+-    {
+-        sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
+-            *busp, service, objPath, session::sessionIntf, "State"));
+-    }
+-    catch (sdbusplus::exception::SdBusError& e)
++    boost::system::error_code ec = ipmi::getDbusProperty(
++        ctx, service, objPath, session::sessionIntf, "State", sessionState);
++    if (ec)
+     {
+         log<level::ERR>("Failed to fetch state property ",
+                         entry("SERVICE=%s", service.c_str()),
+                         entry("OBJECTPATH=%s", objPath.c_str()),
+                         entry("INTERFACE=%s", session::sessionIntf),
+-                        entry("ERRMSG=%s", e.what()));
++                        entry("ERRMSG=%s", ec.message().c_str()));
+         return ipmi::ccUnspecifiedError;
+     }
+-
+     return ipmi::ccSuccess;
+ }
+ 
+ static constexpr uint8_t macAddrLen = 6;
+-struct GetSessionInfoRes
+-{
+-    uint8_t sessionHandle;
+-    uint8_t totalSessionCount;
+-    uint8_t activeSessionCount;
+-    uint8_t userID;
+-    uint8_t privLevel;
+-    uint8_t channelNumber;
+-    uint32_t remoteIpAddr;
+-    std::array<uint8_t, macAddrLen> macAddr = {0};
+-    uint16_t remotePort;
+-};
++/** Alias SessionDetails - contain the optional information about an
++ *        RMCP+ session.
++ *
++ *  @param userID - uint6_t session user ID (0-63)
++ *  @param reserved - uint2_t reserved
++ *  @param privilege - uint4_t session privilege (0-5)
++ *  @param reserved - uint4_t reserved
++ *  @param channel - uint4_t session channel number
++ *  @param protocol - uint4_t session protocol
++ *  @param remoteIP - uint32_t remote IP address
++ *  @param macAddr - std::array<uint8_t, 6> mac address
++ *  @param port - uint16_t remote port
++ */
++using SessionDetails =
++    std::tuple<uint2_t, uint6_t, uint4_t, uint4_t, uint4_t, uint4_t, uint32_t,
++               std::array<uint8_t, macAddrLen>, uint16_t>;
+ 
+-uint8_t
+-    fillGetSessionInfoRes(std::shared_ptr<sdbusplus::asio::connection>& busp,
+-                          const std::string& service,
+-                          const std::string& objPath,
+-                          struct GetSessionInfoRes& resp, uint8_t& sessionState)
++/** @brief get session details for a given session
++ *
++ *  @param[in] ctx - ipmi::Context pointer for accessing D-Bus
++ *  @param[in] service - D-Bus service name to fetch details from
++ *  @param[in] objPath - D-Bus object path for session
++ *  @param[out] sessionHandle - return session handle for session
++ *  @param[out] sessionState - return session state for session
++ *  @param[out] details - return a SessionDetails tuple containing other
++ *                        session info
++ *  @return - ipmi::Cc success or error code
++ */
++ipmi::Cc getSessionDetails(ipmi::Context::ptr ctx, const std::string& service,
++                           const std::string& objPath, uint8_t& sessionHandle,
++                           uint8_t& sessionState, SessionDetails& details)
+ {
+-    try
+-    {
+-        ipmi::PropertyMap sessionProps = ipmi::getAllDbusProperties(
+-            *busp, service, objPath, session::sessionIntf);
++    ipmi::PropertyMap sessionProps;
++    boost::system::error_code ec = ipmi::getAllDbusProperties(
++        ctx, service, objPath, session::sessionIntf, sessionProps);
+ 
+-        sessionState = std::get<uint8_t>(sessionProps.at("State"));
+-        if (sessionState == static_cast<uint8_t>(session::State::active))
+-        {
+-            resp.sessionHandle =
+-                std::get<uint8_t>(sessionProps["SessionHandle"]);
+-            resp.userID = std::get<uint8_t>(sessionProps["UserID"]);
+-            resp.privLevel =
+-                std::get<uint8_t>(sessionProps["CurrentPrivilege"]);
+-            resp.channelNumber = std::get<uint8_t>(sessionProps["ChannelNum"]);
+-            resp.remoteIpAddr =
+-                std::get<uint32_t>(sessionProps["RemoteIPAddr"]);
+-            resp.remotePort = std::get<uint16_t>(sessionProps["RemotePort"]);
+-        }
+-    }
+-    catch (sdbusplus::exception::SdBusError& e)
++    if (ec)
+     {
+         log<level::ERR>("Failed to fetch state property ",
+                         entry("SERVICE=%s", service.c_str()),
+                         entry("OBJECTPATH=%s", objPath.c_str()),
+                         entry("INTERFACE=%s", session::sessionIntf),
+-                        entry("ERRMSG=%s", e.what()));
++                        entry("ERRMSG=%s", ec.message().c_str()));
+         return ipmi::ccUnspecifiedError;
+     }
+ 
++    sessionState = ipmi::mappedVariant<uint8_t>(
++        sessionProps, "State", static_cast<uint8_t>(session::State::inactive));
++    if (sessionState == static_cast<uint8_t>(session::State::active))
++    {
++        sessionHandle =
++            ipmi::mappedVariant<uint8_t>(sessionProps, "SessionHandle", 0);
++        std::get<0>(details) =
++            ipmi::mappedVariant<uint8_t>(sessionProps, "UserID", 0xff);
++        // std::get<1>(details) = 0; // (default constructed to 0)
++        std::get<2>(details) =
++            ipmi::mappedVariant<uint8_t>(sessionProps, "CurrentPrivilege", 0);
++        // std::get<3>(details) = 0; // (default constructed to 0)
++        std::get<4>(details) =
++            ipmi::mappedVariant<uint8_t>(sessionProps, "ChannelNum", 0xff);
++        constexpr uint4_t rmcpPlusProtocol = 1;
++        std::get<5>(details) = rmcpPlusProtocol;
++        std::get<6>(details) =
++            ipmi::mappedVariant<uint32_t>(sessionProps, "RemoteIPAddr", 0);
++        // std::get<7>(details) = {{0}}; // default constructed to all 0
++        std::get<8>(details) =
++            ipmi::mappedVariant<uint16_t>(sessionProps, "RemotePort", 0);
++    }
++
+     return ipmi::ccSuccess;
+ }
+ 
+-ipmi::RspType<
+-    uint8_t,                           // session handle,
+-    uint8_t,                           // total session count
+-    uint8_t,                           // active session count
+-    std::optional<std::tuple<uint8_t,  // user ID
+-                             uint8_t,  // privilege level
+-                             uint8_t,  // channel number
+-                             uint32_t, // remote ip address,
+-                             std::array<uint8_t, macAddrLen>, // mac address
+-                             uint16_t                         // remote port
+-                             >>>
++ipmi::RspType<uint8_t, // session handle,
++              uint8_t, // total session count
++              uint8_t, // active session count
++              std::optional<SessionDetails>>
+     ipmiAppGetSessionInfo(ipmi::Context::ptr ctx, uint8_t sessionIndex,
+                           ipmi::message::Payload& payload)
+ {
+@@ -1143,87 +1152,77 @@ ipmi::RspType<
+     {
+         return ipmi::response(completionCode);
+     }
+-    struct GetSessionInfoRes res = {0};
+-    res.totalSessionCount = getTotalSessionCount();
+-    res.activeSessionCount = 0;
+-    auto busp = getSdBus();
++    ipmi::ObjectTree objectTree;
++    boost::system::error_code ec = ipmi::getAllDbusObjects(
++        ctx, session::sessionManagerRootPath, session::sessionIntf, objectTree);
++    if (ec)
++    {
++        log<level::ERR>("Failed to fetch object from dbus",
++                        entry("INTERFACE=%s", session::sessionIntf),
++                        entry("ERRMSG=%s", ec.message().c_str()));
++        return ipmi::responseUnspecifiedError();
++    }
+ 
+-    try
++    uint8_t totalSessionCount = getTotalSessionCount();
++    uint8_t activeSessionCount = 0;
++    uint8_t sessionHandle = session::defaultSessionHandle;
++    std::optional<SessionDetails> maybeDetails;
++    uint8_t index = 0;
++    for (auto& objectTreeItr : objectTree)
+     {
+-        uint8_t index = 0;
+-        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
+-            *busp, session::sessionManagerRootPath, session::sessionIntf);
++        uint32_t sessionId = 0;
++        std::string objectPath = objectTreeItr.first;
+ 
+-        for (auto& objectTreeItr : objectTree)
++        if (!parseCloseSessionInputPayload(objectPath, sessionId,
++                                           sessionHandle))
+         {
+-            uint32_t sessionId = 0;
+-            uint8_t sessionHandle = session::defaultSessionHandle;
+-            std::string objectPath = objectTreeItr.first;
+-
+-            if (!parseCloseSessionInputPayload(objectPath, sessionId,
+-                                               sessionHandle))
+-            {
+-                continue;
+-            }
+-            index++;
+-            auto& serviceMap = objectTreeItr.second;
+-            auto itr = serviceMap.begin();
++            continue;
++        }
++        index++;
++        auto& serviceMap = objectTreeItr.second;
++        auto itr = serviceMap.begin();
+ 
+-            if (serviceMap.size() != 1)
+-            {
+-                return ipmi::responseUnspecifiedError();
+-            }
++        if (serviceMap.size() != 1)
++        {
++            return ipmi::responseUnspecifiedError();
++        }
+ 
+-            std::string service = itr->first;
+-            uint8_t sessionState = 0;
+-            completionCode =
+-                getSessionState(busp, service, objectPath, sessionState);
+-            if (completionCode)
+-            {
+-                return ipmi::response(completionCode);
+-            }
++        std::string service = itr->first;
++        uint8_t sessionState = 0;
++        completionCode =
++            getSessionState(ctx, service, objectPath, sessionState);
++        if (completionCode)
++        {
++            return ipmi::response(completionCode);
++        }
+ 
+-            if (sessionState == static_cast<uint8_t>(session::State::active))
+-            {
+-                res.activeSessionCount++;
+-            }
++        if (sessionState == static_cast<uint8_t>(session::State::active))
++        {
++            activeSessionCount++;
++        }
+ 
+-            if (index != sessionIndex && reqSessionId != sessionId &&
+-                reqSessionHandle != sessionHandle)
+-            {
+-                continue;
+-            }
++        if (index != sessionIndex && reqSessionId != sessionId &&
++            reqSessionHandle != sessionHandle)
++        {
++            continue;
++        }
+ 
+-            completionCode =
+-                fillGetSessionInfoRes(busp, service, objectPath, res, state);
++        SessionDetails details{};
++        completionCode = getSessionDetails(ctx, service, objectPath,
++                                           sessionHandle, state, details);
+ 
+-            if (completionCode)
+-            {
+-                return ipmi::response(completionCode);
+-            }
++        if (completionCode)
++        {
++            return ipmi::response(completionCode);
+         }
++        maybeDetails = std::move(details);
+     }
+ 
+-    catch (sdbusplus::exception::SdBusError& e)
+-    {
+-        log<level::ERR>("Failed to fetch object from dbus",
+-                        entry("INTERFACE=%s", session::sessionIntf),
+-                        entry("ERRMSG=%s", e.what()));
+-        return ipmi::responseUnspecifiedError();
+-    }
+-
+-    if (state == static_cast<uint8_t>(session::State::active))
+-    {
+-        return ipmi::responseSuccess(
+-            res.sessionHandle, res.totalSessionCount, res.activeSessionCount,
+-            std::make_tuple(res.userID, res.privLevel, res.channelNumber,
+-                            res.remoteIpAddr, res.macAddr, res.remotePort));
+-    }
+-    else if (state == static_cast<uint8_t>(session::State::tearDownInProgress))
++    if (state == static_cast<uint8_t>(session::State::active) ||
++        state == static_cast<uint8_t>(session::State::tearDownInProgress))
+     {
+-        res.sessionHandle = 0;
+-        return ipmi::responseSuccess(res.sessionHandle, res.totalSessionCount,
+-                                     res.activeSessionCount, std::nullopt);
++        return ipmi::responseSuccess(sessionHandle, totalSessionCount,
++                                     activeSessionCount, maybeDetails);
+     }
+ 
+     return ipmi::responseInvalidFieldRequest();
+diff --git a/include/ipmid/utils.hpp b/include/ipmid/utils.hpp
+index cd72ec0..b8b59bf 100644
+--- a/include/ipmid/utils.hpp
++++ b/include/ipmid/utils.hpp
+@@ -376,6 +376,33 @@ boost::system::error_code getAllAncestors(Context::ptr ctx,
+ 
+ /********* End co-routine yielding alternatives ***************/
+ 
++/** @brief Retrieve the value from map of variants,
++ *         returning a default if the key does not exist or the
++ *         type of the value does not match the expected type
++ *
++ *  @tparam T - type of expected value to return
++ *  @param[in] props - D-Bus propery map (Map of variants)
++ *  @param[in] name - key name of property to fetch
++ *  @param[in] defaultValue - default value to return on error
++ *  @return - value from propery map at name, or defaultValue
++ */
++template <typename T>
++T mappedVariant(const ipmi::PropertyMap& props, const std::string& name,
++                const T& defaultValue)
++{
++    auto item = props.find(name);
++    if (item == props.end())
++    {
++        return defaultValue;
++    }
++    const T* prop = std::get_if<T>(&item->second);
++    if (!prop)
++    {
++        return defaultValue;
++    }
++    return *prop;
++}
++
+ /** @struct VariantToDoubleVisitor
+  *  @brief Visitor to convert variants to doubles
+  *  @details Performs a static cast on the underlying type
+-- 
+2.7.4
+

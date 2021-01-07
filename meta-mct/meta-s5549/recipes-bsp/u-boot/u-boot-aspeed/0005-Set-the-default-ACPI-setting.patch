@@ -1,0 +1,42 @@
+From 063ac297cde68541534ddb47896d9c323de67536 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 17 Dec 2020 17:25:52 +0800
+Subject: [PATCH] Set the default ACPI setting
+
+---
+ board/aspeed/ast-g5/ast-g5.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/board/aspeed/ast-g5/ast-g5.c b/board/aspeed/ast-g5/ast-g5.c
+index b687436..7256691 100755
+--- a/board/aspeed/ast-g5/ast-g5.c
++++ b/board/aspeed/ast-g5/ast-g5.c
+@@ -39,6 +39,16 @@ void Set_Default_UART_Route(void)
+     *(volatile ulong *)(0x1E78909C) = 0x1400000 ;
+ }
+ 
++/*--------------------------------------------------------------------
++ * @fn Set Default ACPI Setting
++ * @brief Set Default ACPI Setting
++ *--------------------------------------------------------------------*/
++void Set_Default_ACPI_Setting(void)
++{
++    puts("Set Default ACPI setting to disable\n");
++    *(volatile ulong *)(0x1E6E2000) = 0x1688A8A8;
++    *(volatile ulong *)(0x1E6E207C) = 0x00080000;
++}
+ 
+ int board_init(void)
+ {
+@@ -47,7 +57,7 @@ int board_init(void)
+ 
+ 	Light_BMC_Heartbeat_LED();
+     Set_Default_UART_Route();
+-    
++	Set_Default_ACPI_Setting();
+ 	return 0;
+ }
+ 
+-- 
+2.7.4
+

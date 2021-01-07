@@ -1,0 +1,137 @@
+From 2be12fa2d6f6907251fe2edb7a831a261c4c4e30 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 11 Mar 2020 18:56:40 +0800
+Subject: [PATCH 1/1] Detect host status by pgood
+
+---
+ host_check_main_mct.cpp | 104 ++++++++++++++++++++++++++++++++++++++++
+ meson.build             |   2 +-
+ 2 files changed, 105 insertions(+), 1 deletion(-)
+ create mode 100644 host_check_main_mct.cpp
+
+diff --git a/host_check_main_mct.cpp b/host_check_main_mct.cpp
+new file mode 100644
+index 0000000..1638733
+--- /dev/null
++++ b/host_check_main_mct.cpp
+@@ -0,0 +1,104 @@
++#include <cstdlib>
++#include <unistd.h>
++#include <iostream>
++#include <fstream>
++#include <cstdio>
++#include <sdbusplus/bus.hpp>
++#include <phosphor-logging/log.hpp>
++#include <config.h>
++
++using namespace phosphor::logging;
++
++bool hostRunning = false;
++
++// Determine power status by getting pgood
++void determineInitialState()
++{
++    using sdbusplus::exception::SdBusError;
++
++    sdbusplus::message::variant<int> pgood = -1;
++	int save_pgood = -1;
++    auto bus = sdbusplus::bus::new_default();
++    auto method = bus.new_method_call(
++        "org.openbmc.control.Power", "/org/openbmc/control/power0",
++        "org.freedesktop.DBus.Properties", "Get");
++
++    method.append("org.openbmc.control.Power", "pgood");
++    try
++    {
++        auto reply = bus.call(method);
++        if (reply.is_method_error())
++        {
++            log<level::ERR>(
++                "Error in response message - could not get initial pgood");
++            goto fail;
++        }
++
++        try
++        {
++            reply.read(pgood);
++        }
++        catch (const SdBusError& e)
++        {
++            log<level::ERR>("Error in bus response - bad encoding of pgood",
++                            entry("ERROR=%s", e.what()),
++                            entry("REPLY_SIG=%s", reply.get_signature()));
++            goto fail;
++        }
++		save_pgood = std::get<int>(pgood);
++        if (save_pgood == 1)
++        {
++            log<level::INFO>("Initial Host State will be On");
++            hostRunning = true;
++            return;
++        }
++    }
++    catch (const SdBusError& e)
++    {
++        // It's acceptable for the pgood state service to not be available
++        // since it will notify us of the pgood state when it comes up.
++        if (e.name() != nullptr &&
++            strcmp("org.freedesktop.DBus.Error.ServiceUnknown", e.name()) == 0)
++        {
++            goto fail;
++        }
++
++        // Only log for unexpected error types.
++        log<level::ERR>("Error performing call to get pgood",
++                        entry("ERROR=%s", e.what()));
++        goto fail;
++    }
++
++fail:
++    log<level::INFO>("Initial Host State will be Off");
++    hostRunning = false;
++
++    return;
++}
++
++int main(int argc, char* argv[])
++{
++    log<level::INFO>("Check if host is running");
++
++    determineInitialState();    
++
++    // If host running then create file
++    if (hostRunning)
++    {
++        log<level::INFO>("Host is running!");
++        // Create file for host instance and create in filesystem to indicate
++        // to services that host is running
++        auto size = std::snprintf(nullptr, 0, HOST_RUNNING_FILE, 0);
++        size++; // null
++        std::unique_ptr<char[]> buf(new char[size]);
++        std::snprintf(buf.get(), size, HOST_RUNNING_FILE, 0);
++        std::ofstream outfile(buf.get());
++        outfile.close();
++    }
++    else
++    {
++        log<level::INFO>("Host is not running!");
++    }
++
++    return 0;
++}
+diff --git a/meson.build b/meson.build
+index f4eb4bb..2f83960 100644
+--- a/meson.build
++++ b/meson.build
+@@ -90,7 +90,7 @@ executable('phosphor-discover-system-state',
+ )
+ 
+ executable('phosphor-host-check',
+-            'host_check_main.cpp',
++            'host_check_main_mct.cpp',
+             dependencies: [
+             sdbusplus, phosphorlogging
+             ],
+-- 
+2.22.0
+

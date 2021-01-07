@@ -1,0 +1,107 @@
+From 1204b69b8d10ac7bb8637a7dfb987f7d3fc363b1 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Mon, 14 Sep 2020 14:24:02 +0800
+Subject: [PATCH] fixed increase and decrease refresh time
+
+---
+ pid/fsccontroller.cpp | 26 +++++++++++++-------------
+ pid/fsccontroller.hpp |  2 +-
+ 2 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/pid/fsccontroller.cpp b/pid/fsccontroller.cpp
+index 9a92bb5..0fb0087 100755
+--- a/pid/fsccontroller.cpp
++++ b/pid/fsccontroller.cpp
+@@ -177,7 +177,7 @@ void FscController::process(void)
+     {
+         lastOutput = floorOutput;
+         output = lastOutput;
+-        delayTime = 0;
++        count = 0;
+     }
+     else
+     {
+@@ -206,58 +206,58 @@ void FscController::process(void)
+                 output = lastOutput + (input - info.setPointH)*2;
+             }
+             lastInput = input;
+-            delayTime = 0;
++            count = 0;
+         }
+         else
+         {
+-            if ((updateDir == 1) && (delayTime >= 5))
++            if (updateDir == 1)
+             {
+-                if (input > info.setPointH)
++                if ((input > info.setPointH) && (count >= 2))
+                 {
+                     output = lastOutput + (input - info.setPointH)*2;
+                     if (output >= maxDuty)
+                     {
+                         output = maxDuty;
+                     }
+-                    delayTime = 0;
++                    count = 0;
+                 }
+                 else if (input < info.setPointL)
+                 {
+                     updateDir = 2;
+                     output = lastOutput - (info.setPointL - input)*2;
+-                    delayTime = 0;
++                    count = 0;
+                 }
+                 lastInput = input;
+             }
+-            else if ((updateDir == 2) && (delayTime >= 30))
++            else if (updateDir == 2)
+             {
+-                if (input < info.setPointL)
++                if ((input < info.setPointL) && (count >= 14))
+                 {
+                     output = lastOutput - (info.setPointL - input)*2;
+                     if (output <= floorOutput)
+                     {
+                         output = floorOutput;
+                     }
+-                    delayTime = 0;
++                    count = 0;
+                 }
+                 else if (input > info.setPointH)
+                 {
+                     updateDir = 1;
+                     output = lastOutput + (input - info.setPointH)*2;
+-                    delayTime = 0;
++                    count = 0;
+                 }
+                 lastInput = input;
+             }
+         }
+     }
+ 
+-    if (delayTime > 100)
++    if (count > 100)
+     {
+-        delayTime = 0;
++        count = 0;
+     }
+     else
+     {
+-        delayTime += 1;
++        count += 1;
+     }
+ 
+     lastOutput = output;
+diff --git a/pid/fsccontroller.hpp b/pid/fsccontroller.hpp
+index f67cb0b..a06c88c 100755
+--- a/pid/fsccontroller.hpp
++++ b/pid/fsccontroller.hpp
+@@ -53,7 +53,7 @@ class FscController : public Controller
+     double lastInput = std::numeric_limits<double>::quiet_NaN();
+     double lastOutput = std::numeric_limits<double>::quiet_NaN();
+     double floorOutput = std::numeric_limits<double>::quiet_NaN();
+-    double delayTime = std::numeric_limits<double>::quiet_NaN();
++    double count = std::numeric_limits<double>::quiet_NaN();
+     double updateDir = std::numeric_limits<double>::quiet_NaN();
+     double maxDuty = std::numeric_limits<double>::quiet_NaN();
+     double tcontrol = std::numeric_limits<double>::quiet_NaN();

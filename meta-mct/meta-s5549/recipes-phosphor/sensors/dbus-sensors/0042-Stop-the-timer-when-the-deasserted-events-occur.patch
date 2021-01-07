@@ -1,0 +1,106 @@
+From 92ed8f07f0b5a30034017ca75b1ef6da36942824 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 16 Jun 2020 11:07:16 +0800
+Subject: [PATCH 1/1] Stop the timer when the deasserted events occur
+
+---
+ include/Thresholds.hpp | 42 +++++++++++++++++++++++++++++++++++++-----
+ src/Thresholds.cpp     |  1 +
+ 2 files changed, 38 insertions(+), 5 deletions(-)
+ mode change 100644 => 100755 include/Thresholds.hpp
+
+diff --git a/include/Thresholds.hpp b/include/Thresholds.hpp
+old mode 100644
+new mode 100755
+index 00df68c..59aa58a
+--- a/include/Thresholds.hpp
++++ b/include/Thresholds.hpp
+@@ -45,7 +45,15 @@ struct Threshold
+ void assertThresholds(Sensor* sensor, thresholds::Level level,
+                       thresholds::Direction direction, bool assert);
+ 
+-using TimerPair = std::pair<bool, boost::asio::deadline_timer>;
++struct TimerUsed
++{
++    bool used;
++    Level level;
++    Direction direction;
++};
++
++using TimerPair = std::pair<struct TimerUsed, boost::asio::deadline_timer>;
++
+ 
+ struct ThresholdTimer
+ {
+@@ -55,14 +63,32 @@ struct ThresholdTimer
+     {
+     }
+ 
++    void stopTimer(const Threshold& threshold)
++        {
++            struct TimerUsed timerUsed = {};
++            for (TimerPair& timer : timers)
++            {
++                timerUsed = timer.first;
++                if (timerUsed.used)
++                {
++                    if ((timerUsed.level == threshold.level) &&
++                        (timerUsed.direction == threshold.direction))
++                    {
++                        timer.second.cancel();
++                    }
++                }
++            }
++        }
++
+     void startTimer(const Threshold& threshold)
+     {
++        struct TimerUsed timerUsed = {};
+         constexpr const size_t waitTime = 5;
+         TimerPair* pair = nullptr;
+ 
+         for (TimerPair& timer : timers)
+         {
+-            if (!timer.first)
++            if (!timer.first.used)
+             {
+                 pair = &timer;
+                 break;
+@@ -70,13 +96,19 @@ struct ThresholdTimer
+         }
+         if (pair == nullptr)
+         {
+-            pair = &timers.emplace_back(false, boost::asio::deadline_timer(io));
++            pair = &timers.emplace_back(timerUsed,
++                                        boost::asio::deadline_timer(io));
++
+         }
+-        pair->first = true;
++        pair->first.used = true;
++        pair->first.level = threshold.level;
++        pair->first.direction = threshold.direction;
++
+         pair->second.expires_from_now(boost::posix_time::seconds(waitTime));
+         pair->second.async_wait(
+             [this, pair, threshold](boost::system::error_code ec) {
+-                pair->first = false;
++                pair->first.used = false;
++
+ 
+                 if (ec == boost::asio::error::operation_aborted)
+                 {
+diff --git a/src/Thresholds.cpp b/src/Thresholds.cpp
+index c6bec8b..1fc1e8e 100755
+--- a/src/Thresholds.cpp
++++ b/src/Thresholds.cpp
+@@ -342,6 +342,7 @@ void checkThresholdsPowerDelay(Sensor* sensor, ThresholdTimer& thresholdTimer)
+         }
+         else
+         {
++            thresholdTimer.stopTimer(threshold);
+             assertThresholds(sensor, threshold.level, threshold.direction,
+                              false);
+         }
+-- 
+2.26.2
+

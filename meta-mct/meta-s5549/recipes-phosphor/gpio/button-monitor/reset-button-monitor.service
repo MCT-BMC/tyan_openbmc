@@ -1,0 +1,12 @@
+[Unit]
+Description="Reset Button Monitor"
+Wants=gpio-initial.service
+After=gpio-initial.service
+
+[Service]
+Restart=always
+ExecStart=/usr/sbin/reset-button-monitor
+SyslogIdentifier=reset-button-monitor
+
+[Install]
+RequiredBy={SYSTEMD_DEFAULT_TARGET}

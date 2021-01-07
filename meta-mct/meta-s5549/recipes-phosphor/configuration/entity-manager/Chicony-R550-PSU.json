@@ -1,0 +1,157 @@
+[
+     {
+        "Exposes": [
+            {
+                "Address": "0x58",
+                "Bus": "$bus",
+                "Name": "PSU0",
+                "Labels": ["pin", "pout1", "vin", "vout1", "iin", "iout1", "temp1", "fan1"],
+                "pin_Max": 1500,
+                "pin_Min": 0,
+                "pout1_Max": 1500,
+                "pout1_Min": 0,
+                "vin_Max": 300,
+                "vin_Min": 0,
+                "vout1_Max": 20,
+                "vout1_Min": 0,
+                "iin_Max": 15,
+                "iin_Min": 0,
+                "iout1_Max": 90,
+                "iout1_Min": 0,
+                "temp1_Max": 127,
+                "temp1_Min": -127,
+                "fan1_Max": 30000,
+                "fan1_Min": 0,
+                "PowerStates": [
+                    {
+                        "Label": "pin",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "pout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "vin",
+                        "PowerState": "Always"
+                    },
+                    {
+                        "Label": "vout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "iin",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "iout1",
+                        "PowerState": "On"
+                    },
+                    {
+                        "Label": "temp1",
+                        "PowerState": "Always"
+                    },
+                    {
+                        "Label": "fan1",
+                        "PowerState": "Always"
+                    }
+                ],
+                "Thresholds": [
+                    {
+                        "Direction": "greater than",
+                        "Label": "pin",
+                        "Name": "upper non critical",
+                        "Severity": 0,
+                        "Value": 605
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "pout1",
+                        "Name": "upper non critical",
+                        "Severity": 0,
+                        "Value": 550
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "vin",
+                        "Name": "upper non critical",
+                        "Severity": 0,
+                        "Value": 264
+                    },
+                    {
+                        "Direction": "less than",
+                        "Label": "vin",
+                        "Name": "lower non critical",
+                        "Severity": 0,
+                        "Value": 90
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "vout1",
+                        "Name": "upper critical",
+                        "Severity": 1,
+                        "Value": 12.809
+                    },
+                    {
+                        "Direction": "less than",
+                        "Label": "vout1",
+                        "Name": "lower critical",
+                        "Severity": 1,
+                        "Value": 11.59
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "iout1",
+                        "Name": "upper critical",
+                        "Severity": 1,
+                        "Value": 63.75
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "iout1",
+                        "Name": "upper non critical",
+                        "Severity": 0,
+                        "Value": 46.75
+                    },
+                    {
+                        "Direction": "greater than",
+                        "Label": "temp1",
+                        "Name": "upper non critical",
+                        "Severity": 0,
+                        "Value": 55
+                    },
+                    {
+                        "Direction": "less than",
+                        "Label": "temp1",
+                        "Name": "lower non critical",
+                        "Severity": 0,
+                        "Value": 0
+                    },
+                    {
+                        "Direction": "less than",
+                        "Label": "fan1",
+                        "Name": "lower critical",
+                        "Severity": 1,
+                        "Value": 1500
+                    }
+                ],
+                "Type": "pmbus"
+            },
+            {
+                "Address": "$address",
+                "Bus": "$bus",
+                "Name": "Chicony R550 PSU FRU",
+                "Type": "EEPROM"
+            }
+        ],
+        "Name": "Chicony R550 PSU 1",
+        "Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': '.*R550*'})",
+        "Type": "PowerSupply",
+        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+            "Manufacturer": "$BOARD_MANUFACTURER",
+            "Model": "$BOARD_PRODUCT_NAME",
+            "PartNumber": "$BOARD_PART_NUMBER",
+            "SerialNumber": "$BOARD_SERIAL_NUMBER"
+        }
+    }
+]

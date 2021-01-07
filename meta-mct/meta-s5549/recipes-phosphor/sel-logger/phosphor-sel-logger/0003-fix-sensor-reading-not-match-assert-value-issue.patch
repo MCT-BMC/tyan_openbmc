@@ -1,0 +1,31 @@
+From c699b3b59abe4000f4a5d870523f4d3902fea2cb Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 16 Jun 2020 10:29:23 +0800
+Subject: [PATCH 1/1] fix sensor reading not match assert value issue
+
+---
+ include/threshold_event_monitor.hpp | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/include/threshold_event_monitor.hpp b/include/threshold_event_monitor.hpp
+index 49331e3..e5681ca 100755
+--- a/include/threshold_event_monitor.hpp
++++ b/include/threshold_event_monitor.hpp
+@@ -157,7 +157,13 @@ inline static sdbusplus::bus::match::match startThresholdEventMonitor(
+             min = std::visit(ipmi::VariantToDoubleVisitor(), findMin->second);
+         }
+         double sensorVal = 0;
+-        auto findVal = sensorValue.find("Value");
++        //auto findVal = sensorValue.find("Value");
++        std::string valStr = (assert) ? "ValueAssert" : "Value";
++        auto findVal = sensorValue.find(valStr);
++        if (findVal == sensorValue.end())
++        {
++            findVal = sensorValue.find("Value");
++        }
+         if (findVal != sensorValue.end())
+         {
+             sensorVal =
+-- 
+2.26.2
+

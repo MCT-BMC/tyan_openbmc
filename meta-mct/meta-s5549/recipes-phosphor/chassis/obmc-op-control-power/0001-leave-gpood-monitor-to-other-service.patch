@@ -1,0 +1,74 @@
+From e79640fed82f72df4e6e7b5feddbfaf482a230e0 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 4 Feb 2020 19:40:46 +0800
+Subject: [PATCH] leave gpood monitor to other service
+
+---
+ op-pwrctl/power_control_obj.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+ mode change 100644 => 100755 op-pwrctl/power_control_obj.c
+
+diff --git a/power_control_obj.c b/power_control_obj.c
+old mode 100644
+new mode 100755
+index ada9b3b..057c80f
+--- a/power_control_obj.c
++++ b/power_control_obj.c
+@@ -29,6 +29,7 @@ time_t pgood_timeout_start = 0;
+ static gboolean
+ poll_pgood(gpointer user_data)
+ {
++	return TRUE;
+ 	ControlPower *control_power = object_get_control_power((Object*)user_data);
+ 	Control* control = object_get_control((Object*)user_data);
+ 
+@@ -57,7 +58,8 @@ poll_pgood(gpointer user_data)
+ 		gpio_close(&g_gpio_configs.power_gpio.power_good_in);
+ 		g_print("ERROR PowerControl: GPIO open error (gpio=%s,rc=%d)\n",
+ 				g_gpio_configs.power_gpio.power_good_in.name, rc);
+-		return FALSE;
++		//Mitac, don't stop the polling
++		return true;
+ 	}
+ 	rc = gpio_read(&g_gpio_configs.power_gpio.power_good_in, &pgood_state);
+ 	gpio_close(&g_gpio_configs.power_gpio.power_good_in);
+@@ -133,7 +135,8 @@ poll_pgood(gpointer user_data)
+ 		g_print("ERROR PowerControl: GPIO read error (gpio=%s,rc=%d)\n",
+ 				g_gpio_configs.power_gpio.power_good_in.name, rc);
+ 		//return false so poll won't get called anymore
+-		return FALSE;
++		//Mitac, don't stop the polling anyhow or the entire state management system will be ruined.
++		return true;
+ 	}
+ 	//pgood is not at desired state yet
+ 	if(pgood_state != control_power_get_state(control_power) &&
+@@ -368,10 +371,12 @@ set_up_gpio(PowerGpio *power_gpio, ControlPower* control_power)
+ 			error = rc;
+ 		}
+ 	}
++#if 0 //leave to gpiomonitor	
+ 	rc = gpio_get_params(&power_gpio->power_good_in);
+ 	if(rc != GPIO_OK) {
+ 		error = rc;
+ 	}
++#endif	
+ 	for(int i = 0; i < power_gpio->num_power_up_outs; i++) {
+ 		rc = gpio_get_params(&power_gpio->power_up_outs[i]);
+ 		if(rc != GPIO_OK) {
+@@ -392,7 +397,7 @@ set_up_gpio(PowerGpio *power_gpio, ControlPower* control_power)
+ 	}
+ 
+ 	gpio_inits_done();
+-
++#if 0 //leave to gpiomonitor
+ 	rc = gpio_open(&power_gpio->power_good_in, 0);
+ 	if(rc != GPIO_OK) {
+ 		gpio_close(&power_gpio->power_good_in);
+@@ -407,6 +412,7 @@ set_up_gpio(PowerGpio *power_gpio, ControlPower* control_power)
+ 	control_power_set_pgood(control_power, pgood_state);
+ 	control_power_set_state(control_power, pgood_state);
+ 	g_print("Pgood state: %d\n", pgood_state);
++#endif
+ 
+ 	return error;
+ }

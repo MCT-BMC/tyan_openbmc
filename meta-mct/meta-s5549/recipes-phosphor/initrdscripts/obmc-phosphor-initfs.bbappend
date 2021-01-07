@@ -1,0 +1,1 @@
+FILESEXTRAPATHS_prepend_s5549 := "${THISDIR}/${PN}:"

@@ -1,0 +1,27 @@
+[
+     {
+        "Exposes": [
+            {
+                "Address": "0x58",
+                "Bus": "$bus",
+                "Name": "PSU0",
+                "Type": "pmbus"
+            },
+            {
+                "Address": "$address",
+                "Bus": "$bus",
+                "Name": "Delta DPS-650AB PSU FRU",
+                "Type": "EEPROM"
+            }
+        ],
+        "Name": "Delta DPS-650AB PSU 1",
+		"Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': '.*DPS-650*'})",
+        "Type": "PowerSupply",
+        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+            "Manufacturer": "$BOARD_MANUFACTURER",
+            "Model": "$BOARD_PRODUCT_NAME",
+            "PartNumber": "$BOARD_PART_NUMBER",
+            "SerialNumber": "$BOARD_SERIAL_NUMBER"
+        }
+    }
+]

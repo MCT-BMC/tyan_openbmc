@@ -1,0 +1,25 @@
+From f119fb599427c84ae08562e6c1d599e2d251afd9 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 5 May 2020 15:54:31 +0800
+Subject: [PATCH] Register all of dimm sensors when initializing
+
+---
+ drivers/hwmon/peci-dimmtemp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/hwmon/peci-dimmtemp.c b/drivers/hwmon/peci-dimmtemp.c
+index 45eabd2..0ff37d2 100644
+--- a/drivers/hwmon/peci-dimmtemp.c
++++ b/drivers/hwmon/peci-dimmtemp.c
+@@ -233,7 +233,7 @@ static int check_populated_dimms(struct peci_dimmtemp *priv)
+ 		}
+ 
+ 		for (dimm_idx = 0; dimm_idx < dimm_idx_max; dimm_idx++)
+-			if (cfg_data[dimm_idx])
++			// if (cfg_data[dimm_idx])
+ 				priv->dimm_mask |= BIT(chan_rank *
+ 						       dimm_idx_max +
+ 						       dimm_idx);
+-- 
+2.7.4
+

@@ -1,0 +1,62 @@
+From 75126145f1f228f6ded8dd5ee2a14a92fe78d040 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 28 Sep 2020 15:29:06 +0800
+Subject: [PATCH] Support rest API for MCT OEM
+
+---
+ CMakeLists.txt         | 6 ++++++
+ src/webserver_main.cpp | 5 +++++
+ 2 files changed, 11 insertions(+)
+ mode change 100644 => 100755 src/webserver_main.cpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5266c5d..995b2b0 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,6 +41,11 @@ option (
+     ON
+ )
+ option (
++    BMCWEB_ENABLE_MCT_OEM_REST
++    "Enable MCT OEM REST APIs.  Paths are under '/'."
++    OFF
++)
++option (
+     BMCWEB_ENABLE_HOST_SERIAL_WEBSOCKET
+     "Enable host serial console WebSocket.  Path is '/console0'.  See
+     https://github.com/openbmc/docs/blob/master/console.md."
+@@ -445,6 +450,7 @@ target_compile_definitions (
+     $<$<BOOL:${BMCWEB_ENABLE_VM_NBDPROXY}>: -DBMCWEB_ENABLE_VM_NBDPROXY>
+     $<$<BOOL:${BMCWEB_ENABLE_DBUS_REST}>: -DBMCWEB_ENABLE_DBUS_REST>
+     $<$<BOOL:${BMCWEB_ENABLE_REDFISH}>: -DBMCWEB_ENABLE_REDFISH>
++    $<$<BOOL:${BMCWEB_ENABLE_MCT_OEM_REST}>: -DBMCWEB_ENABLE_MCT_OEM_REST>
+     $<$<BOOL:${BMCWEB_ENABLE_STATIC_HOSTING}>: -DBMCWEB_ENABLE_STATIC_HOSTING>
+     $<$<BOOL:${BMCWEB_ENABLE_HOST_SERIAL_WEBSOCKET}>:
+     -DBMCWEB_ENABLE_HOST_SERIAL_WEBSOCKET>
+diff --git a/src/webserver_main.cpp b/src/webserver_main.cpp
+old mode 100644
+new mode 100755
+index 0694b19..4410931
+--- a/src/webserver_main.cpp
++++ b/src/webserver_main.cpp
+@@ -19,6 +19,7 @@
+ #include <ssl_key_handler.hpp>
+ #include <vm_websocket.hpp>
+ #include <webassets.hpp>
++#include <mct_oem_rest.hpp>
+ 
+ #include <memory>
+ #include <string>
+@@ -93,6 +94,10 @@ int main(int /*argc*/, char** /*argv*/)
+     crow::obmc_vm::requestRoutes(app);
+ #endif
+ 
++#ifdef BMCWEB_ENABLE_MCT_OEM_REST
++    crow::mct_oem_rest::requestRoutes(app);
++#endif
++
+ #ifdef BMCWEB_ENABLE_IBM_MANAGEMENT_CONSOLE
+     crow::ibm_mc::requestRoutes(app);
+     crow::ibm_mc_lock::Lock::getInstance();
+-- 
+2.7.4

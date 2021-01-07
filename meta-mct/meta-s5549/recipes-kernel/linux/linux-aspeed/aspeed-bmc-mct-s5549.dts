@@ -1,0 +1,380 @@
+// SPDX-License-Identifier: GPL-2.0
+// Copyright (c) 2017 Intel Corporation
+/dts-v1/;
+
+#include "aspeed-g5.dtsi"
+#include <dt-bindings/gpio/aspeed-gpio.h>
+
+/ {
+    model = "s5549 BMC";
+    compatible = "mct,s5549-bmc", "aspeed,ast2500";
+
+    chosen {
+        stdout-path = &uart5;
+        bootargs = "earlyprintk";
+    };
+
+    memory {
+        reg = <0x80000000 0x20000000>;
+    };
+
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        flash_memory: region@98000000 {
+            no-map;
+            reg = <0x98000000 0x02000000>; /* 32M */
+        };
+
+		ramoops@9c000000 {
+			compatible = "ramoops";
+			reg = <0x9c000000 0x180000>; /* 16 * (3 * 0x8000) */
+			record-size = <0x8000>;
+			console-size = <0x8000>;
+			pmsg-size = <0x8000>;
+			max-reason = <3>; /* KMSG_DUMP_EMERG */
+		};
+
+		gfx_memory: framebuffer@9f000000 {
+			no-map;
+			compatible = "shared-dma-pool";
+			reg = <0x9f000000 0x01000000>; /* 16M */
+        };
+
+    };
+
+    leds {
+        compatible = "gpio-leds";
+
+        power {
+            gpios = <&gpio ASPEED_GPIO(F, 4) GPIO_ACTIVE_HIGH>;
+        };
+
+        identify {
+            gpios = <&gpio ASPEED_GPIO(S, 6) GPIO_ACTIVE_HIGH>;
+        };
+
+        hw-fault {
+            gpios = <&gpio ASPEED_GPIO(F, 5) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D1 {
+            gpios = <&gpio ASPEED_GPIO(P, 0) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D2 {
+            gpios = <&gpio ASPEED_GPIO(P, 1) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D3 {
+            gpios = <&gpio ASPEED_GPIO(P, 2) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D4 {
+            gpios = <&gpio ASPEED_GPIO(P, 3) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D5 {
+            gpios = <&gpio ASPEED_GPIO(P, 4) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D6 {
+            gpios = <&gpio ASPEED_GPIO(P, 5) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D7 {
+            gpios = <&gpio ASPEED_GPIO(P, 6) GPIO_ACTIVE_LOW>;
+        };
+
+        BIOS-POST-D8 {
+            gpios = <&gpio ASPEED_GPIO(P, 7) GPIO_ACTIVE_LOW>;
+        };
+    };
+
+    iio-hwmon {
+        compatible = "iio-hwmon";
+        io-channels = <&adc 0>, <&adc 1>, <&adc 2>, <&adc 3>,
+            <&adc 4>, <&adc 5>, <&adc 6>, <&adc 7>,
+            <&adc 8>, <&adc 9>, <&adc 10>, <&adc 11>,
+            <&adc 12>, <&adc 13>, <&adc 14>, <&adc 15>;
+    };
+};
+
+&fmc {
+    status = "okay";
+    flash@0 {
+        status = "okay";
+        m25p,fast-read;
+        label = "bmc";
+#include "openbmc-flash-layout.dtsi"
+    };
+};
+
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_spi1_default>;
+
+    flash@0 {
+        status = "okay";
+        m25p,fast-read;
+        label = "pnor";
+    };
+};
+
+&vuart {
+       status = "okay";
+};
+
+&uart1 {
+    status = "okay";
+   pinctrl-names = "default";
+   pinctrl-0 = <&pinctrl_txd1_default
+            &pinctrl_rxd1_default
+            &pinctrl_ncts1_default
+            &pinctrl_ndcd1_default
+            &pinctrl_ndsr1_default
+            &pinctrl_nri1_default
+            &pinctrl_ndtr1_default
+            &pinctrl_nrts1_default>;
+};
+
+&uart2 {
+    status = "okay";
+    pinctrl-names = "default";
+   pinctrl-0 = <&pinctrl_txd2_default
+            &pinctrl_rxd2_default
+            &pinctrl_ncts2_default
+            &pinctrl_ndcd2_default
+            &pinctrl_ndsr2_default
+            &pinctrl_nri2_default
+            &pinctrl_ndtr2_default
+            &pinctrl_nrts2_default>;
+};
+
+&uart3 {
+    status = "okay";
+};
+
+&uart5 {
+    status = "okay";
+};
+/*
+&mac0 {
+    status = "okay";
+    
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_rmii1_default>;
+    use-ncsi;
+};
+*/
+&mac1 {
+    status = "okay";
+
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_rgmii2_default>;
+};
+
+&i2c0 {
+    status = "okay";
+};
+
+&i2c1 {
+    status = "okay";
+};
+
+&i2c2 {
+    status = "okay";
+};
+
+&i2c3 {
+    status = "okay";
+};
+
+&i2c4 {
+    status = "okay";
+};
+
+&i2c5 {
+    status = "okay";
+    multi-master =<1>;
+    ipmb@10 {
+        compatible = "ipmb-dev";
+        reg = <0x10>;
+        i2c-protocol;
+
+    };
+};
+
+&i2c6 {
+    status = "okay";
+    eeprom@50 {
+        compatible = "atmel,24c1024";
+        reg = <0x50>;
+        pagesize = <32>;
+    };
+};
+
+&i2c7 {
+    status = "okay";
+    power-supply@58 {
+        compatible = "ibm,cffps1";
+        reg = <0x58>;
+    };
+};
+
+&gfx {
+       status = "okay";
+       memory-region = <&gfx_memory>;
+};
+
+&video {
+       status = "okay";
+       memory-region = <&gfx_memory>;
+};
+
+&vhub {
+       status = "okay";
+};
+
+&pwm_tacho {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_pwm0_default &pinctrl_pwm1_default &pinctrl_pwm2_default &pinctrl_pwm3_default &pinctrl_pwm4_default &pinctrl_pwm5_default>;
+    sysfan1@0 {
+        reg = <0x00>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x00>;
+    };
+
+    sysfan2@1 {
+        reg = <0x01>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x01>;
+    };
+
+    sysfan3@2 {
+        reg = <0x02>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x02>;
+    };
+
+    sysfan4@3 {
+        reg = <0x03>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x03>;
+    };
+
+    sysfan5@4 {
+        reg = <0x04>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x04>;
+    };
+
+    sysfan5@5 {
+        reg = <0x05>;
+        aspeed,fan-tach-ch = /bits/ 8 <0x05>;
+    };
+};
+
+&lpc_ctrl {
+    status = "okay";
+    memory-region = <&flash_memory>;
+    flash = <&spi1>;
+};
+
+&adc {
+    status = "okay";
+};
+
+&lpc_bmc {
+    compatible = "aspeed,ast2500-lpc-bmc", "simple-mfd", "syscon";        
+    reg = <0x0 0x80>;
+    reg-io-width = <4>;
+    #address-cells = <1>;
+    #size-cells = <1>;
+    ranges = <0x0 0x0 0x80>;
+
+    kcs1@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <1>;
+        kcs_addr = <0xca0>;
+        status = "okay";
+    };
+
+    kcs2@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <2>;
+        kcs_addr = <0xca8>;
+        status = "okay";
+    };
+
+    kcs3@0 {
+        compatible = "aspeed,ast2500-kcs-bmc";
+        reg = <0x0 0x80>;
+        interrupts = <8>;
+        kcs_chan = <3>;
+        kcs_addr = <0xca2>;
+        status = "okay";
+    };    
+
+    interrupt {
+        status = "okay";
+        compatible = "aspeed,bmc-misc";
+        interrupts-extended = <&scu_ic 4>;
+        lpc-rst {
+            offset = <0x08>;
+            bit-mask = <1>;
+            bit-shift = <6>;
+        };
+    };
+
+};
+
+&hbled {
+    status = "okay";
+};
+
+&peci0 {
+    status = "okay";
+};
+
+&gpio {
+    status = "okay";
+    gpio-line-names =
+    /*A0-A7*/   "","","BMC_EUP_LOT6","","","","","",
+    /*B0-B7*/   "","","","","","","PROCHOT","",
+    /*C0-C7*/   "","","","","","","","",
+    /*D0-D7*/   "","","","","","PHY_RST","","CLR_CMOS",
+    /*E0-E7*/   "","RSTBTN_OUT","","","","","","",
+    /*F0-F7*/   "PCH_NMI","","","","","","","",
+    /*G0-G7*/   "","CATERR","","","BAT_MON","","","BIOS_SPI_SW",
+    /*H0-H7*/   "","","","SYS_FAULT1","","","SYS_FAULT2","",
+    /*I0-I7*/   "","","","","","","","",
+    /*J0-J7*/   "","","","","","","","",
+    /*K0-K7*/   "","","","","","","","",
+    /*L0-L7*/   "","","","","","","","",
+    /*M0-M7*/   "","","","","","","","",
+    /*N0-N7*/   "","","","","","","","",
+    /*O0-O7*/   "","","","","","","","",
+    /*P0-P7*/   "","","","","","","","",
+    /*Q0-Q7*/   "","","","","","","FLASH_SEC_OVRD","",
+    /*R0-R7*/   "THERMTRIP","","","","","","","",
+    /*S0-S7*/   "ID_BUTTON","PS_PWROK","","","","","","",
+    /*T0-T7*/   "","","","","","","","",
+    /*U0-U7*/   "","","","","","","","",
+    /*V0-V7*/   "","","","","","","","",
+    /*W0-W7*/   "","","","","","","","",
+    /*X0-X7*/   "","","","","","","","",
+    /*Y0-Y7*/   "","","","","","","","",
+    /*Z0-Z7*/   "","","PWRBTN_OUT","PCH_SCI_LPC","","","","",
+    /*AA0-AA7*/ "","","","","","","","",
+    /*AB0-AB7*/ "","","","","","","","",
+    /*AC0-AC7*/ "","","","","","","","";
+};
+
+&lpc_snoop {
+    status = "okay";
+    snoop-ports = <0x80>;
+};

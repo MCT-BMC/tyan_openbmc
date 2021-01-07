@@ -1,0 +1,80 @@
+From 8fadcbc95232b4a6da211571cb2a0c3ea7da780b Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 3 Dec 2019 20:57:20 +0800
+Subject: [PATCH] workaroud for fru edit
+
+---
+ src/FruDevice.cpp | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
+index a1fdd48..192a611 100755
+--- a/src/FruDevice.cpp
++++ b/src/FruDevice.cpp
+@@ -176,6 +176,7 @@ bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
+         return false;
+     }
+ 
++#if 0 //MiTAC : ipmitool issue: fru edit don't check the non-existing area and fill incorrect area offset.
+     // verify offsets are 0, or don't point to another offset
+     std::set<uint8_t> foundOffsets;
+     for (int ii = 1; ii < 6; ii++)
+@@ -190,6 +191,7 @@ bool validateHeader(const std::array<uint8_t, I2C_SMBUS_BLOCK_MAX>& blockData)
+             return false;
+         }
+     }
++#endif 
+ 
+     // validate checksum
+     size_t sum = 0;
+@@ -274,6 +276,9 @@ static std::vector<char> processEeprom(int bus, int address)
+         fruLength = (areaOffset > fruLength) ? areaOffset : fruLength;
+     }
+ 
++    //MiTAC limit FRU to 512B : workaroud to prevent unreasonable fru size caculation due to ipmitool fru edit issue.
++    if(fruLength > 512) fruLength = 512;
++    
+     // You already copied these first 8 bytes (the ipmi fru header size)
+     fruLength -= 8;
+ 
+@@ -690,6 +695,9 @@ bool formatFru(const std::vector<char>& fruBytes,
+ 
+     const std::vector<const char*>* fieldData;
+ 
++    //MiTAC: area overlapping check. 
++    std::vector<char>::const_iterator perviousAreaEnd = fruBytes.begin();
++    
+     for (const std::string& area : FRU_AREAS)
+     {
+         fruAreaOffsetField++;
+@@ -705,6 +713,13 @@ bool formatFru(const std::vector<char>& fruBytes,
+             std::vector<char>::const_iterator fruBytesIter =
+                 fruBytes.begin() + offset + 2;
+ 
++            //check area length and overlapping 
++            if(*(fruBytesIter-1) == 0 || *(fruBytesIter-1) == 0xff || fruBytesIter <= perviousAreaEnd )
++            {
++                //skip incorrect area
++                continue;
++            }
++            
+             if (fruBytesIter >= fruBytes.end())
+             {
+                 return false;
+@@ -771,6 +786,7 @@ bool formatFru(const std::vector<char>& fruBytes,
+                  * field to be read */
+                 if (static_cast<uint8_t>(*fruBytesIter) == 0xC1)
+                 {
++                    perviousAreaEnd = fruBytesIter;
+                     break;
+                 }
+ 
+@@ -797,7 +813,7 @@ bool formatFru(const std::vector<char>& fruBytes,
+                     std::cerr << "Warning Fru Length Mismatch:\n    ";
+                     for (auto& c : fruBytes)
+                     {
+-                        std::cerr << c;
++                        std::cerr <<" "<< std::hex << std::setw(2) << std::setfill('0')<<(static_cast<unsigned int>(c));
+                     }
+                     std::cerr << "\n";
+                     if (DEBUG)

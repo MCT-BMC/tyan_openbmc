@@ -1,0 +1,69 @@
+ [
+    {
+        "Name": "PowerGood",
+        "LineName": "PS_PWROK",
+        "EventMon": "BOTH",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "SetPowerGoodPropertyOff.service"
+            ],
+            "RISING": [
+                "SetPowerGoodPropertyOn.service"
+            ]
+        }
+    },
+    {
+        "Name": "ThermalTrip",
+        "LineName": "THERMTRIP",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.thermtrip.service"
+            ]
+        }
+    },
+    {
+        "Name": "CATERR",
+        "LineName": "CATERR",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.caterr.service"
+            ]
+        }
+    },
+    {
+        "Name": "IdButton",
+        "LineName": "ID_BUTTON",
+        "EventMon": "FALLING",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "id-button-pressed.service"
+            ]
+        }
+    },
+    {
+        "Name": "PROCHOT",
+        "LineName": "PROCHOT",
+        "EventMon": "BOTH",
+        "Continue": true,
+        "Target":
+        {
+            "FALLING": [
+                "xyz.openbmc_project.prochot0.service"
+            ],
+            "RISING": [
+                "xyz.openbmc_project.prochot0_deassert.service"
+            ]
+        }
+    }
+ ]
+

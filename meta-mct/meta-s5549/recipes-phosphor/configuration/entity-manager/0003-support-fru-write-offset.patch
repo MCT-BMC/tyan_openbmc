@@ -1,0 +1,29 @@
+From 996ddcb51b75c63d0aa400c5b9caeb3da559983c Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 29 Nov 2019 22:41:16 +0800
+Subject: [PATCH] support fru write offset
+
+---
+ src/FruDevice.cpp | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
+index 841dcd4..a1fdd48 100755
+--- a/src/FruDevice.cpp
++++ b/src/FruDevice.cpp
+@@ -1016,6 +1016,15 @@ bool writeFru(uint8_t bus, uint8_t address, const std::vector<uint8_t>& fru)
+                 return false;
+             }
+ 
++            //mitac support fru offset for write operation
++            auto result = lseek(eeprom, FRU_OFFSET, SEEK_SET);
++            if (result < 0)
++            {
++                std::cerr << "failed to seek\n";
++                return false;
++            }
++            //mitac end
++
+             ssize_t writtenBytes = write(eeprom, fru.data(), fru.size());
+             if (writtenBytes < 0)
+             {

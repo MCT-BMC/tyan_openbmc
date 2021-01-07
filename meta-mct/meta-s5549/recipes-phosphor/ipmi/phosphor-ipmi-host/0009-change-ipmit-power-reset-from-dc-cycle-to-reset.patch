@@ -1,0 +1,29 @@
+From b6502e266c977324d89b117efcfa5d8087a0cde1 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 30 Apr 2020 11:26:51 +0800
+Subject: [PATCH 1/1] change ipmit power reset from dc cycle to reset
+
+---
+ chassishandler.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+ mode change 100644 => 100755 chassishandler.cpp
+
+diff --git a/chassishandler.cpp b/chassishandler.cpp
+old mode 100644
+new mode 100755
+index af3c414..d634e5e
+--- a/chassishandler.cpp
++++ b/chassishandler.cpp
+@@ -1239,6 +1239,9 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+             break;
+ 
+         case CMD_HARD_RESET:
++            rc = initiate_state_transition(State::Host::Transition::ForceWarmReboot);
++            break;
++            
+         case CMD_POWER_CYCLE:
+             // SPEC has a section that says certain implementations can trigger
+             // PowerOn if power is Off when a command to power cycle is
+-- 
+2.22.0
+

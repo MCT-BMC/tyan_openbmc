@@ -1,0 +1,25 @@
+From 678d550c1cdcfde9d1f621c0346107a94562fdde Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 21 Jul 2020 18:16:13 +0800
+Subject: [PATCH]  Set watchdog initialized action to None as default
+
+---
+ xyz/openbmc_project/State/Watchdog.interface.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xyz/openbmc_project/State/Watchdog.interface.yaml b/xyz/openbmc_project/State/Watchdog.interface.yaml
+index c2e17b5..27c192e 100644
+--- a/xyz/openbmc_project/State/Watchdog.interface.yaml
++++ b/xyz/openbmc_project/State/Watchdog.interface.yaml
+@@ -32,7 +32,7 @@ properties:
+       type: enum[self.Action]
+       description: >
+           The action the watchdog should perform when it expires.
+-      default: 'HardReset'
++      default: 'None'
+     - name: Interval
+       type: uint64
+       description: >
+-- 
+2.7.4
+

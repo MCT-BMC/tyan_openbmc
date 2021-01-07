@@ -1,0 +1,29 @@
+From 67015df9ec87ccaaa90777ff57bcf39cbcd0e64d Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 27 Aug 2020 16:01:37 +0800
+Subject: [PATCH] Add the detect for firmare revision
+
+---
+ apphandler.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/apphandler.cpp b/apphandler.cpp
+index 341da07..6077a58 100755
+--- a/apphandler.cpp
++++ b/apphandler.cpp
+@@ -623,6 +623,12 @@ ipmi::RspType<uint8_t,  // Device ID
+             std::memcpy(&devId.aux, rev.d, 4);
+         }
+ 
++        if(devId.fw[0] == 0x00 && devId.fw[1] == 0x00)
++        {
++            dev_id_initialized = false;
++            return ipmi::responseCommandNotAvailable();
++        }
++
+         // IPMI Spec version 2.0
+         devId.ipmiVer = 2;
+ 
+-- 
+2.7.4
+

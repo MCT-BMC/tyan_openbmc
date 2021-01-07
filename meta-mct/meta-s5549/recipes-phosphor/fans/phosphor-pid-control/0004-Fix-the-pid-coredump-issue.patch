@@ -1,0 +1,201 @@
+From 624ad75be22e0afc066e08b91d6bac3df98bc28d Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 18 Aug 2020 09:50:20 +0800
+Subject: [PATCH] Fix the pid coredump issue
+
+Create flag for enable or disable pid loop
+Add patch "catch the execption during buildSensors" by manual.
+Add patch "dbusconfiguration: Filter InterfacesAdded Match" by manual.
+---
+ dbus/dbusconfiguration.cpp | 43 ++++++++++++++++++++++++++++++++++++++++---
+ main.cpp                   | 31 ++++++++++++++++++++++++++++++-
+ pid/pidloop.cpp            |  6 ++++++
+ util.hpp                   |  2 +-
+ 4 files changed, 77 insertions(+), 5 deletions(-)
+ mode change 100644 => 100755 main.cpp
+ mode change 100644 => 100755 pid/pidloop.cpp
+
+diff --git a/dbus/dbusconfiguration.cpp b/dbus/dbusconfiguration.cpp
+index b5ae8a3..7bb2018 100755
+--- a/dbus/dbusconfiguration.cpp
++++ b/dbus/dbusconfiguration.cpp
+@@ -36,6 +36,7 @@ static constexpr bool DEBUG = false; // enable to print found configuration
+ extern std::map<std::string, struct conf::SensorConfig> sensorConfig;
+ extern std::map<int64_t, conf::PIDConf> zoneConfig;
+ extern std::map<int64_t, struct conf::ZoneConfig> zoneDetailsConfig;
++extern bool pidControlLoopEnable;
+ 
+ constexpr const char* pidConfigurationInterface =
+     "xyz.openbmc_project.Configuration.Pid";
+@@ -52,6 +53,9 @@ constexpr const char* thermalControlIface =
+ constexpr const char* sensorInterface = "xyz.openbmc_project.Sensor.Value";
+ constexpr const char* pwmInterface = "xyz.openbmc_project.Control.FanPwm";
+ 
++using Association = std::tuple<std::string, std::string, std::string>;
++using Associations = std::vector<Association>;
++
+ namespace thresholds
+ {
+ constexpr const char* warningInterface =
+@@ -235,13 +239,46 @@ std::vector<std::string> getSelectedProfiles(sdbusplus::bus::bus& bus)
+     return ret;
+ }
+ 
+-int eventHandler(sd_bus_message*, void* context, sd_bus_error*)
++int eventHandler(sd_bus_message* m, void* context, sd_bus_error*)
+ {
+ 
+-    if (context == nullptr)
++    if (context == nullptr || m == nullptr)
+     {
+         throw std::runtime_error("Invalid match");
+     }
++
++    // we skip associations because the mapper populates these, not the sensors
++    const std::array<const char*, 1> skipList = {
++        "xyz.openbmc_project.Association"};
++
++    sdbusplus::message::message message(m);
++    if (std::string(message.get_member()) == "InterfacesAdded")
++    {
++        sdbusplus::message::object_path path;
++        std::unordered_map<
++            std::string,
++            std::unordered_map<std::string, std::variant<Associations, bool>>>
++            data;
++
++        message.read(path, data);
++
++        for (const char* skip : skipList)
++        {
++            auto find = data.find(skip);
++            if (find != data.end())
++            {
++                data.erase(find);
++                if (data.empty())
++                {
++                    return 1;
++                }
++            }
++        }
++    }
++
++    //Disable running process for pid loop.
++    pidControlLoopEnable = false;
++
+     boost::asio::steady_timer* timer =
+         static_cast<boost::asio::steady_timer*>(context);
+ 
+@@ -256,7 +293,7 @@ int eventHandler(sd_bus_message*, void* context, sd_bus_error*)
+         }
+ 
+         std::cout << "New configuration detected, reloading\n.";
+-        restartControlLoops();
++        tryRestartControlLoops();
+     });
+ 
+     return 1;
+diff --git a/main.cpp b/main.cpp
+old mode 100644
+new mode 100755
+index be0691d..078e229
+--- a/main.cpp
++++ b/main.cpp
+@@ -69,6 +69,8 @@ static sdbusplus::asio::connection
+ static sdbusplus::asio::connection
+     passiveBus(io, sdbusplus::bus::new_system().release());
+ 
++bool pidControlLoopEnable;
++
+ void restartControlLoops()
+ {
+     static SensorManager mgmr;
+@@ -119,10 +121,37 @@ void restartControlLoops()
+     {
+         auto& timer = timers.emplace_back(io);
+         std::cerr << "pushing zone " << i.first << "\n";
++        pidControlLoopEnable = true;
+         pidControlLoop(i.second.get(), timer);
+     }
+ }
+ 
++void tryRestartControlLoops()
++{
++    int count = 0;
++    for (count = 0; count <= 5; count++)
++    {
++        try
++        {
++            restartControlLoops();
++            break;
++        }
++        catch (const std::exception& e)
++        {
++            std::cerr << count
++                      << " Failed during restartControlLoops, try again: "
++                      << e.what() << "\n";
++            if (count >= 5)
++            {
++                throw std::runtime_error(e.what());
++            }
++        }
++        std::this_thread::sleep_for(std::chrono::seconds(10));
++    }
++
++    return;
++}
++
+ int main(int argc, char* argv[])
+ {
+     loggingPath = "";
+@@ -155,7 +184,7 @@ int main(int argc, char* argv[])
+      * it.
+      */
+ 
+-    restartControlLoops();
++    tryRestartControlLoops();
+ 
+     io.run();
+     return 0;
+diff --git a/pid/pidloop.cpp b/pid/pidloop.cpp
+old mode 100644
+new mode 100755
+index 56bf8bd..61bf6b8
+--- a/pid/pidloop.cpp
++++ b/pid/pidloop.cpp
+@@ -27,6 +27,8 @@
+ #include <thread>
+ #include <vector>
+ 
++extern bool pidControlLoopEnable;
++
+ static void processThermals(PIDZone* zone)
+ {
+     // Get the latest margins.
+@@ -62,6 +64,10 @@ void pidControlLoop(PIDZone* zone, boost::asio::steady_timer& timer, bool first,
+                 return; // timer being canceled, stop loop
+             }
+ 
++            if(!pidControlLoopEnable)
++            {
++                return;
++            }
+             /*
+              * This should sleep on the conditional wait for the listen thread
+              * to tell us it's in sync.  But then we also need a timeout option
+diff --git a/util.hpp b/util.hpp
+index e40b61f..f3ef5fa 100644
+--- a/util.hpp
++++ b/util.hpp
+@@ -30,7 +30,7 @@ IOInterfaceType getWriteInterfaceType(const std::string& path);
+ 
+ IOInterfaceType getReadInterfaceType(const std::string& path);
+ 
+-void restartControlLoops(void);
++void tryRestartControlLoops();
+ 
+ /*
+  * Given a configuration structure, fill out the information we use within the
+-- 
+2.7.4
+

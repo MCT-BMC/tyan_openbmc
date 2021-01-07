@@ -1,0 +1,663 @@
+From 347a207972586b9b1540d815ac6cdded7a645b90 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 12 Mar 2020 15:30:29 +0800
+Subject: [PATCH 1/1] Add-type-sensors-to-support-the-invalid-value-property
+
+---
+ CMakeLists.txt        |  5 ++++
+ include/CPUSensor.hpp |  6 ++--
+ include/PSUSensor.hpp |  5 +++-
+ src/ADCSensor.cpp     | 50 ++++++++++++++++++++++++++++++---
+ src/CPUSensor.cpp     | 45 +++++++++++++++++++++++++++++-
+ src/CPUSensorMain.cpp | 36 +++++++++++++++++++++++-
+ src/IpmbSensor.cpp    |  4 +++
+ src/PSUSensor.cpp     | 65 +++++++++++++++++++++++++++++++++++++++++--
+ src/PSUSensorMain.cpp | 58 +++++++++++++++++++++++++++++++++++++-
+ src/TachSensor.cpp    | 40 ++++++++++++++++++++++++--
+ 10 files changed, 298 insertions(+), 16 deletions(-)
+ mode change 100644 => 100755 include/CPUSensor.hpp
+ mode change 100644 => 100755 include/PSUSensor.hpp
+ mode change 100644 => 100755 src/ADCSensor.cpp
+ mode change 100644 => 100755 src/PSUSensor.cpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e81611b..094822c 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -50,6 +50,7 @@ option (DISABLE_NVME "Disable installing NVME sensor" ON)
+ option (DISABLE_PROCESSOR "Disable installing processor sensor" OFF)
+ option (DISABLE_ACPI "Disable installing acpi sensor" OFF)
+ option (DISABLE_POWER_STATUS "Disable installing power status sensor" OFF)
++option (BMC_CPU_SENSOR_TCONTROL "Enable Tcontrol Threshold setting" ON)
+ 
+ include ("cmake/HunterGate.cmake")
+ 
+@@ -165,6 +166,10 @@ add_executable (cpusensor src/CPUSensorMain.cpp ${CPU_SRC_FILES})
+ add_dependencies (cpusensor sdbusplus-project)
+ target_link_libraries (cpusensor ${SENSOR_LINK_LIBS})
+ target_link_libraries (cpusensor gpiodcxx)
++target_compile_definitions (
++    cpusensor PRIVATE
++    $<$<BOOL:${BMC_CPU_SENSOR_TCONTROL}>: -DBMC_CPU_SENSOR_TCONTROL>
++)
+ 
+ add_executable (exitairtempsensor src/ExitAirTempSensor.cpp
+                 ${EXIT_AIR_SRC_FILES})
+diff --git a/include/CPUSensor.hpp b/include/CPUSensor.hpp
+old mode 100644
+new mode 100755
+index 8f9cb6e..1f05d2d
+--- a/include/CPUSensor.hpp
++++ b/include/CPUSensor.hpp
+@@ -24,13 +24,13 @@ class CPUSensor : public Sensor
+               boost::asio::io_service& io, const std::string& sensorName,
+               std::vector<thresholds::Threshold>&& thresholds,
+               const std::string& configuration, int cpuId, bool show,
+-              double dtsOffset);
++              double dtsOffset, double maxReading, double minReading);
+     ~CPUSensor();
+     static constexpr unsigned int sensorScaleFactor = 1000;
+     static constexpr unsigned int sensorPollMs = 1000;
+     static constexpr size_t warnAfterErrorCount = 10;
+-    static constexpr double maxReading = 127;
+-    static constexpr double minReading = -128;
++    //static constexpr double maxReading = 127;
++    //static constexpr double minReading = -128;
+     static constexpr const char* labelTcontrol = "Tcontrol";
+ 
+   private:
+diff --git a/include/PSUSensor.hpp b/include/PSUSensor.hpp
+old mode 100644
+new mode 100755
+index 14b6d96..ec59acd
+--- a/include/PSUSensor.hpp
++++ b/include/PSUSensor.hpp
+@@ -18,7 +18,7 @@ class PSUSensor : public Sensor
+               std::vector<thresholds::Threshold>&& thresholds,
+               const std::string& sensorConfiguration,
+               std::string& sensorTypeName, unsigned int factor, double max,
+-              double min);
++              double min, PowerState readState);
+     ~PSUSensor();
+ 
+   private:
+@@ -36,6 +36,9 @@ class PSUSensor : public Sensor
+     int fd;
+     static constexpr unsigned int sensorPollMs = 1000;
+     static constexpr size_t warnAfterErrorCount = 10;
++    // Power-on sensor
++    PowerState readState;
++    thresholds::ThresholdTimer thresholdTimer;
+ };
+ 
+ class PSUProperty
+diff --git a/src/ADCSensor.cpp b/src/ADCSensor.cpp
+old mode 100644
+new mode 100755
+index 5e01503..df7ca52
+--- a/src/ADCSensor.cpp
++++ b/src/ADCSensor.cpp
+@@ -77,10 +77,10 @@ ADCSensor::ADCSensor(const std::string& path,
+     association = objectServer.add_interface(
+         "/xyz/openbmc_project/sensors/voltage/" + name, association::interface);
+     setInitialProperties(conn);
+-    setupRead();
+ 
+     // setup match
+     setupPowerMatch(conn);
++    setupRead();
+ }
+ 
+ ADCSensor::~ADCSensor()
+@@ -129,8 +129,41 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
+ {
+     if (err == boost::system::errc::bad_file_descriptor)
+     {
++        updateValueInvalid(true);
+         return; // we're being destroyed
+     }
++
++    // Set as sensor reading invalid for power-on type sensor
++    if (readState != PowerState::always && !isPowerOn())
++    {
++        updateValueInvalid(true);
++        // updateValue(0);
++        errCount = 0;
++
++        // clear response buffer reading
++        std::istream invalidResponseStream(&readBuf);
++        std::string invalidResponse;
++        std::getline(invalidResponseStream, invalidResponse);
++        invalidResponseStream.clear();
++
++        inputDev.close();
++        int fd = open(path.c_str(), O_RDONLY);
++        if (fd <= 0)
++        {
++            return;
++        }
++        inputDev.assign(fd);
++        waitTimer.expires_from_now(boost::posix_time::milliseconds(sensorPollMs));
++        waitTimer.async_wait([&](const boost::system::error_code& ec) {
++            if (ec == boost::asio::error::operation_aborted)
++            {
++                return;
++            }
++            setupRead();
++        });
++        return;
++    }
++
+     std::istream responseStream(&readBuf);
+ 
+     if (!err)
+@@ -151,6 +184,7 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
+                 updateValue(nvalue);
+             }
+             errCount = 0;
++            updateValueInvalid(false);
+         }
+         catch (std::invalid_argument&)
+         {
+@@ -175,7 +209,8 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
+ 
+     if (errCount >= warnAfterErrorCount)
+     {
+-        updateValue(0);
++        updateValueInvalid(true);
++        //updateValue(0);
+     }
+ 
+     responseStream.clear();
+@@ -202,10 +237,17 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
+ 
+ void ADCSensor::checkThresholds(void)
+ {
+-    if (readState == PowerState::on && !isPowerOn())
++    if (readState != PowerState::always && !isPowerOn())
+     {
+         return;
+     }
+ 
+-    thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
++    if(readState == PowerState::always)
++    {
++        thresholds::checkThresholds(this);
++    }
++    else
++    {
++        thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
++    }
+ }
+diff --git a/src/CPUSensor.cpp b/src/CPUSensor.cpp
+index 27c9c38..8a9942f 100644
+--- a/src/CPUSensor.cpp
++++ b/src/CPUSensor.cpp
+@@ -39,7 +39,8 @@ CPUSensor::CPUSensor(const std::string& path, const std::string& objectType,
+                      boost::asio::io_service& io, const std::string& sensorName,
+                      std::vector<thresholds::Threshold>&& _thresholds,
+                      const std::string& sensorConfiguration, int cpuId,
+-                     bool show, double dtsOffset) :
++                     bool show, double dtsOffset, double maxReading,
++                     double minReading) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(_thresholds), sensorConfiguration, objectType, maxReading,
+            minReading),
+@@ -104,9 +105,42 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ {
+     if (err == boost::system::errc::bad_file_descriptor)
+     {
++        updateValueInvalid(true);
+         return; // we're being destroyed
+     }
+     size_t pollTime = CPUSensor::sensorPollMs;
++
++    // Set as sensor reading invalid for cup peci sensors
++    if (!isPowerOn())
++    {
++        updateValueInvalid(true);
++        errCount = 0;
++
++        // clear response buffer reading
++        std::istream invalidResponseStream(&readBuf);
++        std::string invalidResponse;
++        std::getline(invalidResponseStream, invalidResponse);
++        invalidResponseStream.clear();
++
++        inputDev.close();
++        int fd = open(path.c_str(), O_RDONLY);
++        if (fd <= 0)
++        {
++            return; // we're no longer valid
++        }
++        inputDev.assign(fd);
++        waitTimer.expires_from_now(boost::posix_time::milliseconds(pollTime));
++        waitTimer.async_wait([&](const boost::system::error_code& ec) {
++        if (ec == boost::asio::error::operation_aborted)
++        {
++            return; // we're being canceled
++        }
++            setupRead();
++        });
++
++        return;
++    }
++
+     std::istream responseStream(&readBuf);
+     if (!err)
+     {
+@@ -128,6 +162,10 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+                     value = nvalue;
+                 }
+             }
++
++            updateValueInvalid(false);
++
++#ifdef BMC_CPU_SENSOR_TCONTROL
+             double gTcontrol = gCpuSensors[nameTcontrol]
+                                    ? gCpuSensors[nameTcontrol]->value
+                                    : std::numeric_limits<double>::quiet_NaN();
+@@ -160,6 +198,8 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+                     }
+                 }
+             }
++#endif
++
+             errCount = 0;
+         }
+         catch (const std::invalid_argument&)
+@@ -175,6 +215,9 @@ void CPUSensor::handleResponse(const boost::system::error_code& err)
+ 
+     if (errCount >= warnAfterErrorCount)
+     {
++        // Set the sensor reading invalid
++        updateValueInvalid(true);
++
+         // only an error if power is on
+         if (isPowerOn())
+         {
+diff --git a/src/CPUSensorMain.cpp b/src/CPUSensorMain.cpp
+index 6ed1627..7e198a1 100755
+--- a/src/CPUSensorMain.cpp
++++ b/src/CPUSensorMain.cpp
+@@ -52,6 +52,9 @@
+ 
+ static constexpr bool DEBUG = false;
+ 
++static constexpr double maxReading = 127;
++static constexpr double minReading = -128;
++
+ boost::container::flat_map<std::string, std::unique_ptr<CPUSensor>> gCpuSensors;
+ boost::container::flat_map<std::string,
+                            std::shared_ptr<sdbusplus::asio::dbus_interface>>
+@@ -289,8 +292,39 @@ bool createSensors(boost::asio::io_service& io,
+             std::getline(labelFile, label);
+             labelFile.close();
+ 
++            double maxValue = maxReading; // Initial value if we don't set value in json.
++            double minValue = minReading; // Initial value if we don't set value in json.
++            auto limits = std::make_pair(maxReading, minReading);
++
++            findLimits(limits, baseConfiguration);
++
+             std::string sensorName = label + " CPU" + std::to_string(cpuId);
+ 
++            label = boost::replace_all_copy(label, " ", "_");
++
++            bool isLabelsError = false; // Check the label format is correct or not.
++            for (const auto& item : *sensorData)
++            {
++                if (item.first.find("Labels") == std::string::npos)
++                {
++                    continue;
++                }
++                auto nameFind = item.second.find(label);
++                if (nameFind != item.second.end())
++                {
++                    sensorName = std::visit(VariantToStringVisitor(), nameFind->second);
++                }
++                else
++                {
++                    isLabelsError = true;
++                }
++            }
++
++            if (isLabelsError)
++            {
++                continue;
++            }
++
+             auto findSensor = gCpuSensors.find(sensorName);
+             if (findSensor != gCpuSensors.end())
+             {
+@@ -355,7 +389,7 @@ bool createSensors(boost::asio::io_service& io,
+             sensorPtr = std::make_unique<CPUSensor>(
+                 inputPathStr, sensorType, objectServer, dbusConnection, io,
+                 sensorName, std::move(sensorThresholds), *interfacePath, cpuId,
+-                show, dtsOffset);
++                show, dtsOffset, limits.first, limits.second);
+             createdSensors.insert(sensorName);
+             if (DEBUG)
+             {
+diff --git a/src/IpmbSensor.cpp b/src/IpmbSensor.cpp
+index 9f591ac..11aac0c 100644
+--- a/src/IpmbSensor.cpp
++++ b/src/IpmbSensor.cpp
+@@ -248,6 +248,7 @@ void IpmbSensor::read(void)
+         }
+         if (!isPowerOn() && readState != PowerState::always)
+         {
++            updateValueInvalid(true);
+             updateValue(0);
+             read();
+             return;
+@@ -259,12 +260,14 @@ void IpmbSensor::read(void)
+                 if (ec || status)
+                 {
+                     processError();
++                    updateValueInvalid(true);
+                     updateValue(0);
+                     read();
+                     return;
+                 }
+                 if (!isPowerOn() && readState != PowerState::always)
+                 {
++                    updateValueInvalid(true);
+                     updateValue(0);
+                     read();
+                     return;
+@@ -341,6 +344,7 @@ void IpmbSensor::read(void)
+                 /* Adjust value as per scale and offset */
+                 value = (value * scaleVal) + offsetVal;
+                 updateValue(value);
++                updateValueInvalid(false);
+                 read();
+                 errorCount = 0; // success
+             },
+diff --git a/src/PSUSensor.cpp b/src/PSUSensor.cpp
+old mode 100644
+new mode 100755
+index e94d1c4..18ce06a
+--- a/src/PSUSensor.cpp
++++ b/src/PSUSensor.cpp
+@@ -41,13 +41,13 @@ PSUSensor::PSUSensor(const std::string& path, const std::string& objectType,
+                      std::vector<thresholds::Threshold>&& _thresholds,
+                      const std::string& sensorConfiguration,
+                      std::string& sensorTypeName, unsigned int factor,
+-                     double max, double min) :
++                     double max, double min, PowerState readState) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(_thresholds), sensorConfiguration, objectType, max, min),
+     objServer(objectServer), inputDev(io), waitTimer(io), path(path),
+     errCount(0),
+ 
+-    sensorFactor(factor)
++    sensorFactor(factor), readState(std::move(readState)), thresholdTimer(io, this)
+ {
+     if constexpr (DEBUG)
+     {
+@@ -90,6 +90,7 @@ PSUSensor::PSUSensor(const std::string& path, const std::string& objectType,
+     association = objectServer.add_interface(dbusPath, association::interface);
+ 
+     createInventoryAssoc(conn, association, configurationPath);
++    setupPowerMatch(conn);
+     setupRead();
+ }
+ 
+@@ -105,10 +106,17 @@ PSUSensor::~PSUSensor()
+ 
+ void PSUSensor::setupRead(void)
+ {
++    #if 0
+     boost::asio::async_read_until(
+         inputDev, readBuf, '\n',
+         [&](const boost::system::error_code& ec,
+             std::size_t /*bytes_transfered*/) { handleResponse(ec); });
++    #endif
++
++    // Sync read to PSU sensor
++    boost::system::error_code ec;
++    boost::asio::read_until(inputDev, readBuf, '\n', ec);
++    handleResponse(ec);
+ }
+ 
+ void PSUSensor::handleResponse(const boost::system::error_code& err)
+@@ -116,6 +124,40 @@ void PSUSensor::handleResponse(const boost::system::error_code& err)
+     if (err == boost::system::errc::bad_file_descriptor)
+     {
+         std::cerr << "Bad file descriptor from " << path << "\n";
++        updateValueInvalid(true);
++        // updateValue(0);
++        return;
++    }
++
++    // Set as sensor reading invalid for power-on type sensor
++    if (readState != PowerState::always && !isPowerOn())
++    {
++        updateValueInvalid(true);
++        // updateValue(0);
++        errCount = 0;
++
++        // clear response buffer reading
++        std::istream invalidResponseStream(&readBuf);
++        std::string invalidResponse;
++        std::getline(invalidResponseStream, invalidResponse);
++        invalidResponseStream.clear();
++
++        inputDev.close();
++        int fd = open(path.c_str(), O_RDONLY);
++        if (fd <= 0)
++        {
++            return;
++        }
++        inputDev.assign(fd);
++        waitTimer.expires_from_now(boost::posix_time::milliseconds(sensorPollMs));
++        waitTimer.async_wait([&](const boost::system::error_code& ec) {
++            if (ec == boost::asio::error::operation_aborted)
++            {
++                return;
++            }
++            setupRead();
++        });
++
+         return;
+     }
+     std::istream responseStream(&readBuf);
+@@ -141,14 +183,19 @@ void PSUSensor::handleResponse(const boost::system::error_code& err)
+                     std::cerr << "Update " << path << " from " << value
+                               << " to " << nvalue << "\n";
+                 }
++
+                 updateValue(nvalue);
+             }
++
++            updateValueInvalid(false);
+             errCount = 0;
+         }
+         catch (const std::invalid_argument&)
+         {
+             std::cerr << "Could not parse " << response << " from path " << path
+                       << "\n";
++            updateValueInvalid(true);
++            // updateValue(0);
+             errCount++;
+         }
+     }
+@@ -183,5 +230,17 @@ void PSUSensor::handleResponse(const boost::system::error_code& err)
+ 
+ void PSUSensor::checkThresholds(void)
+ {
+-    thresholds::checkThresholds(this);
++    if (readState != PowerState::always && !isPowerOn())
++    {
++        return;
++    }
++
++    if(readState == PowerState::always)
++    {
++        thresholds::checkThresholds(this);
++    }
++    else
++    {
++        thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
++    }
+ }
+diff --git a/src/PSUSensorMain.cpp b/src/PSUSensorMain.cpp
+index d5d5937..6b1ae3a 100755
+--- a/src/PSUSensorMain.cpp
++++ b/src/PSUSensorMain.cpp
+@@ -207,6 +207,52 @@ static void
+     }
+ }
+ 
++static bool checkPowerState(const SensorData& sensorData,
++                            PowerState& sensorReadState,
++                            const std::string* matchLabel)
++{
++    sensorReadState = PowerState::always;
++
++    if (matchLabel == nullptr)
++    {
++        return false;
++    }
++
++    for (const auto& item : sensorData)
++    {
++        if (item.first.find("PowerStates") == std::string::npos)
++        {
++            continue;
++        }
++
++        auto labelFind = item.second.find("Label");
++        if (labelFind == item.second.end())
++        {
++            continue;
++        }
++        if (std::visit(VariantToStringVisitor(), labelFind->second) !=
++            *matchLabel)
++        {
++            continue;
++        }
++
++        auto findPowerState = item.second.find("PowerState");
++        if (findPowerState == item.second.end())
++        {
++            std::cerr << "failed to find PowerState in configuration\n";
++            return false;
++        }
++
++        std::string powerState = std::visit(
++                            VariantToStringVisitor(), findPowerState->second);
++        setReadState(powerState, sensorReadState);
++
++        break;
++    }
++
++    return true;
++}
++
+ void createSensors(boost::asio::io_service& io,
+                    sdbusplus::asio::object_server& objectServer,
+                    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
+@@ -720,11 +766,21 @@ void createSensors(boost::asio::io_service& io,
+                           << "\"\n";
+             }
+ 
++            /* Parse the sensor reading power state from the config file.
++                States: Always / On / BiosPost
++            */
++            PowerState sensorReadState;
++            if (!checkPowerState(*sensorData, sensorReadState, &labelHead))
++            {
++                std::cerr << "failed to find the sensor read power state for "
++                        << sensorNameSubStr << "\n";
++            }
++
+             sensors[sensorName] = std::make_unique<PSUSensor>(
+                 sensorPathStr, sensorType, objectServer, dbusConnection, io,
+                 sensorName, std::move(sensorThresholds), *interfacePath,
+                 findSensorType->second, factor, psuProperty->maxReading,
+-                psuProperty->minReading);
++                psuProperty->minReading, sensorReadState);
+ 
+             ++numCreated;
+             if constexpr (DEBUG)
+diff --git a/src/TachSensor.cpp b/src/TachSensor.cpp
+index 3e08160..2cdbff3 100755
+--- a/src/TachSensor.cpp
++++ b/src/TachSensor.cpp
+@@ -124,10 +124,43 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+ {
+     if (err == boost::system::errc::bad_file_descriptor)
+     {
++        updateValueInvalid(true);
+         return; // we're being destroyed
+     }
+     bool missing = false;
+     size_t pollTime = pwmPollMs;
++
++    // Host power is off
++    if (!isPowerOn())
++    {
++        updateValueInvalid(true);
++        // updateValue(0);
++        errCount = 0;
++
++        // clear response buffer reading
++        std::istream invalidResponseStream(&readBuf);
++        std::string invalidResponse;
++        std::getline(invalidResponseStream, invalidResponse);
++        invalidResponseStream.clear();
++
++        inputDev.close();
++        int fd = open(path.c_str(), O_RDONLY);
++        if (fd <= 0)
++        {
++            return;
++        }
++        inputDev.assign(fd);
++        waitTimer.expires_from_now(boost::posix_time::milliseconds(pollTime));
++        waitTimer.async_wait([&](const boost::system::error_code& ec) {
++            if (ec == boost::asio::error::operation_aborted)
++            {
++                return;
++            }
++            setupRead();
++        });
++        return;
++    }
++
+     if (presence)
+     {
+         if (!presence->getValue())
+@@ -154,6 +187,7 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+                     updateValue(nvalue);
+                 }
+                 errCount = 0;
++                updateValueInvalid(false);
+             }
+             catch (const std::invalid_argument&)
+             {
+@@ -165,7 +199,8 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+             if (!isPowerOn())
+             {
+                 errCount = 0;
+-                updateValue(std::numeric_limits<double>::quiet_NaN());
++                // updateValue(std::numeric_limits<double>::quiet_NaN());
++                updateValueInvalid(true);
+             }
+             else
+             {
+@@ -181,7 +216,8 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
+                 std::cerr << "Failure to read sensor " << name << " at " << path
+                           << " ec:" << err << "\n";
+             }
+-            updateValue(0);
++            // updateValue(0);
++            updateValueInvalid(true);
+         }
+     }
+     responseStream.clear();
+-- 
+2.22.0
+

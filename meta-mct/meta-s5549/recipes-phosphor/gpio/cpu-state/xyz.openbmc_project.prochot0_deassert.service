@@ -1,0 +1,10 @@
+[Unit]
+Description=deassert Prochot0 
+StartLimitIntervalSec=6
+StartLimitBurst=1
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env prochot_thermtrip_update.sh deassert CPU0_State prochot
+SyslogIdentifier=prochot0_deassert
+RemainAfterExit=true

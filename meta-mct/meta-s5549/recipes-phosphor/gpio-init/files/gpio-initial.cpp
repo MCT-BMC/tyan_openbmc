@@ -1,0 +1,88 @@
+#include "gpio-initial.hpp"
+
+static constexpr bool DEBUG = false;
+
+namespace GPIO{
+
+void setInput(std::string lineName)
+{
+    int value;
+    struct gpiod_line *line = nullptr;;
+
+    line = gpiod_line_find(lineName.c_str());
+    if (gpiod_line_request_input(line,"set-inptut") < 0)
+    {
+        std::cerr << "Error request line\n";
+    }
+    gpiod_line_release(line);
+}
+
+void setOutput(std::string lineName,int setValue)
+{
+    int value;
+    struct gpiod_line *line = nullptr;;
+
+    line = gpiod_line_find(lineName.c_str());
+    if (gpiod_line_request_output(line,"set-output",setValue) < 0)
+    {
+        std::cerr << "Error request line\n";
+    }
+    gpiod_line_release(line);
+}
+}
+
+int main(int argc, char *argv[])
+{
+
+    std::ifstream gpioInitialConfig(gpioInitialConfigPath);
+
+    if(!gpioInitialConfig)
+    {
+        std::cerr << "GPIO initial config file not found. PATH:" << gpioInitialConfigPath << std::endl;
+        return 0;
+    }
+
+    auto gpioConfig = nlohmann::json::parse(gpioInitialConfig, nullptr, false);
+
+    if(gpioConfig.is_discarded())
+    {
+        std::cerr << "Syntax error in " << gpioInitialConfigPath << "\n";
+        return 0;
+    }
+
+    for (auto& object : gpioConfig)
+    {
+        if constexpr (DEBUG){
+            std::cerr << LINE_NAME << " : " << object[LINE_NAME] << "\n";
+            std::cerr << DIRECTION << " : " << object[DIRECTION] << "\n";
+            std::cerr << VALUE << " : " << object[VALUE] << "\n";
+        }
+
+        if(object[LINE_NAME].is_null() || object[DIRECTION].is_null() || object[VALUE].is_null())
+        {
+            continue;
+        }
+        if(object[DIRECTION]=="Input")
+        {
+            GPIO::setInput(object[LINE_NAME]);
+        }
+        if(object[DIRECTION]=="Output")
+        {
+            GPIO::setOutput(object[LINE_NAME],object[VALUE]);
+        }
+        // TODO: GPIOs should be used as interrupt feature
+    }
+
+    uint32_t registerBuffer = 0;
+    if (read_register(0x1E7800E0,&registerBuffer) < 0)
+    {
+        std::cerr<<"Failed to read register \n";
+    }
+    else
+    {
+        registerBuffer |= (1UL << 24);
+        write_register(0x1E7800E0, registerBuffer);
+    }
+
+    return 0;
+}

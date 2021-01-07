@@ -1,0 +1,28 @@
+From bdddc5d8c4d49d20c142a150face043fe1ebc3c2 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Fri, 3 Jul 2020 17:59:21 +0800
+Subject: [PATCH 1/1] log assert event when timer cancelled
+
+---
+ include/Thresholds.hpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/include/Thresholds.hpp b/include/Thresholds.hpp
+index 59aa58a..29c7a49 100755
+--- a/include/Thresholds.hpp
++++ b/include/Thresholds.hpp
+@@ -75,6 +75,11 @@ struct ThresholdTimer
+                         (timerUsed.direction == threshold.direction))
+                     {
+                         timer.second.cancel();
++                        if (isPowerOn())
++                        {
++                            assertThresholds(sensor, threshold.level,
++                                    threshold.direction, true);
++                        }
+                     }
+                 }
+             }
+-- 
+2.26.2
+

@@ -1,0 +1,37 @@
+From 22380e47cc86e08b0fe5d06b57a6b128d8f85dd8 Mon Sep 17 00:00:00 2001
+From: Varun Sampat <vsampat@twitter.com>
+Date: Wed, 18 Dec 2019 19:49:10 -0500
+Subject: [PATCH] Add prochot sensor
+
+---
+ src/ProcessorSensorMain.cpp | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/src/ProcessorSensorMain.cpp b/src/ProcessorSensorMain.cpp
+index 8e9986a..1e2ea28 100755
+--- a/src/ProcessorSensorMain.cpp
++++ b/src/ProcessorSensorMain.cpp
+@@ -73,11 +73,23 @@ int main()
+     std::shared_ptr<sdbusplus::asio::dbus_interface> iface =
+         objServer.add_interface("/xyz/openbmc_project/sensors/processor/CATERR",sensorValueInterface);
+ 
++    std::shared_ptr<sdbusplus::asio::dbus_interface> iface2 =
++        objServer.add_interface("/xyz/openbmc_project/sensors/processor/CPU0_State",sensorValueInterface);
++
++    std::shared_ptr<sdbusplus::asio::dbus_interface> iface3 =
++        objServer.add_interface("/xyz/openbmc_project/sensors/processor/CPU1_State",sensorValueInterface);
++
+     double value = 0;
+     //ray__ test value
+     iface->register_property("Value", value);
+     iface->initialize();
+     
++    iface2->register_property("Value", value);
++    iface2->initialize();
++
++    iface3->register_property("Value", value);
++    iface3->initialize();
++
+     auto caterrEventMatcherCallback =
+         [systemBus](sdbusplus::message::message& message) {
+             boost::container::flat_map<std::string, sdbusplus::message::variant<std::string>> propertiesChanged;

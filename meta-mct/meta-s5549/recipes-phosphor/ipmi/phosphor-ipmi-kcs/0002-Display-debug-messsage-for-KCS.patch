@@ -1,0 +1,25 @@
+From 80487fce1321ce82d58d06ace25799133e41b1bd Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Tue, 21 Jul 2020 17:56:53 +0800
+Subject: [PATCH] Display debug messsage for KCS
+
+---
+ phosphor-ipmi-kcs@.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/phosphor-ipmi-kcs@.service b/phosphor-ipmi-kcs@.service
+index 56c0b72..82915ee 100644
+--- a/phosphor-ipmi-kcs@.service
++++ b/phosphor-ipmi-kcs@.service
+@@ -5,7 +5,7 @@ After=phosphor-ipmi-host.service
+ 
+ [Service]
+ Restart=always
+-ExecStart=/usr/bin/kcsbridged -c "%i"
++ExecStart=/usr/bin/kcsbridged -c "%i" -v 1
+ SyslogIdentifier=kcsbridged-%i
+ 
+ [Install]
+-- 
+2.7.4
+

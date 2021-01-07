@@ -1,0 +1,71 @@
+From 52c6229cebe77257bc12150630c475aa0c9a2e61 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Tue, 16 Jun 2020 10:31:28 +0800
+Subject: [PATCH 1/1] add assert value to log event data
+
+---
+ include/sensor.hpp |  3 +++
+ src/Thresholds.cpp | 13 ++++++++++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 src/Thresholds.cpp
+
+diff --git a/include/sensor.hpp b/include/sensor.hpp
+index 1e41525..bd9c3ef 100755
+--- a/include/sensor.hpp
++++ b/include/sensor.hpp
+@@ -83,6 +83,9 @@ struct Sensor
+             "InvalidValue", invalidValue, [&](const bool& newState, bool& oldState) {
+                 return setSensorValueInvalid(newState, oldState);
+             });
++        
++        sensorInterface->register_property("ValueAssert", maxValue);
++        sensorInterface->register_property("ValueDeassert", minValue);
+ 
+         for (auto& threshold : thresholds)
+         {
+diff --git a/src/Thresholds.cpp b/src/Thresholds.cpp
+old mode 100644
+new mode 100755
+index 0b33829..c6bec8b
+--- a/src/Thresholds.cpp
++++ b/src/Thresholds.cpp
+@@ -303,10 +303,16 @@ static std::vector<std::pair<Threshold, bool>> checkThresholds(Sensor* sensor,
+ bool checkThresholds(Sensor* sensor)
+ {
+     bool status = true;
++    bool needToUpdate = true;
+     std::vector<std::pair<Threshold, bool>> changes =
+         checkThresholds(sensor, sensor->value);
+     for (const auto& [threshold, asserted] : changes)
+     {
++        if(asserted && needToUpdate)
++        {
++            needToUpdate = false;
++            (sensor->sensorInterface)->set_property("ValueAssert", sensor->value);
++        }
+         assertThresholds(sensor, threshold.level, threshold.direction,
+                          asserted);
+         if (threshold.level == thresholds::Level::CRITICAL && asserted)
+@@ -320,13 +326,18 @@ bool checkThresholds(Sensor* sensor)
+ 
+ void checkThresholdsPowerDelay(Sensor* sensor, ThresholdTimer& thresholdTimer)
+ {
+-
++    bool needToUpdate = true;
+     std::vector<std::pair<Threshold, bool>> changes =
+         checkThresholds(sensor, sensor->value);
+     for (const auto& [threshold, asserted] : changes)
+     {
+         if (asserted)
+         {
++            if(needToUpdate)
++            {
++                needToUpdate = false;
++                (sensor->sensorInterface)->set_property("ValueAssert", sensor->value);    
++            } 
+             thresholdTimer.startTimer(threshold);
+         }
+         else
+-- 
+2.26.2
+

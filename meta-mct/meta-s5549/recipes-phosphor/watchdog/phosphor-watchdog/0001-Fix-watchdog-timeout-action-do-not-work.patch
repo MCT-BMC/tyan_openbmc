@@ -1,0 +1,142 @@
+From 840387d449e6175fceb95ae852f37f7cd9a6e826 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 May 2020 13:02:19 +0800
+Subject: [PATCH] Fix watchdog timeout action do not work
+
+Change timeout function implementation from timeout target to power target
+Create the function for setting dbus RequestedHostTransition parameter
+---
+ watchdog.cpp | 72 ++++++++++++++++++++++++++++++++++++++++++++++++------------
+ watchdog.hpp |  8 +++++++
+ 2 files changed, 66 insertions(+), 14 deletions(-)
+ mode change 100644 => 100755 watchdog.cpp
+ mode change 100644 => 100755 watchdog.hpp
+
+diff --git a/watchdog.cpp b/watchdog.cpp
+old mode 100644
+new mode 100755
+index 57e9050..daf98a1
+--- a/watchdog.cpp
++++ b/watchdog.cpp
+@@ -131,22 +131,21 @@ void Watchdog::timeOutHandler()
+             entry("TIMER_USE=%s", convertForMessage(expiredTimerUse()).c_str()),
+             entry("TARGET=%s", target->second.c_str()));
+ 
+-        try
++        switch (action)
+         {
+-            auto method = bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_ROOT,
+-                                              SYSTEMD_INTERFACE, "StartUnit");
+-            method.append(target->second);
+-            method.append("replace");
+-
+-            bus.call_noreply(method);
+-        }
+-        catch (const SdBusError& e)
+-        {
+-            log<level::ERR>("watchdog: Failed to start unit",
+-                            entry("TARGET=%s", target->second.c_str()),
+-                            entry("ERROR=%s", e.what()));
+-            commit<InternalFailure>();
++            case Action::None:
++                break;
++            case Action::HardReset:
++                initiate_state_transition(State::Host::Transition::ForceWarmReboot);
++                break;
++            case Action::PowerOff:
++                initiate_state_transition(State::Host::Transition::Off);
++                break;
++            case Action::PowerCycle:
++                initiate_state_transition(State::Host::Transition::Reboot);
++                break;
+         }
++
+     }
+ 
+     tryFallbackOrDisable();
+@@ -175,5 +174,50 @@ void Watchdog::tryFallbackOrDisable()
+     WatchdogInherits::enabled(false);
+ }
+ 
++std::string Watchdog::getService(const std::string& path, const std::string& interface)
++{
++    constexpr auto mapperObjPath = "/xyz/openbmc_project/object_mapper";
++    constexpr auto mapperService = "xyz.openbmc_project.ObjectMapper";
++    constexpr auto mapperIface = "xyz.openbmc_project.ObjectMapper";
++
++    auto method = bus.new_method_call(mapperService, mapperObjPath, mapperIface,
++                                      "GetObject");
++    method.append(path, std::vector{interface});
++    auto result = bus.call(method);
++
++    std::map<std::string, std::vector<std::string>> objectData;
++    result.read(objectData);
++
++    return objectData.begin()->first;
++}
++
++void Watchdog::initiate_state_transition(State::Host::Transition transition)
++{
++    // OpenBMC Host State Manager dbus framework
++    constexpr auto HOST_STATE_MANAGER_ROOT = "/xyz/openbmc_project/state/host0";
++    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
++    constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
++    constexpr auto PROPERTY = "RequestedHostTransition";
++
++    std::variant<std::string> state = convertForMessage(transition);
++
++    try
++    {
++        auto service = getService(HOST_STATE_MANAGER_ROOT, DBUS_PROPERTY_IFACE);
++        auto method = bus.new_method_call(service.c_str(), HOST_STATE_MANAGER_ROOT,
++                                          DBUS_PROPERTY_IFACE, "Set");
++        method.append(HOST_STATE_MANAGER_IFACE, PROPERTY , state);
++
++        bus.call_noreply(method);
++
++        log<level::INFO>("Transition request initiated successfully");
++    }
++    catch (const SdBusError& e)
++    {
++        log<level::ERR>("Failed to initiate transition",
++                        entry("ERRNO=0x%X", e.what()));
++    }
++}
++
+ } // namespace watchdog
+ } // namespace phosphor
+diff --git a/watchdog.hpp b/watchdog.hpp
+old mode 100644
+new mode 100755
+index 7de9bb3..9f3b650
+--- a/watchdog.hpp
++++ b/watchdog.hpp
+@@ -9,6 +9,7 @@
+ #include <unordered_map>
+ #include <utility>
+ #include <xyz/openbmc_project/State/Watchdog/server.hpp>
++#include <xyz/openbmc_project/State/Host/server.hpp>
+ 
+ namespace phosphor
+ {
+@@ -17,6 +18,7 @@ namespace watchdog
+ 
+ constexpr auto DEFAULT_MIN_INTERVAL_MS = 0;
+ namespace Base = sdbusplus::xyz::openbmc_project::State::server;
++namespace State = sdbusplus::xyz::openbmc_project::State::server;
+ using WatchdogInherits = sdbusplus::server::object::object<Base::Watchdog>;
+ 
+ /** @class Watchdog
+@@ -170,6 +172,12 @@ class Watchdog : public WatchdogInherits
+ 
+     /** @brief Attempt to enter the fallback watchdog or disables it */
+     void tryFallbackOrDisable();
++
++    /** @brief Calls into Object Mapper to get Dbus object service */
++    std::string getService(const std::string& path, const std::string& interface);
++
++    /** @brief Calls into Host State Manager Dbus object */
++    void initiate_state_transition(State::Host::Transition transition);
+ };
+ 
+ } // namespace watchdog

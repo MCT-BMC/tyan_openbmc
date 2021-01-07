@@ -1,0 +1,80 @@
+From 3acbb09c71569900488826cc3a00c0c66d126878 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Mon, 15 Jun 2020 15:56:42 +0800
+Subject: [PATCH 1/1] change ADC range to be configurable
+
+---
+ include/ADCSensor.hpp |  3 ++-
+ src/ADCSensor.cpp     |  5 +++--
+ src/ADCSensorMain.cpp | 10 +++++++++-
+ 3 files changed, 14 insertions(+), 4 deletions(-)
+ mode change 100644 => 100755 include/ADCSensor.hpp
+ mode change 100644 => 100755 src/ADCSensorMain.cpp
+
+diff --git a/include/ADCSensor.hpp b/include/ADCSensor.hpp
+old mode 100644
+new mode 100755
+index dfd8713..acf4664
+--- a/include/ADCSensor.hpp
++++ b/include/ADCSensor.hpp
+@@ -60,7 +60,8 @@ class ADCSensor : public Sensor
+               std::vector<thresholds::Threshold>&& thresholds,
+               const double scaleFactor, PowerState readState,
+               const std::string& sensorConfiguration,
+-              std::optional<BridgeGpio>&& bridgeGpio);
++              std::optional<BridgeGpio>&& bridgeGpio,
++              const std::pair<size_t, size_t>& limits);
+     ~ADCSensor();
+ 
+   private:
+diff --git a/src/ADCSensor.cpp b/src/ADCSensor.cpp
+index df7ca52..f941a73 100755
+--- a/src/ADCSensor.cpp
++++ b/src/ADCSensor.cpp
+@@ -50,10 +50,11 @@ ADCSensor::ADCSensor(const std::string& path,
+                      std::vector<thresholds::Threshold>&& _thresholds,
+                      const double scaleFactor, PowerState readState,
+                      const std::string& sensorConfiguration,
+-                     std::optional<BridgeGpio>&& bridgeGpio) :
++                     std::optional<BridgeGpio>&& bridgeGpio,
++                     const std::pair<size_t, size_t>& limits) :
+     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
+            std::move(_thresholds), sensorConfiguration,
+-           "xyz.openbmc_project.Configuration.ADC", maxReading, minReading),
++           "xyz.openbmc_project.Configuration.ADC",limits.second, limits.first),
+     objServer(objectServer), inputDev(io, open(path.c_str(), O_RDONLY)),
+     waitTimer(io), path(path), errCount(0), scaleFactor(scaleFactor),
+     bridgeGpio(std::move(bridgeGpio)), readState(std::move(readState)),
+diff --git a/src/ADCSensorMain.cpp b/src/ADCSensorMain.cpp
+old mode 100644
+new mode 100755
+index 1b56d93..1679946
+--- a/src/ADCSensorMain.cpp
++++ b/src/ADCSensorMain.cpp
+@@ -235,6 +235,14 @@ void createSensors(
+                     }
+                 }
+ 
++                constexpr double defaultMaxReading = 20;
++                constexpr double defaultMinReading = 0;
++                auto limits =
++                std::make_pair(defaultMinReading, defaultMaxReading);
++
++                findLimits(limits, baseConfiguration);
++                
++
+                 auto& sensor = sensors[sensorName];
+                 sensor = nullptr;
+ 
+@@ -272,7 +280,7 @@ void createSensors(
+                 sensor = std::make_unique<ADCSensor>(
+                     path.string(), objectServer, dbusConnection, io, sensorName,
+                     std::move(sensorThresholds), scaleFactor, readState,
+-                    *interfacePath, std::move(bridgeGpio));
++                    *interfacePath, std::move(bridgeGpio), limits);
+             }
+         }));
+ 
+-- 
+2.26.2
+

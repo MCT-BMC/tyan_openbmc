@@ -1,0 +1,26 @@
+From 83831689006eab6e6d566da51f9a3822f85ace03 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 29 May 2020 13:59:29 +0800
+Subject: [PATCH] Add DCMI power event sensor
+
+---
+ src/eventSensor.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/eventSensor.cpp b/src/eventSensor.cpp
+index 3afe87b..da34f2a 100755
+--- a/src/eventSensor.cpp
++++ b/src/eventSensor.cpp
+@@ -40,7 +40,8 @@ const static boost::container::flat_map<std::string, std::string>eventsensors
+         {"BUTTON","pwr_button"},  
+         {"BMC_FW_UPDATE","versionchange"}, 
+         {"BMC_Reboot","mgtsubsyshealth"},    
+-        {"PSU_STATUS","power_supply"}, 
++        {"PSU_STATUS","power_supply"},
++        {"DCMI_POWER_LIMIT","power_supply"},
+         {"IPMI_POWER_CYCLE","fru_state"},
+         {"IPMI_POWER_ON","fru_state"},
+         {"IPMI_POWER_OFF","fru_state"},
+-- 
+2.7.4
+

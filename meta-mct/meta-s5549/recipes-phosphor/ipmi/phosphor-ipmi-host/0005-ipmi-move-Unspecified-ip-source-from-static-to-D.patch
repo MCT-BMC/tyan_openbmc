@@ -1,0 +1,30 @@
+From 1415a8ed64e3b5170a1db68a30dc071f03c2530d Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Wed, 11 Dec 2019 21:12:34 +0800
+Subject: [PATCH] ipmi: move Unspecified ip source from static to DHCP.
+
+Tested: set ip source to unspecified and BMC should keep ip to DHCP -> PASS
+---
+ transporthandler.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 transporthandler.cpp
+
+diff --git a/transporthandler.cpp b/transporthandler.cpp
+old mode 100644
+new mode 100755
+index 1a06ae5..0c7bb93
+--- a/transporthandler.cpp
++++ b/transporthandler.cpp
+@@ -1394,11 +1394,11 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
+             switch (static_cast<IPSrc>(static_cast<uint8_t>(flag)))
+             {
+                 case IPSrc::DHCP:
++                case IPSrc::Unspecified:    
+                 {
+                     channelCall<setDHCPProperty>(channel, true);
+                     return responseSuccess();
+                 }
+-                case IPSrc::Unspecified:
+                 case IPSrc::Static:
+                 case IPSrc::BIOS:
+                 case IPSrc::BMC:

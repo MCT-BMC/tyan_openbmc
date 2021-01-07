@@ -1,0 +1,341 @@
+From b1ebb8c99c0196c24cd95bcf5e7813a7003f6f26 Mon Sep 17 00:00:00 2001
+From: Ray Lue <ray.lue@mic.com.tw>
+Date: Thu, 12 Mar 2020 16:28:35 +0800
+Subject: [PATCH 1/1] support leaky bucket sensor
+
+---
+ CMakeLists.txt                                |  13 +
+ ...penbmc_project.hostmemoryeccsensor.service |  12 +
+ src/HostMemoryEccSenosr.cpp                   | 266 ++++++++++++++++++
+ 3 files changed, 291 insertions(+)
+ create mode 100644 service_files/xyz.openbmc_project.hostmemoryeccsensor.service
+ create mode 100755 src/HostMemoryEccSenosr.cpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4f48e56..b55dcb0 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -52,6 +52,7 @@ option (DISABLE_ACPI "Disable installing acpi sensor" OFF)
+ option (DISABLE_POWER_STATUS "Disable installing power status sensor" OFF)
+ option (BMC_CPU_SENSOR_TCONTROL "Enable Tcontrol Threshold setting" ON)
+ option (DISABLE_MOSTEMP "Disable installing MOS temperature sensor" OFF)
++option (DISABLE_HOST_MEM_ECC "Disable host memory ECC sensor" OFF)
+ 
+ include ("cmake/HunterGate.cmake")
+ 
+@@ -229,6 +230,10 @@ add_dependencies (mostempsensor sdbusplus-project)
+ target_link_libraries (mostempsensor ${SENSOR_LINK_LIBS})
+ target_link_libraries (mostempsensor i2c)
+ 
++add_executable (hostmemoryeccsensor src/HostMemoryEccSenosr.cpp)
++add_dependencies (hostmemoryeccsensor sdbusplus-project)
++target_link_libraries (hostmemoryeccsensor ${SENSOR_LINK_LIBS})
++
+ if (NOT DISABLE_NVME)
+     add_executable (nvmesensor ${NVME_SRC_FILES})
+     add_dependencies (nvmesensor sdbusplus-project)
+@@ -361,3 +366,11 @@ if (NOT DISABLE_MOSTEMP)
+     )
+ endif ()
+ 
++if (NOT DISABLE_HOST_MEM_ECC)
++    install (TARGETS hostmemoryeccsensor DESTINATION bin)
++    install (FILES
++                ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.hostmemoryeccsensor.service
++                DESTINATION ${SERVICE_FILE_INSTALL_DIR}
++    )
++endif ()
++
+diff --git a/service_files/xyz.openbmc_project.hostmemoryeccsensor.service b/service_files/xyz.openbmc_project.hostmemoryeccsensor.service
+new file mode 100644
+index 0000000..74585a9
+--- /dev/null
++++ b/service_files/xyz.openbmc_project.hostmemoryeccsensor.service
+@@ -0,0 +1,12 @@
++[Unit]
++Description=Host Memory ECC leaky bucket sensor
++StopWhenUnneeded=false
++After=xyz.openbmc_project.EntityManager.service
++[Service]
++Restart=always
++RestartSec=5
++ExecStart=/usr/bin/env hostmemoryeccsensor
++SyslogIdentifier=hostMemEcc
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/src/HostMemoryEccSenosr.cpp b/src/HostMemoryEccSenosr.cpp
+new file mode 100755
+index 0000000..6453c1b
+--- /dev/null
++++ b/src/HostMemoryEccSenosr.cpp
+@@ -0,0 +1,266 @@
++#include <Utils.hpp>
++#include <boost/algorithm/string/predicate.hpp>
++#include <boost/asio.hpp>
++#include <boost/bind.hpp>
++#include <boost/format.hpp>
++#include <chrono>
++#include <ctime>
++#include <iostream>
++#include <algorithm>
++#include <sdbusplus/asio/connection.hpp>
++#include <sdbusplus/asio/object_server.hpp>
++#include <sdbusplus/asio/sd_event.hpp>
++#include <sdbusplus/bus.hpp>
++#include <sdbusplus/exception.hpp>
++#include <sdbusplus/server.hpp>
++#include <sdbusplus/timer.hpp>
++#include <sensor.hpp>
++#include <systemd/sd-journal.h>
++#include <fstream>
++
++
++static constexpr bool DEBUG = false;
++
++static const std::string hostEccSensorPath = "/xyz/openbmc_project/leakyBucket/HOST_DIMM_ECC";
++static const std::string lbConfigFile = "/var/lib/ipmi/lbConfig";
++
++uint8_t t1 = 49;
++uint8_t t2 = 7;
++static size_t pollTime = 24; // in seconds
++
++struct leakyBucketSensor 
++{
++    leakyBucketSensor(const std::string& name, std::shared_ptr<sdbusplus::asio::connection>& conn,
++                             boost::asio::io_service& io,
++                             sdbusplus::asio::object_server& objectServer):
++                             name(name), objectServer(objectServer), dbusConnection(conn), waitTimer(io)
++    {
++        std::string bucketPath = hostEccSensorPath + "/" + name;
++        intf = objectServer.add_interface(bucketPath,sensorValueInterface);
++        intf->register_property("count", count);
++        intf->initialize();
++    }
++    ~leakyBucketSensor()
++    {
++        waitTimer.cancel();
++        objectServer.remove_interface(intf);
++    }
++    void read(void);
++    void init(void);
++    bool addEcc(void);
++
++    std::string name;
++    uint8_t count = 0;
++
++  private:
++    sdbusplus::asio::object_server& objectServer;
++    std::shared_ptr<sdbusplus::asio::connection> dbusConnection;
++    boost::asio::deadline_timer waitTimer;
++    std::shared_ptr<sdbusplus::asio::dbus_interface> intf;
++};
++
++boost::container::flat_map<std::string, std::unique_ptr<leakyBucketSensor>> lbSensors;
++
++void createBucket(
++    const std::string &bucketName,
++    boost::asio::io_service& io, sdbusplus::asio::object_server& objectServer,
++    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
++{
++    if (!dbusConnection)
++    {
++        std::cerr << "Connection not created\n";
++        return;
++    }
++    
++    auto& bucket = lbSensors[bucketName];
++
++    bucket = std::make_unique<leakyBucketSensor>(
++            bucketName, dbusConnection, io, objectServer);
++
++    bucket->init();
++}
++
++void leakyBucketSensor::init(void)
++{
++    read();
++}
++
++void leakyBucketSensor::read(void)
++{
++
++    waitTimer.expires_from_now(boost::posix_time::hours(pollTime));
++    waitTimer.async_wait([this](const boost::system::error_code& ec) {
++        if (ec == boost::asio::error::operation_aborted)
++        {
++            return; // we're being cancelled
++        }
++        // read timer error
++        else if (ec)
++        {
++            std::cerr << "timer error\n";
++            return;
++        }
++        count = (count > t2) ? (count-t2):0;
++        intf->set_property("count", count);
++        read();
++    });
++}
++
++bool leakyBucketSensor::addEcc(void)
++{
++    bool overflow = false;
++    count++;
++    
++    //restart timer 
++#if 0    
++    if(count == 1)
++    {
++        waitTimer.cancel();
++        waitTimer.expires_from_now(boost::posix_time::hours(pollTime));
++    }
++#endif     
++    //NOTE!!: according to F4 implementation, the count should be cleared when overflow
++    if(count >= t1){
++        count = 0; 
++        overflow = true;
++    }    
++
++    intf->set_property("count", count);
++    if constexpr (1){
++        boost::posix_time::time_duration td = waitTimer.expires_from_now();
++        //std::cerr << "expires_from_now :" << td.seconds() << "\n";
++        std::cerr << boost::format("%d:%d:%d") % td.hours() % td.minutes() % td.seconds() << "\n";
++    }
++    
++    return overflow;
++}
++
++//increase ECC to bucket, return true if overflow
++static bool 
++    increaseEccToBucket(const std::string &bucketName, boost::asio::io_service& io, 
++    sdbusplus::asio::object_server& objectServer,std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
++{
++    
++    auto bucket = lbSensors.find(bucketName);
++    if (bucket != lbSensors.end())
++    {
++        std::cerr << "bucket existing:" << bucketName << std::endl;
++    }else{
++       createBucket(bucketName, io, objectServer, dbusConnection);
++    }
++
++    auto& sensor = lbSensors[bucketName];
++    return sensor->addEcc();
++    
++}
++
++void updateConfig()
++{
++    static bool init=false;
++
++    if(!init)
++    {
++        init = true;
++        std::ifstream lbConfig(lbConfigFile,std::ios::binary);
++        if(!lbConfig.good())
++        {
++            std::cerr << "file not exist, take default\n";
++            return;
++        }
++        //load from file
++ 
++        t1 = lbConfig.get();       
++        t2 = lbConfig.get();
++        pollTime = (size_t)lbConfig.get();
++  
++        return;
++    }
++
++    std::ofstream output(lbConfigFile,std::ios::binary);
++    if (!output.good())
++    {
++        std::cerr << "can't create config\n";
++    }
++    else
++    {
++        output << t1;
++        output << t2;
++        output << (uint8_t)pollTime;
++        output.close();
++    }
++    return;
++}
++int main()
++{
++    // setup connection to dbus
++    boost::asio::io_service io;
++    auto systemBus = std::make_shared<sdbusplus::asio::connection>(io);
++    auto objServer = sdbusplus::asio::object_server(systemBus);
++    // setup object server, define interface
++    systemBus->request_name("xyz.openbmc_project.leaklyBucketSensor");
++
++    // add interface into sensor tree
++    std::shared_ptr<sdbusplus::asio::dbus_interface> iface =
++        objServer.add_interface(hostEccSensorPath,sensorValueInterface);
++
++    updateConfig();
++    //int64_t count = 0;
++    iface->register_property("T1", t1, sdbusplus::asio::PropertyPermission::readWrite);
++    iface->register_property("T2", t2, sdbusplus::asio::PropertyPermission::readWrite);
++    iface->register_property("polltime", (uint8_t)pollTime, sdbusplus::asio::PropertyPermission::readWrite);
++
++    // add a ecc, check 
++    iface->register_method(
++        "increaseEccToBucket", [&](const std::string &bucketName) {
++            return increaseEccToBucket(bucketName, io, objServer, systemBus);
++        });    
++
++    iface->initialize();
++
++    auto eventHandler =
++        [&](sdbusplus::message::message& message) {
++            boost::container::flat_map<std::string, std::variant<uint8_t>> values;
++            std::string objectName;
++            if (DEBUG)
++            {
++                std::cerr << message.get_path() << " is changed\n";
++            }
++ 
++            message.read(objectName, values);
++          
++            auto tValue = values.find("T1");
++            if (tValue != values.end())
++            {
++                 std::cerr << "T1 change to :" << unsigned(std::get<std::uint8_t>(tValue->second)) << "\n";
++                 t1 = std::get<std::uint8_t>(tValue->second);
++            }
++            tValue = values.find("T2");
++            if (tValue != values.end())
++            {
++                 std::cerr << "T2 change to :" << unsigned(std::get<std::uint8_t>(tValue->second)) << "\n";
++                 t2 = std::get<std::uint8_t>(tValue->second);
++            }
++            tValue = values.find("polltime");
++            if (tValue != values.end())
++            {
++                 std::cerr << "polltime change to :" << unsigned(std::get<std::uint8_t>(tValue->second)) << "\n";
++                 pollTime = (size_t)(std::get<std::uint8_t>(tValue->second));
++            }
++
++            updateConfig();
++        };
++
++    sdbusplus::bus::match::match configMatch(
++        static_cast<sdbusplus::bus::bus&>(*systemBus),
++        "type='signal',member='PropertiesChanged',"
++        "path_namespace='" +
++            std::string(hostEccSensorPath) +
++            "',"
++            "arg0namespace='" +
++            sensorValueInterface + "'",
++        eventHandler);
++    
++    io.run();
++
++    return 0;
++}
+-- 
+2.22.0
+
