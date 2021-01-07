@@ -7,6 +7,7 @@ SRC_URI += "file://s5549-Baseboard.json \
             file://0004-fix-fsc-to-settable-interface.patch \
             file://0005-remove-NVME-P4000.json.patch \
             file://0006-Set-the-EntityManager-service-booting-after-FruDevic.patch \
+            file://0007-Fix-fru-disappear-after-power-off.patch \
             "
 
 do_install_append(){

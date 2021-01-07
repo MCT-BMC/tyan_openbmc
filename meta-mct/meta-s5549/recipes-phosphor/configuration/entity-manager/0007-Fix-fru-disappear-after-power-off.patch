@@ -1,0 +1,75 @@
+From 4902c062d777e30abecc58cc6e6aff8ef990909a Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Mon, 4 Jan 2021 15:21:36 +0800
+Subject: [PATCH] Fix fru disappear after power off
+
+Don't mark devices or buses failed if power is off,
+as it is normal to lose some busses.
+
+Tested: Rescan with power off, then power back on,
+all devices remain
+
+Change-Id: Ia21646a74d4c1ed19efb209ff0555a47766d4169
+Signed-off-by: James Feist <james.feist@linux.intel.com>
+---
+ src/FruDevice.cpp | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/src/FruDevice.cpp b/src/FruDevice.cpp
+index 1c20de5..934dd47 100755
+--- a/src/FruDevice.cpp
++++ b/src/FruDevice.cpp
+@@ -76,6 +76,8 @@ struct FindDevicesWithCallback;
+ 
+ static BusMap busMap;
+ 
++static bool powerIsOn = false;
++
+ static boost::container::flat_map<
+     std::pair<size_t, size_t>, std::shared_ptr<sdbusplus::asio::dbus_interface>>
+     foundDevices;
+@@ -583,7 +585,10 @@ int getBusFrus(int file, int first, int last, int bus,
+             {
+                 std::cerr << "failed to read bus " << bus << " address " << ii
+                           << "\n";
+-                failedItems.insert(ii);
++                if (powerIsOn)
++                {
++                    failedItems.insert(ii);
++                }
+                 continue;
+             }
+ 
+@@ -606,7 +611,10 @@ int getBusFrus(int file, int first, int last, int bus,
+     if (status == std::future_status::timeout)
+     {
+         std::cerr << "Error reading bus " << bus << "\n";
+-        busBlacklist.insert(bus);
++        if (powerIsOn)
++        {
++            busBlacklist.insert(bus);
++        }
+         close(file);
+         return -1;
+     }
+@@ -1388,14 +1396,13 @@ int main()
+                 values;
+             message.read(objectName, values);
+             auto findState = values.find("CurrentHostState");
+-            bool on = false;
+             if (findState != values.end())
+             {
+-                on = boost::ends_with(std::get<std::string>(findState->second),
+-                                      "Running");
++                powerIsOn  = boost::ends_with(
++                    std::get<std::string>(findState->second), "Running");
+             }
+ 
+-            if (on)
++            if (powerIsOn)
+             {
+                 rescanBusses(busMap, dbusInterfaceMap);
+             }
+-- 
+2.7.4
+
