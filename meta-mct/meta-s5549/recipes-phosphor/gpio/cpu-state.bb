@@ -38,10 +38,6 @@ EXTRA_OECMAKE += "-DCATERR_ENABLE_POWER_FILTER=ON"
 EXTRA_OECMAKE += "-DTHERMTRIP_ENABLE_POWER_FILTER=ON"
 EXTRA_OECMAKE += "-DPROCHOT_ENABLE_POWER_FILTER=ON"
 
-do_install_append() {
-    install -d ${D}/usr/sbin
-    install -m 0755 ${WORKDIR}/prochot_thermtrip_update.sh ${D}/${sbindir}/
-}
 
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.caterr.service"
 SYSTEMD_SERVICE_${PN} += "xyz.openbmc_project.prochot0.service"
