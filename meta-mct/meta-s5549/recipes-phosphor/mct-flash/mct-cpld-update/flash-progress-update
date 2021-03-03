@@ -1,0 +1,14 @@
+#! /bin/sh
+CPLD_VERSION_ID=$1
+PECENT=$2
+
+BUS_CMD="/usr/bin/busctl"
+CPLD_UPDATER_CMD="/usr/bin/cpldprog"
+FREQUENCE="500000"
+
+SOFTWARE_OBJ="xyz.openbmc_project.Software.BMC.Updater"
+SOFTWARE_PATH="/xyz/openbmc_project/software/$CPLD_VERSION_ID"
+SOFTWARE_INTF="xyz.openbmc_project.Software.ActivationProgress"
+SOFTWARE_PROPERTY="Progress"
+
+$BUS_CMD set-property $SOFTWARE_OBJ $SOFTWARE_PATH $SOFTWARE_INTF $SOFTWARE_PROPERTY y $PECENT

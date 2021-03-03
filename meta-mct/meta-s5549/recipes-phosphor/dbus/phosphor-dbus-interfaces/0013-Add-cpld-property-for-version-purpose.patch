@@ -1,0 +1,23 @@
+From 705df461e6c5f44225c263537a454fa83e636e56 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 Jan 2021 15:04:09 +0800
+Subject: [PATCH] Add cpld property for version purpose
+
+---
+ xyz/openbmc_project/Software/Version.interface.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/xyz/openbmc_project/Software/Version.interface.yaml b/xyz/openbmc_project/Software/Version.interface.yaml
+index 0afe922..790c120 100755
+--- a/xyz/openbmc_project/Software/Version.interface.yaml
++++ b/xyz/openbmc_project/Software/Version.interface.yaml
+@@ -42,3 +42,6 @@ enumerations:
+         - name: PSU
+           description: >
+             The version is a version for a PSU.
++        - name: CPLD
++          description: >
++            The version is a version for a CPLD.
+-- 
+2.7.4
+

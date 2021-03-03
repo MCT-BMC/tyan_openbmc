@@ -1,0 +1,11 @@
+[Unit]
+Description=Set the jtag driver default disabled
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env disable-jtag.sh
+SyslogIdentifier=disable-jtag
+
+[Install]
+WantedBy=sysinit.target
+
