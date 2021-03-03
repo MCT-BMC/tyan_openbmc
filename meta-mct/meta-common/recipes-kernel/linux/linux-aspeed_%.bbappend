@@ -8,5 +8,6 @@ SRC_URI += "file://0001-Common-sourec-files.patch \
             file://0005-irqchip-Add-Aspeed-SCU-Interrupt-Controller.patch \
             file://0006-Support-interrupt-handle-for-aspeed-bmc-misc.patch \
             file://0007-Add-the-mutex-lock-for-aspeed-misc-driver.patch \
+            file://0008-Support-JTAG-driver-for-ast2500.patch \
             "
 
