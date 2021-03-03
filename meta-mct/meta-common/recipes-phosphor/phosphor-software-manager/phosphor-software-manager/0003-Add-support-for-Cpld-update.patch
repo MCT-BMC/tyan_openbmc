@@ -1,0 +1,266 @@
+From 80ab2472d74c0356f49aa0574adbd69e371461d7 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 20 Jan 2021 15:11:49 +0800
+Subject: [PATCH] Add support for Cpld update
+
+Added support for Cpld upgrade, this is just first stage where there
+is no version check or image verify.
+
+Currently, this expect a cpld image to be copied with manifest file
+having version and provide a system unit file to be executed.
+
+To enable this feature need to enable config option
+--enable-cpld_upgrade via bbappend.
+---
+ Makefile.am              |   4 ++
+ activation.cpp           | 131 +++++++++++++++++++++++++++++++++++++++++++++++
+ activation.hpp           |  11 ++++
+ configure.ac             |   7 +++
+ item_updater.cpp         |   3 ++
+ obmc-flash-cpld@.service |   8 +++
+ 6 files changed, 164 insertions(+)
+ create mode 100755 obmc-flash-cpld@.service
+
+diff --git a/Makefile.am b/Makefile.am
+index 293867e..cd2521d 100755
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -58,6 +58,10 @@ if HOST_BIOS_UPGRADE
+ systemdsystemunit_DATA += obmc-flash-host-bios@.service
+ endif
+ 
++if CPLD_UPGRADE
++systemdsystemunit_DATA += obmc-flash-cpld@.service
++endif
++
+ tmpfilesdir=${exec_prefix}/lib/tmpfiles.d/
+ dist_tmpfiles_DATA = \
+ 	software.conf
+diff --git a/activation.cpp b/activation.cpp
+index 7ddb814..66f1775 100755
+--- a/activation.cpp
++++ b/activation.cpp
+@@ -111,6 +111,29 @@ auto Activation::activation(Activations value) -> Activations
+         }
+ #endif
+ 
++#ifdef CPLD_UPGRADE
++        auto cpldPurpose = parent.versions.find(versionId)->second->purpose();
++        if (cpldPurpose == VersionPurpose::CPLD)
++        {
++            if (!activationProgress)
++            {
++                activationProgress =
++                    std::make_unique<ActivationProgress>(bus, path);
++            }
++
++            // Enable systemd signals
++            subscribeToSystemdSignals();
++
++            // Set initial progress
++            activationProgress->progress(0);
++
++            // Initiate image writing to flash
++            flashWriteCpld();
++
++            return softwareServer::Activation::activation(value);
++        }
++#endif
++
+ #ifdef UBIFS_LAYOUT
+         if (rwVolumeCreated == false && roVolumeCreated == false)
+         {
+@@ -316,6 +339,15 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
+     }
+ #endif
+ 
++#ifdef CPLD_UPGRADE
++    auto cpldPurpose = parent.versions.find(versionId)->second->purpose();
++    if (cpldPurpose == VersionPurpose::CPLD)
++    {
++        onStateChangesCpld(msg);
++        return;
++    }
++#endif
++
+     onStateChanges(msg);
+ 
+     return;
+@@ -497,6 +529,105 @@ int32_t Activation::getBiosImagePath(std::string& biosImagePath)
+ 
+ #endif
+ 
++#ifdef CPLD_UPGRADE
++void Activation::flashWriteCpld()
++{
++    std::string cpldImagePath;
++    auto ret = getCpldImagePath(cpldImagePath);
++
++    if(ret!=0)
++    {
++        log<level::ERR>("Error in finding cpld path.");
++        report<InternalFailure>();
++        return;
++    }
++
++    std::replace( cpldImagePath.begin(), cpldImagePath.end(), '/', '-');
++
++    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
++                                      SYSTEMD_INTERFACE, "StartUnit");
++    auto cpldServiceFile = "obmc-flash-cpld@" + cpldImagePath + ".service";
++    method.append(cpldServiceFile, "replace");
++    try
++    {
++        auto reply = bus.call(method);
++    }
++    catch (const SdBusError& e)
++    {
++        log<level::ERR>("Error in trying to upgrade cpld.");
++        report<InternalFailure>();
++    }
++}
++
++void Activation::onStateChangesCpld(sdbusplus::message::message& msg)
++{
++    uint32_t newStateID{};
++    sdbusplus::message::object_path newStateObjPath;
++    std::string newStateUnit{};
++    std::string newStateResult{};
++
++    // Read the msg and populate each variable
++    msg.read(newStateID, newStateObjPath, newStateUnit, newStateResult);
++
++    auto cpldServiceFile = "obmc-flash-cpld@" + versionId + ".service";
++
++    if (newStateUnit == cpldServiceFile)
++    {
++        // unsubscribe to systemd signals
++        unsubscribeFromSystemdSignals();
++
++        // Remove version object from image manager
++        deleteImageManagerObject();
++
++        if (newStateResult == "done")
++        {
++            // Set activation progress to 100
++            activationProgress->progress(100);
++
++            // Set Activation value to active
++            activation(softwareServer::Activation::Activations::Active);
++
++            log<level::INFO>("CPLD upgrade completed successfully.");
++        }
++        else if (newStateResult == "failed")
++        {
++            // Set Activation value to Failed
++            activation(softwareServer::Activation::Activations::Failed);
++
++            log<level::ERR>("CPLD upgrade failed.");
++        }
++    }
++
++    return;
++}
++
++int32_t Activation::getCpldImagePath(std::string& cpldImagePath)
++{
++    fs::path dirPath(std::string{IMG_UPLOAD_DIR});
++    dirPath = dirPath / versionId;
++
++    int fileCounter = 0;
++    for (auto& it: fs::directory_iterator(dirPath))
++    {
++        if ( it.path().filename() != "MANIFEST" )
++        {
++            cpldImagePath = it.path();
++        }
++        fileCounter++;
++    }
++
++    // The count of files should be 2 : CPLD firmware file and Manifest.
++    if (fileCounter != 2)
++    {
++        log<level::ERR>("Erro in number of files");
++        return -1;
++    }
++
++    return 0;
++}
++
++#endif
++
+ void Activation::rebootBmc()
+ {
+     auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+diff --git a/activation.hpp b/activation.hpp
+index 3d5b23d..eb63c0c 100755
+--- a/activation.hpp
++++ b/activation.hpp
+@@ -241,6 +241,17 @@ class Activation : public ActivationInherit, public Flash
+     int32_t getBiosImagePath(std::string&);
+ #endif
+ 
++#ifdef CPLD_UPGRADE
++    /* @brief write to cpld flash function */
++    void flashWriteCpld();
++
++    /** @brief Function that acts on Cpld upgrade service file state changes */
++    void onStateChangesCpld(sdbusplus::message::message&);
++
++    /** @brief Get the CPLD image path. */
++    int32_t getCpldImagePath(std::string&);
++#endif
++
+     /** @brief Overloaded function that acts on service file state changes */
+     void onStateChanges(sdbusplus::message::message&) override;
+ 
+diff --git a/configure.ac b/configure.ac
+index 403ea8d..91dccb0 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -191,6 +191,13 @@ AS_IF([test "x$enable_host_bios_upgrade" == "xyes"], \
+     [AC_DEFINE([HOST_BIOS_UPGRADE],[],[Enable host bios upgrade support.])])
+ AM_CONDITIONAL([HOST_BIOS_UPGRADE], [test "x$enable_host_bios_upgrade" == "xyes"])
+ 
++# setup cpld upgrade support
++AC_ARG_ENABLE([cpld_upgrade],
++    AS_HELP_STRING([--enable-cpld_upgrade], [Enable host cpld upgrade support.]))
++AS_IF([test "x$enable_cpld_upgrade" == "xyes"], \
++    [AC_DEFINE([CPLD_UPGRADE],[],[Enable cpld upgrade support.])])
++AM_CONDITIONAL([CPLD_UPGRADE], [test "x$enable_cpld_upgrade" == "xyes"])
++
+ # Check for header files.
+ AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd development package required])])
+ AC_CHECK_HEADER(sdbusplus/server.hpp, ,[AC_MSG_ERROR([Could not find sdbusplus/server.hpp...openbmc/sdbusplus package required])])
+diff --git a/item_updater.cpp b/item_updater.cpp
+index 85836bd..e4b1626 100755
+--- a/item_updater.cpp
++++ b/item_updater.cpp
+@@ -67,6 +67,9 @@ void ItemUpdater::createActivation(sdbusplus::message::message& msg)
+ #ifdef HOST_BIOS_UPGRADE
+                         value == VersionPurpose::Host ||
+ #endif
++#ifdef CPLD_UPGRADE
++                        value == VersionPurpose::CPLD ||
++#endif
+                         value == VersionPurpose::System)
+                     {
+                         purpose = value;
+diff --git a/obmc-flash-cpld@.service b/obmc-flash-cpld@.service
+new file mode 100755
+index 0000000..44cf9c6
+--- /dev/null
++++ b/obmc-flash-cpld@.service
+@@ -0,0 +1,8 @@
++[Unit]
++Description=Flash CPLD image %I to CPLD
++
++[Service]
++Type=oneshot
++RemainAfterExit=no
++ExecStart=/usr/sbin/cpld-update %I 1
++ExecStartPost=/usr/sbin/image-active %I Ready None
+\ No newline at end of file
+-- 
+2.7.4
+
