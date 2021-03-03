@@ -1,0 +1,66 @@
+#! /bin/sh
+IMAGE_FILE=$1
+
+BUS_CMD="/usr/bin/busctl"
+
+CPLD_UPDATER_CMD="/usr/bin/cpldprog"
+FREQUENCE="500000"
+
+CPLD_PROGRESS_CMD="/usr/sbin/flash-progress-update"
+PROGREE_ENABLE=$2
+
+POWER_OBJ="xyz.openbmc_project.State.Host"
+POWER_PATH="/xyz/openbmc_project/state/host0"
+POWER_INTF="xyz.openbmc_project.State.Host"
+POWER_PROPERTY="RequestedHostTransition"
+POWER_OFF="xyz.openbmc_project.State.Host.Transition.Off"
+
+JTAG_DEV="1e6e4000.jtag"
+JTAG_PATH="/sys/bus/platform/drivers/jtag-aspeed"
+
+CPLD_VERSION_ID=$(echo $IMAGE_FILE |cut -d / -f 4)
+
+echo "MCT CPLD update handler"
+
+echo "Bind jtag-aspeed jtag driver"
+echo -n $JTAG_DEV > $JTAG_PATH/bind
+sleep 1
+
+#Power off host server.
+echo "Power off host server"
+$BUS_CMD set-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY s $POWER_OFF
+
+#Update progress with version ID
+if [  -n "$PROGREE_ENABLE"  ]; then
+    $CPLD_PROGRESS_CMD $CPLD_VERSION_ID 10
+fi
+
+sleep 15
+if [ $($BUS_CMD get-property $POWER_OBJ $POWER_PATH $POWER_INTF $POWER_PROPERTY|awk 'NR==1 {print $2}'|cut -d . -f 6|cut -d \" -f 0) != "Off" ];
+then
+    echo "Host server didn't power off"
+    echo "Cpld upgrade failed"
+    exit -1
+fi
+echo "Host server powered off"
+
+#Update progress with version ID
+if [  -n "$PROGREE_ENABLE"  ]; then
+    $CPLD_PROGRESS_CMD $CPLD_VERSION_ID 30
+fi
+
+echo "Flashing cpld image $IMAGE_FILE..."
+if [  -n "$PROGREE_ENABLE"  ]; then
+    $CPLD_UPDATER_CMD -P $CPLD_VERSION_ID -f $FREQUENCE -p $IMAGE_FILE
+else
+    $CPLD_UPDATER_CMD -f $FREQUENCE -p $IMAGE_FILE
+fi
+
+echo "Unbind jtag-aspeed jtag driver"
+echo -n $JTAG_DEV > $JTAG_PATH/unbind
+sleep 1
+
+echo "cpld updated successfully..."
+echo "Please do the AC cycle for finishing cpld update"
+
+exit 0
