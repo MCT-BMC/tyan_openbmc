@@ -30,4 +30,5 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           srvcfg-manager \
                                           cpldupdate-jtag \
                                           mct-cpld-update \
+                                          mct-bios-update \
                                         "
