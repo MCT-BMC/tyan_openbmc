@@ -1,0 +1,38 @@
+From 404f04c034251a112dd82ac749b5eb646ee32334 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 29 Jan 2021 20:04:57 +0800
+Subject: [PATCH] Support update progress for bios update feature
+
+---
+ activation.cpp                | 2 +-
+ obmc-flash-host-bios@.service | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/activation.cpp b/activation.cpp
+index 66f1775..c1bf77c 100755
+--- a/activation.cpp
++++ b/activation.cpp
+@@ -102,7 +102,7 @@ auto Activation::activation(Activations value) -> Activations
+             subscribeToSystemdSignals();
+ 
+             // Set initial progress
+-            activationProgress->progress(20);
++            activationProgress->progress(0);
+ 
+             // Initiate image writing to flash
+             flashWriteHost();
+diff --git a/obmc-flash-host-bios@.service b/obmc-flash-host-bios@.service
+index 520cc0d..35f1dde 100755
+--- a/obmc-flash-host-bios@.service
++++ b/obmc-flash-host-bios@.service
+@@ -4,5 +4,5 @@ Description=Flash Host Bios image %I to Host
+ [Service]
+ Type=oneshot
+ RemainAfterExit=no
+-ExecStart=/usr/sbin/bios-update %I
++ExecStart=/usr/sbin/bios-update-handler %I 1
+ ExecStartPost=/usr/sbin/image-active %I Ready None
+\ No newline at end of file
+-- 
+2.7.4
+
