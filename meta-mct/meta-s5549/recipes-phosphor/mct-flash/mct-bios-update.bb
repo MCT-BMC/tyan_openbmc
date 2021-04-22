@@ -15,6 +15,8 @@ SRC_URI = "file://bootstrap.sh \
            file://bios-update.cpp \
            file://bios-update.hpp \
            file://reserved-address.hpp \
+           file://bios-update-handler \
+           file://image-active \
            file://LICENSE \
            file://Makefile.am \
           "
@@ -38,3 +40,9 @@ RDEPENDS_${PN} += " \
 
 # PACKAGECONFIG[debug] = "--enable-debug"
 # PACKAGECONFIG_append = "debug"
+
+do_install_append() {
+    install -d ${D}/usr/sbin
+    install -m 0755 ${S}/bios-update-handler ${D}/${sbindir}/
+    install -m 0755 ${S}/image-active ${D}/${sbindir}/
+}

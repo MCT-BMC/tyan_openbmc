@@ -300,13 +300,13 @@ int recoveryReservedAddress()
 #endif
     if (lseek(fd, startOffset + flashOffset, SEEK_SET) == -1)
     {
-        std::cerr << "Error in 1 " << __func__ << std::endl;
+        std::cerr << "Error in lseek " << __func__ << std::endl;
         return -1;
     }
 
     if( (read(fd,flashBuf,(mtd.erasesize)*copyLength))!= (long int)(mtd.erasesize*copyLength))
     {
-        std::cerr << "Error in 2 " << __func__ << std::endl;
+        std::cerr << "Error in read " << __func__ << std::endl;
         return -1;
     }
 
