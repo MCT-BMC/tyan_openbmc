@@ -3,6 +3,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://0001-Allow-force-update-the-same-version-image.patch \
             file://0002-Implement-the-progress-for-updating-BIOS-image-to-ho.patch \
             file://0003-Add-support-for-Cpld-update.patch \
+            file://0004-Support-update-progress-for-bios-update-feature.patch \
             "
 
 PACKAGECONFIG[flash_cpld] = "--enable-cpld_upgrade"
