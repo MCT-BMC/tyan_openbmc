@@ -18,3 +18,8 @@ SRC_URI += "file://0004-Implement-NMI-command-in-Chassis-Control-command.patch \
             "
 EXTRA_OECONF += "--disable-i2c-whitelist-check"
 
+do_install_append(){
+  install -d ${D}${includedir}/phosphor-ipmi-host
+  install -m 0644 -D ${S}/sensorhandler.hpp ${D}${includedir}/phosphor-ipmi-host
+  install -m 0644 -D ${S}/selutility.hpp ${D}${includedir}/phosphor-ipmi-host
+}
