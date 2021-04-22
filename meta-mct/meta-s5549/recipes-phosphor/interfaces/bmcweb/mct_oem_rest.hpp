@@ -105,121 +105,6 @@ inline void crashdumpsHandler(const crow::Request& req, crow::Response& res)
     res.end();
 }
 
-inline void uploadBiosHandler(const crow::Request& req, crow::Response& res,
-                               const std::string& filename)
-{
-    std::cout << "uploadBiosHandlers\n";
-    // Only allow one FW update at a time
-    if (fwUpdateMatcher != nullptr)
-    {
-        res.addHeader("Retry-After", "30");
-        res.result(boost::beast::http::status::service_unavailable);
-        res.end();
-        return;
-    }
-    // Make this const static so it survives outside this method
-    static boost::asio::deadline_timer timeout(*req.ioService,
-                                               boost::posix_time::seconds(5));
-
-    timeout.expires_from_now(boost::posix_time::seconds(15));
-
-    auto timeoutHandler = [&res](const boost::system::error_code& ec) {
-        fwUpdateMatcher = nullptr;
-        if (ec == boost::asio::error::operation_aborted)
-        {
-            // expected, we were canceled before the timer completed.
-            return;
-        }
-        BMCWEB_LOG_ERROR << "Timed out waiting for Version interface";
-
-        if (ec)
-        {
-            BMCWEB_LOG_ERROR << "Async_wait failed " << ec;
-            return;
-        }
-          std::cout << "timeoutHandler\n";
-        res.jsonValue = {{"data", 
-                           {{"description",
-                                "done"}}},
-                        {"message", "200 OK"},
-                        {"status", "ok"}};
-        BMCWEB_LOG_DEBUG << "ending response";
-        res.end();
-        fwUpdateMatcher = nullptr;
- 
-    };
-
-    std::function<void(sdbusplus::message::message&)> callback =
-        [&res](sdbusplus::message::message& m) {
-            BMCWEB_LOG_DEBUG << "Match fired";
-
-            sdbusplus::message::object_path path;
-            std::vector<std::pair<
-                std::string,
-                std::vector<std::pair<std::string, std::variant<std::string>>>>>
-                interfaces;
-            m.read(path, interfaces);
-
-            if (std::find_if(interfaces.begin(), interfaces.end(),
-                             [](const auto& i) {
-                                 return i.first ==
-                                        "xyz.openbmc_project.Software.Version";
-                             }) != interfaces.end())
-            {
-                boost::system::error_code ec;
-                timeout.cancel(ec);
-                if (ec)
-                {
-                    BMCWEB_LOG_ERROR << "error canceling timer " << ec;
-                }
-
-                std::size_t index = path.str.rfind('/');
-                if (index != std::string::npos)
-                {
-                    path.str.erase(0, index + 1);
-                }
-                res.jsonValue = {{"data", std::move(path.str)},
-                                 {"message", "200 OK"},
-                                 {"status", "ok"}};
-                BMCWEB_LOG_DEBUG << "ending response";
-                res.end();
-                fwUpdateMatcher = nullptr;
-            }
-        };
-    /*
-    fwUpdateMatcher = std::make_unique<sdbusplus::bus::match::match>(
-        *crow::connections::systemBus,
-        "interface='org.freedesktop.DBus.ObjectManager',type='signal',"
-        "member='InterfacesAdded',path='/xyz/openbmc_project/software'",
-        callback);
-        */
-/*  note, this shared library is not default installell  
-    boost::filesystem::path dir("/tmp/bios/");
-
-    if(!(boost::filesystem::exists(dir))){
-        std::cout<<"Doesn't Exists"<<std::endl;
-
-        if (boost::filesystem::create_directory(dir))
-            std::cout << "....Successfully Created !" << std::endl;
-    }
-*/   
-
-    
-    struct stat sb;
-    if (stat("/tmp/bios", &sb) != 0) {
-        mkdir("/tmp/bios", 0755);
-    }
-
-    std::string filepath(
-        "/tmp/bios/bios.tgz");
-    BMCWEB_LOG_DEBUG << "Writing file to " << filepath;
-    std::ofstream out(filepath, std::ofstream::out | std::ofstream::binary |
-                                    std::ofstream::trunc);
-    out << req.body;
-    out.close();
-    timeout.async_wait(timeoutHandler);
-}
-
 inline void requestRoutes(App& app)
 {
     BMCWEB_ROUTE(app, "/sol.log")
@@ -235,12 +120,6 @@ inline void requestRoutes(App& app)
             [](const crow::Request &req, crow::Response &res) {
             crashdumpsHandler(req, res);
         });
-
-    BMCWEB_ROUTE(app, "/upload/bios")
-        .methods(boost::beast::http::verb::post)(
-            [](const crow::Request& req, crow::Response& res) {
-                uploadBiosHandler(req, res, "");
-            });    
 }
 } // namespace mct_oem_rest
 } // namespace crow

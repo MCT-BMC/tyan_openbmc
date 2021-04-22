@@ -11,7 +11,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           intel-ipmi-oem \
                                           phosphor-sel-logger \
                                           phosphor-pid-control \
-                                          bios-update \
                                           s5549-config \
                                           memrw-utility \
                                           system-watchdog \
