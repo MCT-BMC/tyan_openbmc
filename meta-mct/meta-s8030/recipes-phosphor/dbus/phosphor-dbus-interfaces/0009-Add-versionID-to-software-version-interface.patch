@@ -1,0 +1,27 @@
+From 9809ce95cbf13a4ecd37bdc41c8685bfdff7ff27 Mon Sep 17 00:00:00 2001
+From: "wendy.shi" <wendy.shi@mic.com.tw>
+Date: Tue, 11 May 2021 08:56:15 +0800
+Subject: [PATCH] Add versionID to software version interface
+
+---
+ xyz/openbmc_project/Software/Version.interface.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
+ mode change 100644 => 100755 xyz/openbmc_project/Software/Version.interface.yaml
+
+diff --git a/xyz/openbmc_project/Software/Version.interface.yaml b/xyz/openbmc_project/Software/Version.interface.yaml
+old mode 100644
+new mode 100755
+index 345e5b5..0afe922
+--- a/xyz/openbmc_project/Software/Version.interface.yaml
++++ b/xyz/openbmc_project/Software/Version.interface.yaml
+@@ -15,6 +15,10 @@ properties:
+       description: >
+         The purpose of the version.  As in, what can it be used for or
+         applied to?
++    - name: VersionId
++      type: string
++      description: >
++        The version identifier for same version.
+ enumerations:
+     - name: VersionPurpose
+       description: >
