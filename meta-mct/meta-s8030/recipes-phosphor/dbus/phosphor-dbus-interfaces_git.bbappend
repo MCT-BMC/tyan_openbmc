@@ -7,5 +7,6 @@ SRC_URI += "file://0002-Add-interface-for-caterr-logging.patch \
             file://0006-Set-watchdog-initialized-flag-true-as-default.patch \
             file://0007-Add-interface-for-DCMI-power.patch \
             file://0008-Add-interface-for-sensor-status.patch \
+            file://0009-Add-versionID-to-software-version-interface.patch \
             "
 
