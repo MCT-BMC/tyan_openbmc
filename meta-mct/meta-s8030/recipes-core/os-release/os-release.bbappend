@@ -3,8 +3,8 @@
 #
 
 python() {
-        d.setVar('VERSION', "v0.01-00-s8030")
-        d.setVar('VERSION_ID', "v0.01-00-s8030")
+        d.setVar('VERSION', "v0.02-00-s8030")
+        d.setVar('VERSION_ID', "v0.02-00-s8030")
         d.setVar('BMC_NAME', "S8030")
 }
 
