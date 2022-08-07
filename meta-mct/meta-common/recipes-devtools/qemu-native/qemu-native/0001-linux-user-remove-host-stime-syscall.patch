@@ -1,0 +1,29 @@
+From 3600be6cdb3956ef82669d210fa5001cc9f3b734 Mon Sep 17 00:00:00 2001
+From: Janny Au <janny.au@outlook.com>
+Date: Sun, 7 Aug 2022 18:44:26 +0800
+Subject: [PATCH] linux user remove host stime syscall
+
+---
+ linux-user/syscall.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/linux-user/syscall.c b/linux-user/syscall.c
+index 6030402b..05020992 100644
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -7651,10 +7651,12 @@ static abi_long do_syscall1(void *cpu_env, int num, abi_long arg1,
+ #ifdef TARGET_NR_stime /* not on alpha */
+     case TARGET_NR_stime:
+         {
+-            time_t host_time;
+-            if (get_user_sal(host_time, arg1))
++            struct timespec ts;
++            ts.tv_nsec = 0;
++            if (get_user_sal(ts.tv_sec, arg1)) {
+                 return -TARGET_EFAULT;
+-            return get_errno(stime(&host_time));
++            }
++            return get_errno(clock_settime(CLOCK_REALTIME, &ts));
+         }
+ #endif
+ #ifdef TARGET_NR_alarm /* not on alpha */
