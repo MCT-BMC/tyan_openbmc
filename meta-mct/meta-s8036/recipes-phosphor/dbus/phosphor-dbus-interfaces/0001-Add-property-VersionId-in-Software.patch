@@ -1,0 +1,24 @@
+From 60a27eff76a6e75b8853f4e72bef2b98662a4020 Mon Sep 17 00:00:00 2001
+From: Janny Au <janny.au@mic.com.tw>
+Date: Sun, 7 Aug 2022 11:18:53 +0800
+Subject: [PATCH] Add property VersionId in Software
+
+---
+ xyz/openbmc_project/Software/Version.interface.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/xyz/openbmc_project/Software/Version.interface.yaml b/xyz/openbmc_project/Software/Version.interface.yaml
+index 345e5b5..d8f10fd 100644
+--- a/xyz/openbmc_project/Software/Version.interface.yaml
++++ b/xyz/openbmc_project/Software/Version.interface.yaml
+@@ -10,6 +10,10 @@ properties:
+       type: string
+       description: >
+         The version identifier.
++    - name: VersionId
++      type: string
++      description: >
++        The version ID.
+     - name: Purpose
+       type: enum[self.VersionPurpose]
+       description: >
