@@ -17,6 +17,8 @@ SRC_URI = " \
            file://dhcp-check.sh \
            file://disable-jtag.service \
            file://disable-jtag.sh \
+           file://mct-bmc-booting-finish.service \
+           file://bmc-booting-finish.sh \
            "
 
 DEPENDS = "systemd"
@@ -27,6 +29,7 @@ SYSTEMD_SERVICE_${PN} = " \
                          initFruFlag.service \
                          dhcp-check.service \
                          disable-jtag.service \
+                         mct-bmc-booting-finish.service \
                          "
 
 
@@ -37,4 +40,5 @@ do_install() {
     install -m 0755 ${S}relinkLan.sh ${D}/${sbindir}/
     install -m 0755 ${S}dhcp-check.sh ${D}/${sbindir}/
     install -m 0755 ${S}disable-jtag.sh ${D}/${sbindir}/
+    install -m 0755 ${S}/bmc-booting-finish.sh ${D}/${sbindir}/
 }

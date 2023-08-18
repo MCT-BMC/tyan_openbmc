@@ -15,6 +15,7 @@ SRC_URI += "file://0004-Implement-NMI-command-in-Chassis-Control-command.patch \
             file://0017-Fix-the-wrong-field-value-for-session-info-commnad.patch \
             file://0018-Add-the-detect-for-firmare-revision.patch \
             file://0020-Change-power-soft-command-from-action-off-to-action-.patch \
+            file://0021-Add-bmc-self-testing-command-supported.patch \
             "
 EXTRA_OECONF += "--disable-i2c-whitelist-check"
 
