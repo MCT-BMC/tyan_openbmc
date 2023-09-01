@@ -1,0 +1,11 @@
+[Unit]
+Description=MCT early post feature
+
+[Service]
+ExecStartPre=/usr/bin/env bash -c 'echo 0 > /sys/class/graphics/fb0/blank'
+ExecStart=/usr/sbin/mct-early-post 0 /usr/share/mct-early-post/bootlogo.png
+Type=simple
+SyslogIdentifier=mct-early-post
+
+[Install]
+WantedBy=sysinit.target

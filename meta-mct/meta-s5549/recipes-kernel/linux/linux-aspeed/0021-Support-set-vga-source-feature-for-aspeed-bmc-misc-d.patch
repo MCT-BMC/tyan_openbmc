@@ -1,0 +1,61 @@
+From e8b9adf4a542f4466594bf3b4408937602760627 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 31 Aug 2023 07:51:12 +0000
+Subject: [PATCH] Support set vga source feature for aspeed-bmc-misc driver
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ drivers/soc/aspeed/aspeed-bmc-misc.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/drivers/soc/aspeed/aspeed-bmc-misc.c b/drivers/soc/aspeed/aspeed-bmc-misc.c
+index d2508c44de53..36af65b217eb 100755
+--- a/drivers/soc/aspeed/aspeed-bmc-misc.c
++++ b/drivers/soc/aspeed/aspeed-bmc-misc.c
+@@ -37,6 +37,13 @@ struct aspeed_bmc_misc {
+ static int irq;
+ static int irq_status;
+ 
++static u32 scu_misc_addr = 0x1E6E202C;
++static u32 red_buf;
++static u32 feature_status;
++static void __iomem *regs;
++
++#define SET_VGA_SOURCE 0x01
++
+ static int aspeed_bmc_misc_parse_dt_child(struct device_node *child,
+ 					  struct aspeed_bmc_ctrl *ctrl)
+ {
+@@ -66,6 +73,15 @@ static int aspeed_bmc_misc_parse_dt_child(struct device_node *child,
+ 	if (rc < 0)
+ 		return rc;
+ 
++	rc = of_property_read_u32(child, "feature-enable", &feature_status);
++	if (rc >= 0)
++	{
++		if(feature_status & SET_VGA_SOURCE){
++			printk("%s enabled: Set VGA source feature", ctrl->name);
++			regs = ioremap(scu_misc_addr, 4);
++		}
++	}
++
+ 	ctrl->mask <<= ctrl->shift;
+ 
+ 	return 0;
+@@ -188,6 +204,13 @@ static irqreturn_t aspeed_misc_irq(int irq, void *arg)
+ 
+ 	dev_dbg(bmc->dev, "Aspeed BMC MISC IRQ\n");
+ 
++	if(feature_status & SET_VGA_SOURCE){
++		red_buf = readl(regs);
++		red_buf |= BIT(16);
++		red_buf &= ~(BIT(17));
++		writel(red_buf, regs);
++	}
++
+ 	irq_status = 1;
+ 	sysfs_notify_dirent(bmc->kn);
+ 
+-- 
+2.25.1
+

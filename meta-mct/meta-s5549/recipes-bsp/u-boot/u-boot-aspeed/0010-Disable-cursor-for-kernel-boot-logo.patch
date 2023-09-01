@@ -1,0 +1,25 @@
+From 957122ce4f8f17a4f703d4d5954ea899c5ad3859 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 30 Aug 2023 07:39:53 +0000
+Subject: [PATCH] Disable cursor for kernel boot logo
+
+---
+ include/configs/ast-common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/ast-common.h b/include/configs/ast-common.h
+index 25d3d97cef..11b14a62fa 100644
+--- a/include/configs/ast-common.h
++++ b/include/configs/ast-common.h
+@@ -96,7 +96,7 @@
+ #define CONFIG_CMD_MTDPARTS
+ #endif
+ 
+-#define CONFIG_BOOTARGS			"console=ttyS4,115200n8 root=/dev/ram rw"
++#define CONFIG_BOOTARGS			"console=ttyS4,115200n8 root=/dev/ram rw vt.global_cursor_default=0"
+ 
+ #define CONFIG_AST_SPI_NOR    /* AST SPI NOR Flash */
+ #define CONFIG_FMC_CS			1
+-- 
+2.25.1
+

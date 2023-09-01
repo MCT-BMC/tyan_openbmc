@@ -1,0 +1,522 @@
+[
+	[
+		0,
+		"System Initializing..."
+	],
+	[
+		1,
+		"SEC-Power on. Reset type detection (soft/hard)."
+	],
+	[
+		2,
+		"SEC-AP initialization before microcode loading"
+	],
+	[
+		3,
+		"SEC-North Bridge initialization before microcode loading"
+	],
+	[
+		4,
+		"SEC-South Bridge initialization before microcode loading"
+	],
+	[
+		5,
+		"SEC-OEM initialization before microcode loading"
+	],
+	[
+		6,
+		"SEC-Microcode loading"
+	],
+	[
+		7,
+		"SEC-AP initialization after microcode loading"
+	],
+	[
+		8,
+		"SEC-North Bridge initialization after microcode loading"
+	],
+	[
+		9,
+		"SEC-South Bridge initialization after microcode loading"
+	],
+	[
+		11,
+		"SEC-Cache initialization"
+	],
+	[
+		14,
+		"SEC-Microcode not found"
+	],
+	[
+		15,
+		"SEC-Microcode not loaded"
+	],
+	[
+		16,
+		"PEI Core is started"
+	],
+	[
+		17,
+		"PEI-Pre-memory CPU initialization is started"
+	],
+	[
+		21,
+		"PEI-Pre-memory North Bridge initialization is started"
+	],
+	[
+		25,
+		"PEI-Pre-memory South Bridge initialization is started"
+	],
+	[
+		30,
+		"BMC communicate starting"
+	],
+	[
+		31,
+		"BMC communicate ending"
+	],
+	[
+		43,
+		"PEI-Serial Presence Detect (SPD) data reading"
+	],
+	[
+		44,
+		"PEI-Memory presence detection"
+	],
+	[
+		45,
+		"PEI-Programming memory timing information"
+	],
+	[
+		46,
+		"PEI-Configuring memory"
+	],
+	[
+		47,
+		"PEI-Memory initialization (other)."
+	],
+	[
+		48,
+		"PEI-System is waking up from the S3 sleep state"
+	],
+	[
+		49,
+		"PEI-Memory Installed"
+	],
+	[
+		50,
+		"PEI-CPU post-memory initialization is started"
+	],
+	[
+		51,
+		"PEI-Cache initialization"
+	],
+	[
+		52,
+		"PEI-Application Processor(s) (AP) initialization"
+	],
+	[
+		53,
+		"PEI-Boot Strap Processor (BSP) selection"
+	],
+	[
+		54,
+		"PEI-System Management Mode (SMM) initialization"
+	],
+	[
+		55,
+		"PEI-Post-Memory North Bridge initialization is started"
+	],
+	[
+		59,
+		"PEI-Post-Memory South Bridge initialization is started"
+	],
+	[
+		79,
+		"PEI-DXE IPL is started"
+	],
+	[
+		80,
+		"PEI-Invalid memory type or incompatible memory speed"
+	],
+	[
+		81,
+		"PEI-SPD reading has failed"
+	],
+	[
+		82,
+		"PEI-Invalid memory size or memory modules do not match."
+	],
+	[
+		83,
+		"PEI-No usable memory detected"
+	],
+	[
+		84,
+		"PEI-Unspecified memory initialization error."
+	],
+	[
+		85,
+		"PEI-Memory not installed"
+	],
+	[
+		86,
+		"PEI-Invalid CPU type or Speed"
+	],
+	[
+		87,
+		"PEI-CPU mismatch"
+	],
+	[
+		88,
+		"PEI-CPU self test failed or possible CPU cache error"
+	],
+	[
+		89,
+		"PEI-CPU micro-code is not found or micro-code update is failed"
+	],
+	[
+		90,
+		"PEI-Internal CPU error"
+	],
+	[
+		91,
+		"PEI-reset PPI is not available"
+	],
+	[
+		92,
+		"PEI phase BMC self-test failure"
+	],
+	[
+		96,
+		"DXE-DXE Core is started"
+	],
+	[
+		97,
+		"DXE-NVRAM initialization"
+	],
+	[
+		98,
+		"DXE-Installation of the South Bridge Runtime Services"
+	],
+	[
+		99,
+		"DXE-CPU DXE initialization is started"
+	],
+	[
+		104,
+		"DXE-PCI host bridge initialization"
+	],
+	[
+		105,
+		"DXE-North Bridge DXE initialization is started"
+	],
+	[
+		106,
+		"DXE-North Bridge DXE SMM initialization is started"
+	],
+	[
+		112,
+		"DXE-South Bridge DXE initialization is started"
+	],
+	[
+		113,
+		"DXE-South Bridge DXE SMM initialization is started"
+	],
+	[
+		114,
+		"DXE-South Bridge devices initialization"
+	],
+	[
+		120,
+		"DXE-ACPI module initialization"
+	],
+	[
+		121,
+		"DXE-CSM initialization"
+	],
+	[
+		144,
+		"DXE-Boot Device Selection (BDS) phase is started"
+	],
+	[
+		145,
+		"DXE-Driver connecting is started"
+	],
+	[
+		146,
+		"DXE-PCI Bus initialization is started"
+	],
+	[
+		147,
+		"DXE-PCI Bus Hot Plug Controller Initialization"
+	],
+	[
+		148,
+		"DXE-PCI Bus Enumeration"
+	],
+	[
+		149,
+		"DXE-PCI Bus Request Resources"
+	],
+	[
+		150,
+		"DXE-PCI Bus Assign Resources"
+	],
+	[
+		151,
+		"DXE-Console Output devices connect"
+	],
+	[
+		152,
+		"DXE-Console input devices connect"
+	],
+	[
+		153,
+		"DXE-Super IO Initialization"
+	],
+	[
+		154,
+		"DXE-USB initialization is started"
+	],
+	[
+		155,
+		"DXE-USB Reset"
+	],
+	[
+		156,
+		"DXE-USB Detect"
+	],
+	[
+		157,
+		"DXE-USB Enable"
+	],
+	[
+		160,
+		"DXE-IDE initialization is started"
+	],
+	[
+		161,
+		"DXE-IDE Reset"
+	],
+	[
+		162,
+		"DXE-IDE Detect"
+	],
+	[
+		163,
+		"DXE-IDE Enable"
+	],
+	[
+		164,
+		"DXE-SCSI initialization is started"
+	],
+	[
+		165,
+		"DXE-SCSI Reset"
+	],
+	[
+		166,
+		"DXE-SCSI Detect"
+	],
+	[
+		167,
+		"DXE-SCSI Enable"
+	],
+	[
+		168,
+		"DXE-Setup Verifying Password"
+	],
+	[
+		169,
+		"DXE-Start of Setup"
+	],
+	[
+		170,
+		"DXE-Interrupt controller is in APIC mode."
+	],
+	[
+		171,
+		"DXE-Setup Input Wait"
+	],
+	[
+		172,
+		"DXE-Interrupt controller is in PIC mode."
+	],
+	[
+		173,
+		"DXE-Ready To Boot event"
+	],
+	[
+		174,
+		"DXE-Legacy Boot event"
+	],
+	[
+		175,
+		"DXE-Exit Boot Services event"
+	],
+	[
+		176,
+		"DXE-Runtime Set Virtual Address MAP Begin"
+	],
+	[
+		177,
+		"DXE-Runtime Set Virtual Address MAP End"
+	],
+	[
+		178,
+		"DXE-Legacy Option ROM Initialization"
+	],
+	[
+		179,
+		"DXE-System Reset"
+	],
+	[
+		180,
+		"DXE-USB hot plug"
+	],
+	[
+		181,
+		"DXE-PCI bus hot plug"
+	],
+	[
+		182,
+		"DXE-Clean-up of NVRAM"
+	],
+	[
+		183,
+		"DXE-Configuration Reset (reset of NVRAM settings)"
+	],
+	[
+		192,
+		"BDS-OEM BDS initialization codes"
+	],
+	[
+		208,
+		"DXE-CPU initialization error"
+	],
+	[
+		209,
+		"DXE-North Bridge initialization error"
+	],
+	[
+		210,
+		"DXE-South Bridge initialization error"
+	],
+	[
+		211,
+		"DXE-Some of the Architectural Protocols are not available"
+	],
+	[
+		212,
+		"DXE-PCI resource allocation error. Out of Resources"
+	],
+	[
+		213,
+		"DXE-No Space for Legacy Option ROM"
+	],
+	[
+		214,
+		"DXE-No Console Output Devices are found"
+	],
+	[
+		215,
+		"DXE-No Console Input Devices are found"
+	],
+	[
+		216,
+		"DXE-Invalid password"
+	],
+	[
+		217,
+		"DXE-Error loading Boot Option (LoadImage returned error)"
+	],
+	[
+		218,
+		"DXE-Boot Option is failed (StartImage returned error)"
+	],
+	[
+		219,
+		"DXE-Flash update is failed"
+	],
+	[
+		220,
+		"DXE-Reset protocol is not available"
+	],
+	[
+		221,
+		"DXE-DXE phase BMC self-test failure"
+	],
+	[
+		224,
+		"S3 Resume is stared"
+	],
+	[
+		225,
+		"S3 Resume-S3 Boot Script execution"
+	],
+	[
+		226,
+		"S3 Resume-Video repost"
+	],
+	[
+		227,
+		"S3 Resume-OS S3 wake vector call"
+	],
+	[
+		232,
+		"S3 Resume Failed"
+	],
+	[
+		233,
+		"S3 Resume PPI not Found"
+	],
+	[
+		234,
+		"S3 Resume Boot Script Error"
+	],
+	[
+		235,
+		"S3 Resume-S3 OS Wake Error"
+	],
+	[
+		237,
+		"ERR_DIMM_COMPAT-UDIMM is not support"
+	],
+	[
+		240,
+		"Recovery Progress-condition triggered by firmware (Auto recovery)"
+	],
+	[
+		241,
+		"Recovery Progress- condition triggered by user (Forced recovery)"
+	],
+	[
+		242,
+		"Recovery Progress- process started"
+	],
+	[
+		243,
+		"Recovery Progress- firmware image is found"
+	],
+	[
+		244,
+		"Recovery Progress- firmware image is loaded"
+	],
+	[
+		245,
+		"Recovery Progress- for future AMI progress codes"
+	],
+	[
+		248,
+		"Recovery Error-PPI is not available"
+	],
+	[
+		249,
+		"Recovery Error- capsule is not found"
+	],
+	[
+		250,
+		"Recovery Error-Invalid recovery capsule"
+	]
+]

@@ -23,11 +23,12 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s5549 = " libgpiod \
                                           phosphor-host-postd \
                                           ethtool \
                                           mct-dcmi-power \
-                                          gdb \
                                           mct-register-monitor \
                                           state-manager-recheck \
                                           srvcfg-manager \
                                           cpldupdate-jtag \
                                           mct-cpld-update \
                                           mct-bios-update \
+                                          mct-early-post-bin \
+                                          mct-post-code-config \
                                         "

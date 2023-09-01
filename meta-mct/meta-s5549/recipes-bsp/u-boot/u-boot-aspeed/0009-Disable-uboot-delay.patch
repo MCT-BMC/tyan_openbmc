@@ -1,0 +1,26 @@
+From 1b73d88203512df56514b7cddf1a499de1374252 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 23 Aug 2023 12:23:53 +0000
+Subject: [PATCH] Disable uboot delay
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ include/configs/ast-common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/ast-common.h b/include/configs/ast-common.h
+index a0243083bd..25d3d97cef 100644
+--- a/include/configs/ast-common.h
++++ b/include/configs/ast-common.h
+@@ -70,7 +70,7 @@
+ /*
+  * Environment Config
+  */
+-#define CONFIG_BOOTDELAY		2
++#define CONFIG_BOOTDELAY		0
+ 
+ /*
+  * Miscellaneous configurable options
+-- 
+2.25.1
+

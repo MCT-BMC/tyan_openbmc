@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-aspeed:"
 
 SRC_URI += "file://0001-Light-BMC-Heartbeat-LED.patch \
             file://0002-Set-the-default-UART-route-setting.patch \
@@ -10,4 +10,3 @@ SRC_URI += "file://0001-Light-BMC-Heartbeat-LED.patch \
             file://0009-Disable-uboot-delay.patch \
             file://0010-Disable-cursor-for-kernel-boot-logo.patch \
             "
-

@@ -2,6 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 
 SRC_URI += "file://s5549.cfg \
+            file://logo_tyan_clut224.ppm;subdir=git/drivers/video/logo \
             file://aspeed-bmc-mct-s5549.dts;subdir=git/arch/${ARCH}/boot/dts \
             file://0004-Set-RTD_1_2_3-to-thermistor-mode.patch \
             file://0006-Modified-ibm-cffps-driver.patch \
@@ -15,5 +16,10 @@ SRC_URI += "file://s5549.cfg \
             file://0014-Clear-the-i2c-slave-state-when-a-bmc-i2c-master-cmd-.patch \
             file://0015-misc-Add-clock-control-logic-into-Aspeed-LPC-SNOOP-d.patch \
             file://0016-media-aspeed-fix-clock-handling-logic.patch \
+            file://0017-Support-setting-DAC-source-in-DTS.patch \
+            file://0018-Support-default-mode-for-aspeed-gfx-driver.patch \
+            file://0019-Filter-same-post-code-with-post-value-zero.patch \
+            file://0020-Support-tyan-boot-logo.patch \
+            file://0021-Support-set-vga-source-feature-for-aspeed-bmc-misc-d.patch \
             "
 
