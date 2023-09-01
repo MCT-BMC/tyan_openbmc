@@ -1,0 +1,26 @@
+From 98dea5def2af823c558df634775490769a3118c4 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 18 Aug 2023 06:31:07 +0000
+Subject: [PATCH 2/2] Add restart property for post code manager service
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ service_files/xyz.openbmc_project.State.Boot.PostCode.service | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/service_files/xyz.openbmc_project.State.Boot.PostCode.service b/service_files/xyz.openbmc_project.State.Boot.PostCode.service
+index 4246472..eef6a74 100644
+--- a/service_files/xyz.openbmc_project.State.Boot.PostCode.service
++++ b/service_files/xyz.openbmc_project.State.Boot.PostCode.service
+@@ -6,6 +6,8 @@ ExecStart=/usr/bin/env post-code-manager
+ SyslogIdentifier=post-code-manager
+ Type=dbus
+ BusName=xyz.openbmc_project.State.Boot.PostCode
++Restart=always
++RestartSec=5
+ 
+ [Install]
+ WantedBy=multi-user.target
+-- 
+2.25.1
+
