@@ -1,18 +1,18 @@
-From 30e212cbb91fb0ecb4d3e4910fd14931c5b2d7c2 Mon Sep 17 00:00:00 2001
+From f6409ae737e92a6aed0655d3665b7220209dd40c Mon Sep 17 00:00:00 2001
 From: John Chung <john.chung@mic.com.tw>
 Date: Wed, 23 Aug 2023 12:22:23 +0000
 Subject: [PATCH] Set VGA source with AC lost status setting
 
 Signed-off-by: John Chung <john.chung@mic.com.tw>
 ---
- board/aspeed/ast-g5/ast-g5.c | 29 ++++++++++++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
+ board/aspeed/ast-g5/ast-g5.c | 26 +++++++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
 
 diff --git a/board/aspeed/ast-g5/ast-g5.c b/board/aspeed/ast-g5/ast-g5.c
-index eebd4a7edb..6949b14e17 100755
+index eebd4a7edb..ccd8db1f55 100755
 --- a/board/aspeed/ast-g5/ast-g5.c
 +++ b/board/aspeed/ast-g5/ast-g5.c
-@@ -98,6 +98,32 @@ void Set_HW_Watchdog(void)
+@@ -98,6 +98,29 @@ void Set_HW_Watchdog(void)
      writel(0x13, AST_WDT2_BASE + 0x0c);
  }
  
@@ -29,9 +29,6 @@ index eebd4a7edb..6949b14e17 100755
 +        puts ("Graphics CRT mode\n");
 +        *(volatile ulong *)(AST_SCU_BASE + AST_SCU_MISC1_CTRL) |= 0x00010000;
 +        *(volatile ulong *)(0x1e723100) = 0x41434C09; //ascii "A C L (checksum)"
-+
-+        *(volatile ulong *)(0x1e6e6060) |= 0x00000001;
-+        *(volatile ulong *)(0x1e6e6064) |= 0x00000001;
 +    }
 +    else
 +    {
@@ -45,7 +42,7 @@ index eebd4a7edb..6949b14e17 100755
  int board_init(void)
  {
  	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
-@@ -107,7 +133,8 @@ int board_init(void)
+@@ -107,7 +130,8 @@ int board_init(void)
      Set_Default_UART_Route();
  	Set_Default_GPIO_Pass_Through();
  	Set_HW_Watchdog();
