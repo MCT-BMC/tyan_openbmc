@@ -10,7 +10,10 @@ S = "${WORKDIR}/"
 SRC_URI = "file://CMakeLists.txt\
            file://LICENSE \
            file://oemcmd.cpp \
-	       file://oemcmd.hpp "
+           file://oemcmd.hpp \
+           file://common-utils.cpp \
+           file://common-utils.hpp \
+           "
 
 DEPENDS = "boost phosphor-ipmi-host phosphor-logging systemd intel-dbus-interfaces"
 DEPENDS += "libgpiod libpeci"

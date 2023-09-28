@@ -33,6 +33,8 @@
 
 #include "xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp"
 
+#include "common-utils.hpp"
+
 #define FSC_SERVICE "xyz.openbmc_project.EntityManager"
 #define FSC_OBJECTPATH "/xyz/openbmc_project/inventory/system/board/s8030_Baseboard/Pid_"
 #define PID_INTERFACE "xyz.openbmc_project.Configuration.Pid.Zone"
@@ -157,6 +159,68 @@ void createTimer()
     {
         clrCmosTimer = std::make_unique<phosphor::Timer>(clrCmos);
     }
+}
+
+ipmi::Cc setManufactureFieledProperty(uint8_t selctField, uint8_t size,
+                                      uint8_t& readCount, uint8_t& offsetMSB, uint8_t& offsetLSB)
+{
+    std::vector<uint8_t> validSize = {2, 1, 16, 16, 16, 6, 6, 32};
+
+    if(size != validSize[selctField] && readCount==0)
+    {
+        return ipmi::ccReqDataLenInvalid;
+    }
+
+    readCount = validSize[selctField];
+
+    switch(selctField)
+    {
+        case 0:
+            // 0h-Product ID, 2 Bytes, LSB
+            offsetMSB = 0x00;
+            offsetLSB = 0x0d;
+            break;
+        case 1:
+            // 1h-SKU ID, 1 Byte
+            offsetMSB = 0x00;
+            offsetLSB = 0x0f;
+            break;
+        case 2:
+            // 2h-Device GUID, 16 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x10;
+            break;
+        case 3:
+            // 3h-System GUID, 16 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x20;
+            break;
+        case 4:
+            // 4h-Motherboard Serial Number, 16 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x30;
+            break;
+        case 5:
+            //  5h-MAC 1 Address, 6 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x40;
+            break;
+        case 6:
+            //  6h-MAC 2 Address, 6 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x46;
+            break;
+        case 7:
+            // 7h-System Name, 32 Bytes
+            offsetMSB = 0x00;
+            offsetLSB = 0x4c;
+            break;
+        default:
+            return ipmi::ccUnspecifiedError;
+            break;
+    }
+
+    return ipmi::ccSuccess;
 }
 
 /*
@@ -1329,6 +1393,208 @@ ipmi::RspType<uint8_t> ipmi_setAmdSmbusOwner(uint8_t status)
 }
 
 //===============================================================
+/* Set Manufacture Data Command
+NetFun: 0x2E
+Cmd : 0x0D
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+    Byte 4 : Manufacture Data Parameter
+                0h-Product ID, 2 Bytes, LSB
+                1h-SKU ID, 1 Byte
+                2h-Device GUID, 16 Bytes
+                3h-System GUID, 16 Bytes
+                4h-Motherboard Serial Number, 16 Bytes
+                5h-MAC 1 Address, 6 Bytes
+                6h-MAC 2 Address, 6 Bytes
+                7h-System Name, 32 Bytes
+    Byte 5-N : Data
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+*/
+ipmi::RspType<> ipmi_setManufactureData(uint8_t selctField, std::vector<uint8_t> writeData)
+{
+    ipmi::Cc ret;
+    uint8_t busId, slaveAddr;
+    uint8_t readCount = 0x00;
+    uint8_t offsetMSB, offsetLSB;
+
+    if(common::getBaseboardFruAddress(busId, slaveAddr) < 0)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ret = setManufactureFieledProperty(selctField, writeData.size(), readCount, offsetMSB, offsetLSB);
+
+    if(ret !=  ipmi::ccSuccess)
+    {
+        return ipmi::response(ret);
+    }
+
+    std::vector<uint8_t> writeDataWithOffset;
+    writeDataWithOffset.assign(writeData.begin(), writeData.end());
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetLSB);
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetMSB);
+
+    std::vector<uint8_t> readBuf(0x00);
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+
+    ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeDataWithOffset, readBuf);
+
+    if(ret !=  ipmi::ccSuccess)
+    {
+        return ipmi::response(ret);
+    }
+
+    return ipmi::responseSuccess();
+}
+
+//===============================================================
+/* Get Manufacture Data Command
+NetFun: 0x2E
+Cmd : 0x0E
+Request:
+    Byte 1-3 : Tyan Manufactures ID (FD 19 00)
+    Byte 4 : Manufacture Data Parameter
+                0h-Product ID, 2 Bytes, LSB
+                1h-SKU ID, 1 Byte
+                2h-Device GUID, 16 Bytes
+                3h-System GUID, 16 Bytes
+                4h-Motherboard Serial Number, 16 Bytes
+                5h-MAC 1 Address, 6 Bytes
+                6h-MAC 2 Address, 6 Bytes
+                7h-System Name, 32 Bytes
+Response:
+    Byte 1 : Completion Code
+    Byte 2-4 : Tyan Manufactures ID
+    Byte 5-N : Data
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmi_getManufactureData(uint8_t selctField)
+{
+    ipmi::Cc ret;
+    uint8_t busId, slaveAddr;
+    uint8_t readCount = 0x01;
+    uint8_t offsetMSB, offsetLSB;
+
+    if(common::getBaseboardFruAddress(busId, slaveAddr) < 0)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ret = setManufactureFieledProperty(selctField, 0x00, readCount, offsetMSB, offsetLSB);
+
+    if(ret !=  ipmi::ccSuccess)
+    {
+        return ipmi::response(ret);
+    }
+
+    std::vector<uint8_t> readBuf(readCount);
+    std::vector<uint8_t> writeDataWithOffset;
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetLSB);
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetMSB);
+
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+
+    ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeDataWithOffset, readBuf);
+
+    return ipmi::responseSuccess(readBuf);
+}
+
+//===============================================================
+/* Get Device GUID Command
+ * Override the general IPMI command
+NetFun: 0x0A
+Cmd : 0x08
+Request:
+
+Response:
+    Byte 1 : Completion Code
+    Byte 2-17 : GUID bytes 1 through 16.
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmiAppGetDeviceGuid()
+{
+    ipmi::Cc ret;
+    uint8_t busId, slaveAddr;
+    uint8_t readCount = 0x01;
+    uint8_t offsetMSB, offsetLSB;
+    uint8_t selctField = 0x02; // 2h-Device GUID, 16 Bytes
+
+    if(common::getBaseboardFruAddress(busId, slaveAddr) < 0)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ret = setManufactureFieledProperty(selctField, 0x00, readCount, offsetMSB, offsetLSB);
+
+    if(ret !=  ipmi::ccSuccess)
+    {
+        return ipmi::response(ret);
+    }
+
+    std::vector<uint8_t> readBuf(readCount);
+    std::vector<uint8_t> writeDataWithOffset;
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetLSB);
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetMSB);
+
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+
+    ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeDataWithOffset, readBuf);
+
+    return ipmi::responseSuccess(readBuf);
+}
+
+//===============================================================
+/* Get System GUID Command
+ * Override the general IPMI command
+NetFun: 0x0A
+Cmd : 0x37
+Request:
+
+Response:
+    Byte 1 : Completion Code
+    Byte 2-17 : GUID bytes 1 through 16.
+*/
+ipmi::RspType<std::vector<uint8_t>> ipmiAppGetSystemGuid()
+{
+    ipmi::Cc ret;
+    uint8_t busId, slaveAddr;
+    uint8_t readCount = 0x01;
+    uint8_t offsetMSB, offsetLSB;
+    uint8_t selctField = 0x03; // 3h-System GUID, 16 Bytes
+
+    if(common::getBaseboardFruAddress(busId, slaveAddr) < 0)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ret = setManufactureFieledProperty(selctField, 0x00, readCount, offsetMSB, offsetLSB);
+
+    if(ret !=  ipmi::ccSuccess)
+    {
+        return ipmi::response(ret);
+    }
+
+    std::vector<uint8_t> readBuf(readCount);
+    std::vector<uint8_t> writeDataWithOffset;
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetLSB);
+    writeDataWithOffset.insert(writeDataWithOffset.begin(), offsetMSB);
+
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+
+    ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeDataWithOffset, readBuf);
+
+    return ipmi::responseSuccess(readBuf);
+}
+
+//===============================================================
 
 void register_netfn_mct_oem()
 {
@@ -1343,11 +1609,15 @@ void register_netfn_mct_oem()
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFruField, ipmi::Privilege::Admin, ipmi_getFruField);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetFirmwareString, ipmi::Privilege::Admin, ipmi_getFirmwareString);
     ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetAmdSmbusOwner, ipmi::Privilege::Admin, ipmi_setAmdSmbusOwner);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_SetManufactureData, ipmi::Privilege::Admin, ipmi_setManufactureData);
+    ipmi::registerOemHandler(ipmi::prioMax, IANA_TYAN, IPMI_CMD_GetManufactureData, ipmi::Privilege::Admin, ipmi_getManufactureData);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RamdomDelayACRestorePowerON, ipmi::Privilege::Admin, ipmi_tyan_RamdomDelayACRestorePowerON);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_SetService, ipmi::Privilege::Admin, ipmi_SetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetService, ipmi::Privilege::Admin, ipmi_GetService);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_GetPostCode, ipmi::Privilege::Admin, ipmi_GetPostCode);
     ipmi::registerHandler(ipmi::prioMax, NETFUN_TWITTER_OEM, IPMI_CMD_RelinkLan, ipmi::Privilege::Admin, ipmi_RelinkLan);
     ipmi::registerHandler(ipmi::prioMax, ipmi::netFnStorage, ipmi::storage::cmdSetSelTime, ipmi::Privilege::Admin,ipmi_setSELTime);
+    ipmi::registerHandler(ipmi::prioMax, ipmi::netFnApp, ipmi::app::cmdGetDeviceGuid, ipmi::Privilege::Admin, ipmiAppGetDeviceGuid);
+    ipmi::registerHandler(ipmi::prioMax, ipmi::netFnApp, ipmi::app::cmdGetSystemGuid, ipmi::Privilege::Admin, ipmiAppGetSystemGuid);
 }
 }

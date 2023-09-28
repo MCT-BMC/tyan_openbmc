@@ -41,7 +41,7 @@ find_package (OpenSSL REQUIRED)
 include_directories (${OPENSSL_INCLUDE_DIR})
 
 add_library (
-    mctoemcmds SHARED oemcmd.cpp
+    mctoemcmds SHARED oemcmd.cpp common-utils.cpp
 )
 set_target_properties (mctoemcmds PROPERTIES VERSION "0.1.0")
 set_target_properties (mctoemcmds PROPERTIES SOVERSION "0")
