@@ -1,0 +1,42 @@
+From 8cd5a8c57143ac225bcd6e0e2fa62a882770c35e Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 12 Oct 2023 06:48:16 +0000
+Subject: [PATCH] Disable BMC SPI multi-Function pin
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ board/aspeed/ast-g5/ast-g5.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/board/aspeed/ast-g5/ast-g5.c b/board/aspeed/ast-g5/ast-g5.c
+index d1d3aae1ca..18f31a61d7 100644
+--- a/board/aspeed/ast-g5/ast-g5.c
++++ b/board/aspeed/ast-g5/ast-g5.c
+@@ -26,12 +26,24 @@ void Set_Default_UART_Route(void)
+     *(volatile ulong *)(0x1E78909C) = 0x1400000 ;
+ }
+ 
++/*--------------------------------------------------------------------
++ * @fn Disable BMC SPI multi-Function pin
++ * @brief Disable BMC SPI multi-Function pin
++ *--------------------------------------------------------------------*/
++void Disable_BMC_SPI_Multi_Function_Pin(void)
++{
++    puts("Disable BMC SPI multi-Function pin (GPIOR0, GPIOR1)...\n");
++    *(volatile ulong *)(0x1E6E2088) &= 0xFCFFFFFF;
++}
++
++
+ int board_init(void)
+ {
+ 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
+ 	gd->flags = 0;
+ 
+ 	Set_Default_UART_Route();
++	Disable_BMC_SPI_Multi_Function_Pin();
+ 	return 0;
+ }
+ 
+-- 
+2.25.1
+

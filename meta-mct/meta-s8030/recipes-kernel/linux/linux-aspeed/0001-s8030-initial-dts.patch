@@ -4,8 +4,8 @@ Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 341 +++++++++++++++++++++++++++++
- 1 file changed, 341 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 345 +++++++++++++++++++++++++++++
+ 1 file changed, 345 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
@@ -13,7 +13,7 @@ new file mode 100755
 index 0000000..cbaceb2
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,341 @@
+@@ -0,0 +1,345 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -337,7 +337,7 @@ index 0000000..cbaceb2
 +    /*O0-O7*/   "","","","","","","","",
 +    /*P0-P7*/   "","","","","","","","",
 +    /*Q0-Q7*/   "","","","","","","","",
-+    /*R0-R7*/   "","","","","","","","",
++    /*R0-R7*/   "JTAG_MUX_S","JTAG_MUX_OE","","HDT_DBREQ","HDT_SEL","","","",
 +    /*S0-S7*/   "","","","","","","","",
 +    /*T0-T7*/   "","","","","","","","",
 +    /*U0-U7*/   "","","","","","","","",
@@ -354,4 +354,8 @@ index 0000000..cbaceb2
 +&lpc_snoop {
 +    status = "okay";
 +    snoop-ports = <0x80>;
++};
++
++&jtag {
++    status = "okay";
 +};
