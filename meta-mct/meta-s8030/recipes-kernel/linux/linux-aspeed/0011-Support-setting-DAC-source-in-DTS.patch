@@ -1,0 +1,78 @@
+From daeee3a25d61cfaff2ef45b433bdf245ed239698 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Fri, 18 Aug 2023 06:54:37 +0000
+Subject: [PATCH] Support setting DAC source in DTS
+
+Signed-off-by: osmond.chen <osmond.chen@mic.com.tw>
+---
+ drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c | 43 +++++++++++++++++++++++-
+ 1 file changed, 42 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c b/drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c
+index 2184b8be6fd4..460b0461b147 100644
+--- a/drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c
++++ b/drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c
+@@ -4,6 +4,10 @@
+ #include <linux/clk.h>
+ #include <linux/reset.h>
+ #include <linux/regmap.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_reserved_mem.h>
++#include <linux/platform_device.h>
+ 
+ #include <drm/drm_crtc_helper.h>
+ #include <drm/drm_device.h>
+@@ -56,11 +60,48 @@ static int aspeed_gfx_set_pixel_fmt(struct aspeed_gfx *priv, u32 *bpp)
+ 
+ static void aspeed_gfx_enable_controller(struct aspeed_gfx *priv)
+ {
++	struct drm_crtc *crtc = &priv->pipe.crtc;
++	struct drm_device *drm = crtc->dev;
++	struct platform_device *pdev = to_platform_device(drm->dev);
++	struct device_node *np = pdev->dev.of_node;
++
++	const char* default_src;
++	int ret;
++	u32 reg;
++
+ 	u32 ctrl1 = readl(priv->base + CRT_CTRL1);
+ 	u32 ctrl2 = readl(priv->base + CRT_CTRL2);
+ 
+ 	/* SCU2C: set DAC source for display output to Graphics CRT (GFX) */
+-	regmap_update_bits(priv->scu, 0x2c, BIT(16), BIT(16));
++	ret = of_property_read_string(np, "select-dac-source", &default_src);
++	if (ret < 0)
++	{
++		printk("of_property_read_string for default-source failed\n");
++	}
++	printk("select-dac-source: %s\n", default_src);
++
++	if(strcmp(default_src, "vga-mode") == 0)
++	{
++		reg = 0;
++	}
++	else if(strcmp(default_src, "graphics-crt-mode") == 0)
++	{
++		reg = BIT(16);
++	}
++	else if(strcmp(default_src, "passthrough-port-a") == 0)
++	{
++		reg = BIT(17);
++	}
++	else if(strcmp(default_src, "passthrough-port-b") == 0)
++	{
++		reg = (BIT(17) | BIT(16));
++	}
++	else
++	{
++		reg = BIT(16);
++	}
++	regmap_update_bits(priv->scu, 0x2c, BIT(16), (reg & BIT(16)));
++	regmap_update_bits(priv->scu, 0x2c, BIT(17), (reg & BIT(17)));
+ 
+ 	writel(ctrl1 | CRT_CTRL_EN, priv->base + CRT_CTRL1);
+ 	writel(ctrl2 | CRT_CTRL_DAC_EN, priv->base + CRT_CTRL2);
+-- 
+2.25.1
+

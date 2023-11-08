@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-aspeed:"
 
 SRC_URI += "file://0001-Set-the-default-UART-route-setting.patch \
             file://0002-get-mac-from-eeprom.patch \

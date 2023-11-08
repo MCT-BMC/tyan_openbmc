@@ -73,7 +73,7 @@ void interruptHandler(std::string lpcPath,std::string interruptPath)
     struct pollfd fds[2];
     char buf[BUF_LEN];
     nfds_t nfds;
-    int fd, ret;
+    int fd, ret, status;
 
     fd = inotify_init1(IN_NONBLOCK);
     if (fd == -1)
@@ -119,10 +119,10 @@ void interruptHandler(std::string lpcPath,std::string interruptPath)
                         {
                             std::cerr<<"LPC interrupt occurred\n";
                         }
-                        if(readFileValue(lpcPath))
+                        status = readFileValue(lpcPath);
+                        if(status)
                         {
-                            setSensorStatus(bus,"DIMMSensorStatus",0x00);
-                            writeFileValue(lpcPath,0);
+                            interruptAction(lpcPath,status);
                         }
                     }
                     p += sizeof(struct inotify_event) + event->len;
@@ -167,10 +167,28 @@ void registerHandler(boost::asio::io_context& io,double delay)
     });
 }
 
+void interruptAction(std::string lpcPath, int status)
+{
+    constexpr auto objectPath = "/";
+    constexpr auto interface = "org.freedesktop.DBus";
+    constexpr auto signal = "LpcReset";
+    uint8_t responseStatus = status & 0x01;
+
+    auto bus = sdbusplus::bus::new_default();
+    auto msg = bus.new_signal(objectPath, interface, signal);
+    uint32_t parameter = responseStatus;
+    msg.append(parameter);
+    msg.signal_send();
+
+    setSensorStatus(conn,"DIMMSensorStatus",0x00);
+
+    writeFileValue(lpcPath,0);
+}
+
 int main(int argc, char *argv[])
 {
     boost::asio::io_context io;
-    bus = std::make_shared<sdbusplus::asio::connection>(io);
+    conn = std::make_shared<sdbusplus::asio::connection>(io);
 
     propertyInitialize();
 

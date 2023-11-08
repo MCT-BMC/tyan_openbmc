@@ -1,0 +1,67 @@
+From f14c787d7c7c0b79a77fb819019c226cfbff907a Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 30 Aug 2023 03:35:52 +0000
+Subject: [PATCH] Support tyan boot logo
+
+---
+ drivers/video/logo/Kconfig  | 4 ++++
+ drivers/video/logo/Makefile | 1 +
+ drivers/video/logo/logo.c   | 4 ++++
+ include/linux/linux_logo.h  | 1 +
+ 4 files changed, 10 insertions(+)
+
+diff --git a/drivers/video/logo/Kconfig b/drivers/video/logo/Kconfig
+index 6d6f8c08792d..5e32e2a64af5 100644
+--- a/drivers/video/logo/Kconfig
++++ b/drivers/video/logo/Kconfig
+@@ -68,4 +68,8 @@ config LOGO_SUPERH_CLUT224
+ 	depends on SUPERH
+ 	default y
+ 
++config LOGO_TYAN_CLUT224
++        bool "Tyan boot logo"
++        default y
++
+ endif # LOGO
+diff --git a/drivers/video/logo/Makefile b/drivers/video/logo/Makefile
+index 16f60c1e1766..b95e030fa023 100644
+--- a/drivers/video/logo/Makefile
++++ b/drivers/video/logo/Makefile
+@@ -13,6 +13,7 @@ obj-$(CONFIG_LOGO_SUN_CLUT224)		+= logo_sun_clut224.o
+ obj-$(CONFIG_LOGO_SUPERH_MONO)		+= logo_superh_mono.o
+ obj-$(CONFIG_LOGO_SUPERH_VGA16)		+= logo_superh_vga16.o
+ obj-$(CONFIG_LOGO_SUPERH_CLUT224)	+= logo_superh_clut224.o
++obj-$(CONFIG_LOGO_TYAN_CLUT224) += logo_tyan_clut224.o
+ 
+ obj-$(CONFIG_SPU_BASE)			+= logo_spe_clut224.o
+ 
+diff --git a/drivers/video/logo/logo.c b/drivers/video/logo/logo.c
+index 141f15a9a459..6d5d56d8aa99 100644
+--- a/drivers/video/logo/logo.c
++++ b/drivers/video/logo/logo.c
+@@ -71,6 +71,10 @@ const struct linux_logo * __ref fb_find_logo(int depth)
+ 	}
+ 	
+ 	if (depth >= 8) {
++#ifdef CONFIG_LOGO_TYAN_CLUT224
++		/* Tyan boot logo */
++		logo = &logo_tyan_clut224;
++#endif
+ #ifdef CONFIG_LOGO_LINUX_CLUT224
+ 		/* Generic Linux logo */
+ 		logo = &logo_linux_clut224;
+diff --git a/include/linux/linux_logo.h b/include/linux/linux_logo.h
+index d4d5b93efe84..7c12fc19ce24 100644
+--- a/include/linux/linux_logo.h
++++ b/include/linux/linux_logo.h
+@@ -45,6 +45,7 @@ extern const struct linux_logo logo_superh_mono;
+ extern const struct linux_logo logo_superh_vga16;
+ extern const struct linux_logo logo_superh_clut224;
+ extern const struct linux_logo logo_spe_clut224;
++extern const struct linux_logo logo_tyan_clut224;
+ 
+ extern const struct linux_logo *fb_find_logo(int depth);
+ #ifdef CONFIG_FB_LOGO_EXTRA
+-- 
+2.25.1
+

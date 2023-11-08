@@ -1,0 +1,38 @@
+From b2cda12f30bfd2eb93b8c48e1cd54ea4ce67c06d Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Wed, 23 Aug 2023 12:28:03 +0000
+Subject: [PATCH 2/2] Filter same post code with post value zero
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ drivers/soc/aspeed/aspeed-lpc-snoop.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/soc/aspeed/aspeed-lpc-snoop.c b/drivers/soc/aspeed/aspeed-lpc-snoop.c
+index 20acac6342ef..a433ae131620 100644
+--- a/drivers/soc/aspeed/aspeed-lpc-snoop.c
++++ b/drivers/soc/aspeed/aspeed-lpc-snoop.c
+@@ -52,6 +52,8 @@
+ #define HICRB_ENSNP0D		BIT(14)
+ #define HICRB_ENSNP1D		BIT(15)
+ 
++u8 val_pre = 0xFF;
++
+ struct aspeed_lpc_snoop_model_data {
+ 	/* The ast2400 has bits 14 and 15 as reserved, whereas the ast2500
+ 	 * can use them.
+@@ -148,7 +150,10 @@ static irqreturn_t aspeed_lpc_snoop_irq(int irq, void *arg)
+ 	if (reg & HICR6_STR_SNP0W) {
+ 		u8 val = (data & SNPWDR_CH0_MASK) >> SNPWDR_CH0_SHIFT;
+ 
+-		put_fifo_with_discard(&lpc_snoop->chan[0], val);
++		if(val != val_pre || val != 0){
++			put_fifo_with_discard(&lpc_snoop->chan[0], val);
++		}
++		val_pre = val;
+ 	}
+ 	if (reg & HICR6_STR_SNP1W) {
+ 		u8 val = (data & SNPWDR_CH1_MASK) >> SNPWDR_CH1_SHIFT;
+-- 
+2.25.1
+

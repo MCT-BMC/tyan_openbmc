@@ -1,0 +1,4514 @@
+[
+	[
+		0,
+		"System Initializing..."
+	],
+	[
+		1,
+		"SEC-Power on. Reset type detection (soft/hard)."
+	],
+	[
+		2,
+		"SEC-AP init before mc loading"
+	],
+	[
+		3,
+		"SEC-North Bridge init before mc loading"
+	],
+	[
+		4,
+		"SEC-South Bridge init before mc loading"
+	],
+	[
+		5,
+		"SEC-OEM init before mc loading"
+	],
+	[
+		6,
+		"SEC-Microcode loading"
+	],
+	[
+		7,
+		"SEC-AP init after mc loading"
+	],
+	[
+		8,
+		"SEC-North Bridge init after mc loading"
+	],
+	[
+		9,
+		"SEC-South Bridge init after mc loading"
+	],
+	[
+		11,
+		"SEC-Cache init"
+	],
+	[
+		14,
+		"SEC-Microcode not found"
+	],
+	[
+		15,
+		"SEC-Microcode not loaded"
+	],
+	[
+		16,
+		"PEI Core is started"
+	],
+	[
+		17,
+		"PEI-Pre-memory CPU init is started"
+	],
+	[
+		18,
+		"PEI-Pre-memory CPU initialization (CPU module specific)"
+	],
+	[
+		19,
+		"PEI-Pre-memory CPU initialization (CPU module specific)"
+	],
+	[
+		20,
+		"PEI-Pre-memory CPU initialization (CPU module specific)"
+	],
+	[
+		21,
+		"PEI-Pre-memory North Bridge init is started"
+	],
+	[
+		22,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		23,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		24,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		25,
+		"PEI-Pre-memory South Bridge init is started"
+	],
+	[
+		26,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		27,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		28,
+		"PEI-Pre-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		30,
+		"BMC initialization started"
+	],
+	[
+		31,
+		"BMC communicate ending"
+	],
+	[
+		32,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		33,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		34,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		35,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		36,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		37,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		38,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		39,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		40,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		41,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		42,
+		"OEM pre-memory initialization codes"
+	],
+	[
+		43,
+		"PEI-Serial Presence Detect (SPD) data reading"
+	],
+	[
+		44,
+		"PEI-Memory presence detection"
+	],
+	[
+		45,
+		"PEI-Programming memory timing information"
+	],
+	[
+		46,
+		"PEI-Configuring memory"
+	],
+	[
+		47,
+		"PEI-Memory init (other)."
+	],
+	[
+		48,
+		"PEI-System is waking up from the S3 sleep state"
+	],
+	[
+		49,
+		"PEI-Memory Installed"
+	],
+	[
+		50,
+		"PEI-CPU post-memory init is started"
+	],
+	[
+		51,
+		"PEI-Cache init"
+	],
+	[
+		52,
+		"PEI-Application Processor(s) (AP) init"
+	],
+	[
+		53,
+		"PEI-Boot Strap Processor (BSP) selection"
+	],
+	[
+		54,
+		"PEI-System Management Mode (SMM) init"
+	],
+	[
+		55,
+		"PEI-Post-Memory North Bridge init is started"
+	],
+	[
+		56,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		57,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		58,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		59,
+		"PEI-Post-Memory South Bridge init is started"
+	],
+	[
+		60,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		61,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		62,
+		"PEI-Post-Memory North Bridge initialization (North Bridge module specific)"
+	],
+	[
+		63,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		64,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		65,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		66,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		67,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		68,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		69,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		70,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		71,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		72,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		73,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		74,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		75,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		76,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		77,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		78,
+		"OEM Post-memory initialization codes"
+	],
+	[
+		79,
+		"PEI-DXE IPL is started"
+	],
+	[
+		80,
+		"PEI-Invalid memory type or incompatible memory speed"
+	],
+	[
+		81,
+		"PEI-SPD reading has failed"
+	],
+	[
+		82,
+		"PEI-Invalid memory size or memory modules do not match."
+	],
+	[
+		83,
+		"PEI-No usable memory detected"
+	],
+	[
+		84,
+		"PEI-Unspecified memory init error."
+	],
+	[
+		85,
+		"PEI-Memory not installed"
+	],
+	[
+		86,
+		"PEI-Invalid CPU type or Speed"
+	],
+	[
+		87,
+		"PEI-CPU mismatch"
+	],
+	[
+		88,
+		"PEI-CPU self test failed or possible CPU cache error"
+	],
+	[
+		89,
+		"PEI-CPU micro-code is not found or micro-code update is failed"
+	],
+	[
+		90,
+		"PEI-Internal CPU error"
+	],
+	[
+		91,
+		"PEI-reset PPI is not available"
+	],
+	[
+		92,
+		"PEI phase BMC self-test failure"
+	],
+	[
+		93,
+		"AMI error codes"
+	],
+	[
+		94,
+		"AMI error codes"
+	],
+	[
+		95,
+		"AMI error codes"
+	],
+	[
+		96,
+		"DXE-DXE Core is started"
+	],
+	[
+		97,
+		"DXE-NVRAM init"
+	],
+	[
+		98,
+		"DXE-Installation of the South Bridge Runtime Services"
+	],
+	[
+		99,
+		"DXE-CPU DXE init is started"
+	],
+	[
+		100,
+		"DXE-CPU DXE initialization (CPU module specific)"
+	],
+	[
+		101,
+		"DXE-CPU DXE initialization (CPU module specific)"
+	],
+	[
+		102,
+		"DXE-CPU DXE initialization (CPU module specific)"
+	],
+	[
+		103,
+		"DXE-CPU DXE initialization (CPU module specific)"
+	],
+	[
+		104,
+		"DXE-PCI host bridge init"
+	],
+	[
+		105,
+		"DXE-North Bridge DXE init is started"
+	],
+	[
+		106,
+		"DXE-North Bridge DXE SMM init is started"
+	],
+	[
+		107,
+		"DXE-North Bridge DXE initialization (North Bridge module specific)"
+	],
+	[
+		108,
+		"DXE-North Bridge DXE initialization (North Bridge module specific)"
+	],
+	[
+		109,
+		"DXE-North Bridge DXE initialization (North Bridge module specific)"
+	],
+	[
+		110,
+		"DXE-North Bridge DXE initialization (North Bridge module specific)"
+	],
+	[
+		111,
+		"DXE-North Bridge DXE initialization (North Bridge module specific)"
+	],
+	[
+		112,
+		"DXE-South Bridge DXE init is started"
+	],
+	[
+		113,
+		"DXE-South Bridge DXE SMM init is started"
+	],
+	[
+		114,
+		"DXE-South Bridge devices init"
+	],
+	[
+		115,
+		"DXE-South Bridge DXE initialization (South Bridge module specific)"
+	],
+	[
+		116,
+		"DXE-South Bridge DXE initialization (South Bridge module specific)"
+	],
+	[
+		117,
+		"DXE-South Bridge DXE initialization (South Bridge module specific)"
+	],
+	[
+		118,
+		"DXE-South Bridge DXE initialization (South Bridge module specific)"
+	],
+	[
+		119,
+		"DXE-South Bridge DXE initialization (South Bridge module specific)"
+	],
+	[
+		120,
+		"DXE-ACPI module init"
+	],
+	[
+		121,
+		"DXE-CSM init"
+	],
+	[
+		122,
+		"Reserved for future AMI DXE codes"
+	],
+	[
+		123,
+		"Reserved for future AMI DXE codes"
+	],
+	[
+		124,
+		"Reserved for future AMI DXE codes"
+	],
+	[
+		125,
+		"Reserved for future AMI DXE codes"
+	],
+	[
+		126,
+		"Reserved for future AMI DXE codes"
+	],
+	[
+		128,
+		"OEM DXE initialization codes"
+	],
+	[
+		129,
+		"OEM DXE initialization codes"
+	],
+	[
+		130,
+		"OEM DXE initialization codes"
+	],
+	[
+		131,
+		"OEM DXE initialization codes"
+	],
+	[
+		132,
+		"OEM DXE initialization codes"
+	],
+	[
+		133,
+		"OEM DXE initialization codes"
+	],
+	[
+		134,
+		"OEM DXE initialization codes"
+	],
+	[
+		135,
+		"OEM DXE initialization codes"
+	],
+	[
+		136,
+		"OEM DXE initialization codes"
+	],
+	[
+		137,
+		"OEM DXE initialization codes"
+	],
+	[
+		138,
+		"OEM DXE initialization codes"
+	],
+	[
+		139,
+		"OEM DXE initialization codes"
+	],
+	[
+		140,
+		"OEM DXE initialization codes"
+	],
+	[
+		141,
+		"OEM DXE initialization codes"
+	],
+	[
+		142,
+		"OEM DXE initialization codes"
+	],
+	[
+		143,
+		"OEM DXE initialization codes"
+	],
+	[
+		144,
+		"DXE-Boot Device Selection (BDS) phase is started"
+	],
+	[
+		145,
+		"DXE-Driver connecting is started"
+	],
+	[
+		146,
+		"DXE-PCI Bus init is started"
+	],
+	[
+		147,
+		"DXE-PCI Bus Hot Plug Controller Initialization"
+	],
+	[
+		148,
+		"DXE-PCI Bus Enumeration"
+	],
+	[
+		149,
+		"DXE-PCI Bus Request Resources"
+	],
+	[
+		150,
+		"DXE-PCI Bus Assign Resources"
+	],
+	[
+		151,
+		"DXE-Console Output devices connect"
+	],
+	[
+		152,
+		"DXE-Console input devices connect"
+	],
+	[
+		153,
+		"DXE-Super IO Initialization"
+	],
+	[
+		154,
+		"DXE-USB init is started"
+	],
+	[
+		155,
+		"DXE-USB Reset"
+	],
+	[
+		156,
+		"DXE-USB Detect"
+	],
+	[
+		157,
+		"DXE-USB Enable"
+	],
+	[
+		158,
+		"Reserved for future AMI codes"
+	],
+	[
+		159,
+		"Reserved for future AMI codes"
+	],
+	[
+		160,
+		"DXE-IDE init is started"
+	],
+	[
+		161,
+		"DXE-IDE Reset"
+	],
+	[
+		162,
+		"DXE-IDE Detect"
+	],
+	[
+		163,
+		"DXE-IDE Enable"
+	],
+	[
+		164,
+		"DXE-SCSI init is started"
+	],
+	[
+		165,
+		"DXE-SCSI Reset"
+	],
+	[
+		166,
+		"DXE-SCSI Detect"
+	],
+	[
+		167,
+		"DXE-SCSI Enable"
+	],
+	[
+		168,
+		"DXE-Setup Verifying Password"
+	],
+	[
+		169,
+		"DXE-Start of Setup"
+	],
+	[
+		170,
+		"DXE-Interrupt controller is in APIC mode."
+	],
+	[
+		171,
+		"DXE-Setup Input Wait"
+	],
+	[
+		172,
+		"DXE-Interrupt controller is in PIC mode."
+	],
+	[
+		173,
+		"DXE-Ready To Boot event"
+	],
+	[
+		174,
+		"DXE-Legacy Boot event"
+	],
+	[
+		175,
+		"DXE-Exit Boot Services event"
+	],
+	[
+		176,
+		"DXE-Runtime Set Virtual Addr MAP Begin"
+	],
+	[
+		177,
+		"DXE-Runtime Set Virtual Addr MAP End"
+	],
+	[
+		178,
+		"DXE-Legacy Option ROM Initialization"
+	],
+	[
+		179,
+		"DXE-System Reset"
+	],
+	[
+		180,
+		"DXE-USB hot plug"
+	],
+	[
+		181,
+		"DXE-PCI bus hot plug"
+	],
+	[
+		182,
+		"DXE-Clean-up of NVRAM"
+	],
+	[
+		183,
+		"DXE-Configuration Reset (reset of NVRAM settings)"
+	],
+	[
+		184,
+		"Reserved for future AMI error codes"
+	],
+	[
+		185,
+		"Memory test"
+	],
+	[
+		186,
+		"Reserved for future AMI error codes"
+	],
+	[
+		187,
+		"Reserved for future AMI error codes"
+	],
+	[
+		188,
+		"Reserved for future AMI error codes"
+	],
+	[
+		189,
+		"Get memory margins"
+	],
+	[
+		190,
+		"Reserved for future AMI error codes"
+	],
+	[
+		191,
+		"Reserved for future AMI error codes"
+	],
+	[
+		192,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		193,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		194,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		195,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		196,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		197,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		198,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		199,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		200,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		201,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		202,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		203,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		204,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		205,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		206,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		207,
+		"BDS-OEM BDS init codes"
+	],
+	[
+		208,
+		"DXE-CPU init error"
+	],
+	[
+		209,
+		"DXE-North Bridge init error"
+	],
+	[
+		210,
+		"DXE-South Bridge init error"
+	],
+	[
+		211,
+		"DXE-Some of the Architectural Protocols are not available"
+	],
+	[
+		212,
+		"DXE-PCI resource allocation error. Out of Resources"
+	],
+	[
+		213,
+		"DXE-No Space for Legacy Option ROM"
+	],
+	[
+		214,
+		"DXE-No Console Output Devices are found"
+	],
+	[
+		215,
+		"DXE-No Console Input Devices are found"
+	],
+	[
+		216,
+		"DXE-Invalid password"
+	],
+	[
+		217,
+		"DXE-Error loading Boot Option (LoadImage returned error)"
+	],
+	[
+		218,
+		"DXE-Boot Option is failed (StartImage returned error)"
+	],
+	[
+		219,
+		"DXE-Flash update is failed"
+	],
+	[
+		220,
+		"DXE-Reset protocol is not available"
+	],
+	[
+		221,
+		"DXE-DXE phase BMC self-test failure"
+	],
+	[
+		224,
+		"S3 Resume is stared"
+	],
+	[
+		225,
+		"S3 Resume-S3 Boot Script execution"
+	],
+	[
+		226,
+		"S3 Resume-Video repost"
+	],
+	[
+		227,
+		"S3 Resume-OS S3 wake vector call"
+	],
+	[
+		228,
+		"IIO Pre Link Training init"
+	],
+	[
+		229,
+		"S3 Resume (PEI)"
+	],
+	[
+		230,
+		"IIO late init entry"
+	],
+	[
+		231,
+		"Reserved for future AMI error codes"
+	],
+	[
+		232,
+		"S3 Resume Failed"
+	],
+	[
+		233,
+		"S3 Resume PPI not Found"
+	],
+	[
+		234,
+		"S3 Resume Boot Script Error"
+	],
+	[
+		235,
+		"S3 Resume-S3 OS Wake Error"
+	],
+	[
+		236,
+		"Reserved for future AMI error codes"
+	],
+	[
+		237,
+		"Reserved for future AMI error codes"
+	],
+	[
+		238,
+		"IIO late init exit"
+	],
+	[
+		239,
+		"Final IIO init"
+	],
+	[
+		240,
+		"Recovery Progress-condition triggered by firmware (Auto recovery)"
+	],
+	[
+		241,
+		"Recovery Progress- condition triggered by user (Forced recovery)"
+	],
+	[
+		242,
+		"Recovery Progress- process started"
+	],
+	[
+		243,
+		"Recovery Progress- firmware image is found"
+	],
+	[
+		244,
+		"Recovery Progress- firmware image is loaded"
+	],
+	[
+		245,
+		"Recovery Progress- for future AMI progress codes"
+	],
+	[
+		246,
+		"Reserved for future AMI error codes"
+	],
+	[
+		247,
+		"Reserved for future AMI error codes"
+	],
+	[
+		248,
+		"Recovery Error-PPI is not available"
+	],
+	[
+		249,
+		"Recovery Error- capsule is not found"
+	],
+	[
+		250,
+		"Recovery Error-Invalid recovery capsule"
+	],
+	[
+		251,
+		"Reserved for future AMI error codes"
+	],
+	[
+		252,
+		"Reserved for future AMI error codes"
+	],
+	[
+		253,
+		"Reserved for future AMI error codes"
+	],
+	[
+		254,
+		"Reserved for future AMI error codes"
+	],
+	[
+		255,
+		"Reserved for future AMI error codes"
+	],
+	[
+		40960,
+		"Reserved for future AMI error codes"
+	],
+	[
+		40961,
+		"Universal ACPI entry"
+	],
+	[
+		40962,
+		"Universal ACPI exit"
+	],
+	[
+		40963,
+		"Universal ACPI abort"
+	],
+	[
+		40964,
+		"Universal SMBIOS entry"
+	],
+	[
+		40965,
+		"Universal SMBIOS exit"
+	],
+	[
+		40966,
+		"Universal SMBIOS abort"
+	],
+	[
+		41217,
+		"Memory structure initialization (Public interface)"
+	],
+	[
+		41218,
+		"SPD Data processing  (Public interface)"
+	],
+	[
+		41219,
+		"Memory configuration  (Public interface)"
+	],
+	[
+		41220,
+		"DRAM initialization"
+	],
+	[
+		41221,
+		"TpProcMemSPDChecking"
+	],
+	[
+		41222,
+		"TpProcMemModeChecking"
+	],
+	[
+		41223,
+		"Speed and TCL configuration"
+	],
+	[
+		41224,
+		"TpProcMemSpdTiming"
+	],
+	[
+		41225,
+		"TpProcMemDramMapping"
+	],
+	[
+		41226,
+		"TpProcMemPlatformSpecificConfig"
+	],
+	[
+		41227,
+		"TPProcMemPhyCompensation"
+	],
+	[
+		41228,
+		"TpProcMemStartDcts"
+	],
+	[
+		41229,
+		"(Public interface)"
+	],
+	[
+		41230,
+		"TpProcMemPhyFenceTraining"
+	],
+	[
+		41231,
+		"TpProcMemSynchronizeDcts"
+	],
+	[
+		41232,
+		"TpProcMemSystemMemoryMapping"
+	],
+	[
+		41233,
+		"TpProcMemMtrrConfiguration"
+	],
+	[
+		41234,
+		"TpProcMemDramTraining"
+	],
+	[
+		41235,
+		"(Public interface)"
+	],
+	[
+		41236,
+		"TpProcMemWriteLevelizationTraining"
+	],
+	[
+		41237,
+		"Below 800Mhz first pass start"
+	],
+	[
+		41238,
+		"Above 800Mhz second pass start"
+	],
+	[
+		41239,
+		"Target DIMM configured"
+	],
+	[
+		41240,
+		"Prepare DIMMS for WL"
+	],
+	[
+		41241,
+		"Configure DIMMS for WL"
+	],
+	[
+		41242,
+		"TpProcMemReceiverEnableTraining"
+	],
+	[
+		41243,
+		"Start sweep loop"
+	],
+	[
+		41244,
+		"Set receiver Delay"
+	],
+	[
+		41245,
+		"Write test pattern"
+	],
+	[
+		41246,
+		"Read test pattern"
+	],
+	[
+		41247,
+		"Compare test pattern"
+	],
+	[
+		41248,
+		"Calculate MaxRdLatency per channel"
+	],
+	[
+		41249,
+		"TpProcMemReceiveDqsTraining"
+	],
+	[
+		41250,
+		"Set Write Data delay"
+	],
+	[
+		41251,
+		"Write test pattern"
+	],
+	[
+		41252,
+		"Start read sweep"
+	],
+	[
+		41253,
+		"Set Receive DQS delay"
+	],
+	[
+		41254,
+		"Read Test pattern"
+	],
+	[
+		41255,
+		"Compare Test pattern"
+	],
+	[
+		41256,
+		"Update results"
+	],
+	[
+		41257,
+		"Start Find passing window"
+	],
+	[
+		41258,
+		"TpProcMemTransmitDqsTraining"
+	],
+	[
+		41259,
+		"Start write sweep"
+	],
+	[
+		41260,
+		"Set Transmit DQ delay"
+	],
+	[
+		41261,
+		"Write test pattern"
+	],
+	[
+		41262,
+		"Read Test pattern"
+	],
+	[
+		41263,
+		"Compare Test pattern"
+	],
+	[
+		41264,
+		"Update results"
+	],
+	[
+		41265,
+		"Start Find passing window"
+	],
+	[
+		41266,
+		"TpProcMemMaxRdLatencyTraining"
+	],
+	[
+		41267,
+		"Start sweep"
+	],
+	[
+		41268,
+		"Set delay"
+	],
+	[
+		41269,
+		"Write test pattern"
+	],
+	[
+		41270,
+		"Read Test pattern"
+	],
+	[
+		41271,
+		"Compare Test pattern"
+	],
+	[
+		41272,
+		"Online Spare init"
+	],
+	[
+		41273,
+		"Bank Interleave Init"
+	],
+	[
+		41274,
+		"Node Interleave Init"
+	],
+	[
+		41275,
+		"Channel Interleave Init"
+	],
+	[
+		41276,
+		"ECC initialization"
+	],
+	[
+		41277,
+		"Platform Specific Init"
+	],
+	[
+		41278,
+		"Before callout for \"AgesaReadSpd\""
+	],
+	[
+		41279,
+		"After callout for \"AgesaReadSpd\""
+	],
+	[
+		41280,
+		"Before optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		41281,
+		"After optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		41282,
+		"Before optional callout \"AgesaHookBeforeDQSTraining\""
+	],
+	[
+		41283,
+		"After optional callout \"AgesaHookBeforeDQSTraining\""
+	],
+	[
+		41284,
+		"Before optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		41285,
+		"After optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		41286,
+		"After MemDataInit"
+	],
+	[
+		41287,
+		"Before InitializeMCT"
+	],
+	[
+		41288,
+		"Before LV DDR3"
+	],
+	[
+		41289,
+		"Before InitMCT"
+	],
+	[
+		41290,
+		"Before OtherTiming"
+	],
+	[
+		41291,
+		"Before UMAMemTyping"
+	],
+	[
+		41292,
+		"Before SetDqsEccTmgs"
+	],
+	[
+		41293,
+		"Before MemClr"
+	],
+	[
+		41294,
+		"Before On DIMM Thermal"
+	],
+	[
+		41295,
+		"Before DMI"
+	],
+	[
+		41296,
+		"End of memory code"
+	],
+	[
+		41297,
+		"Entry point S3Init"
+	],
+	[
+		41344,
+		"Sending MRS2"
+	],
+	[
+		41345,
+		"Sedding MRS3"
+	],
+	[
+		41346,
+		"Sending MRS1"
+	],
+	[
+		41347,
+		"Sending MRS0"
+	],
+	[
+		41348,
+		"Continuous Pattern Read"
+	],
+	[
+		41349,
+		"Continuous Pattern Write"
+	],
+	[
+		41350,
+		"Mem: 2d RdDqs Training begin"
+	],
+	[
+		41351,
+		"Mem: Before optional callout to platform BIOS to change External Vref during 2d Training"
+	],
+	[
+		41352,
+		"Mem: After optional callout to platform BIOS to change External Vref during 2d Training"
+	],
+	[
+		41353,
+		"Configure DCT For General use begin"
+	],
+	[
+		41354,
+		"Configure DCT For training begin"
+	],
+	[
+		41355,
+		"Configure DCT For Non-Explicit"
+	],
+	[
+		41356,
+		"Configure to Sync channels"
+	],
+	[
+		41357,
+		"Allocate C6 Storage"
+	],
+	[
+		41358,
+		"Before LV DDR4"
+	],
+	[
+		41360,
+		"BR before AP launch"
+	],
+	[
+		41361,
+		"Install AP launched PPI"
+	],
+	[
+		41362,
+		"BR after AP launch"
+	],
+	[
+		41363,
+		"Before CPU PM"
+	],
+	[
+		41364,
+		"Enable IO Cstate"
+	],
+	[
+		41365,
+		"Enable C6"
+	],
+	[
+		41366,
+		"Install CCX PEI complete PPI"
+	],
+	[
+		41367,
+		"BR CPU memory done call back entry"
+	],
+	[
+		41368,
+		"Before APM weights"
+	],
+	[
+		41369,
+		"After APM weights"
+	],
+	[
+		41370,
+		"BR CPU memory done call back end"
+	],
+	[
+		41371,
+		"BR Init Mid entry"
+	],
+	[
+		41372,
+		"BR enable APM"
+	],
+	[
+		41373,
+		"BR Init Mid install protocol"
+	],
+	[
+		41374,
+		"BR Init Mid end"
+	],
+	[
+		41375,
+		"BR Init Late entry"
+	],
+	[
+		41376,
+		"BR Init Late install protocol"
+	],
+	[
+		41377,
+		"BR Init Late end"
+	],
+	[
+		41378,
+		"BR DXE install complete protocol"
+	],
+	[
+		41379,
+		"UNB install complete PPI"
+	],
+	[
+		41380,
+		"UNB AfterApLaunch callback entry"
+	],
+	[
+		41381,
+		"UNB AfterApLaunch callback end"
+	],
+	[
+		41452,
+		"Before the S3 save code calls out to allocate a buffer"
+	],
+	[
+		41453,
+		"After the S3 save code calls out to allocate a buffer"
+	],
+	[
+		41454,
+		"Before the memory S3 save code calls out to allocate a buffer"
+	],
+	[
+		41455,
+		"After the memory S3 save code calls out to allocate a buffer"
+	],
+	[
+		41456,
+		"Before the memory code calls out to locate a buffer"
+	],
+	[
+		41457,
+		"After the memory code calls out to locate a buffer"
+	],
+	[
+		41458,
+		"Before the memory code calls out to locate a buffer"
+	],
+	[
+		41459,
+		"After the memory code calls out to locate a buffer"
+	],
+	[
+		41460,
+		"Before the memory code calls out to locate a buffer"
+	],
+	[
+		41461,
+		"After the memory code calls out to locate a buffer"
+	],
+	[
+		41462,
+		"Before the memory code calls out to locate a buffer"
+	],
+	[
+		41463,
+		"After the memory code calls out to locate a buffer"
+	],
+	[
+		41465,
+		"Failed PMU training."
+	],
+	[
+		42241,
+		"PspPeiV1 entry"
+	],
+	[
+		42242,
+		"PspPeiV1 exit"
+	],
+	[
+		42243,
+		"MemoryDiscoveredPpiCallback entry"
+	],
+	[
+		42244,
+		"MemoryDiscoveredPpiCallback exit"
+	],
+	[
+		42247,
+		"PspDxeV1 entry"
+	],
+	[
+		42248,
+		"PspDxeV1 exit"
+	],
+	[
+		42250,
+		"PspDxeV1 PspPciEnumerationCompleteCallBack entry"
+	],
+	[
+		42251,
+		"PspDxeV1 PspPciEnumerationCompleteCallBack exit"
+	],
+	[
+		42252,
+		"PspDxeV1 ready to boot entry"
+	],
+	[
+		42253,
+		"PspDxeV1 ready to boot exit"
+	],
+	[
+		42254,
+		"PspSmmV1 entry"
+	],
+	[
+		42255,
+		"PspSmmV1 exit"
+	],
+	[
+		42256,
+		"PspSmmV1 SwSmiCallBack entry"
+	],
+	[
+		42257,
+		"PspSmmV1 SwSmiCallBack exit"
+	],
+	[
+		42258,
+		"PspSmmV1 BspSmmResumeVector entry"
+	],
+	[
+		42259,
+		"PspSmmV1 BspSmmResumeVector exit"
+	],
+	[
+		42260,
+		"PspSmmV1 ApSmmResumeVector entry"
+	],
+	[
+		42261,
+		"PspSmmV1 ApSmmResumeVector exit"
+	],
+	[
+		42262,
+		"PspP2CmboxV1 entry"
+	],
+	[
+		42263,
+		"PspP2CmboxV1 exit"
+	],
+	[
+		42273,
+		"PspPeiV2 entry"
+	],
+	[
+		42274,
+		"PspPeiV2 exit"
+	],
+	[
+		42275,
+		"PspDxeV2 entry"
+	],
+	[
+		42276,
+		"PspDxeV2 exit"
+	],
+	[
+		42277,
+		"PspDxeV2 PspMpServiceCallBack entry"
+	],
+	[
+		42278,
+		"PspDxeV2 PspMpServiceCallBack exit"
+	],
+	[
+		42279,
+		"PspDxeV2 FlashAccCallBack entry"
+	],
+	[
+		42280,
+		"PspDxeV2 FlashAccCallBack exit"
+	],
+	[
+		42281,
+		"PspDxeV2 ready to boot entry"
+	],
+	[
+		42282,
+		"PspDxeV2 ready to boot exit"
+	],
+	[
+		42283,
+		"PspDxeV2 exit boot serivce entry"
+	],
+	[
+		42284,
+		"PspDxeV2 exit boot serivce exit"
+	],
+	[
+		42285,
+		"PspSmmV2 entry"
+	],
+	[
+		42286,
+		"PspSmmV2 exit"
+	],
+	[
+		42287,
+		"PspSmmV2 SwSmiCallBack entry"
+	],
+	[
+		42288,
+		"PspSmmV2 SwSmiCallBack exit"
+	],
+	[
+		42289,
+		"PspSmmV2 BspSmmResumeVector entry"
+	],
+	[
+		42290,
+		"PspSmmV2 BspSmmResumeVector exit"
+	],
+	[
+		42291,
+		"PspSmmV2 ApSmmResumeVector entry"
+	],
+	[
+		42292,
+		"PspSmmV2 ApSmmResumeVector exit"
+	],
+	[
+		42293,
+		"PspP2CmboxV2 entry"
+	],
+	[
+		42294,
+		"PspP2CmboxV2 exit"
+	],
+	[
+		42295,
+		"TpPspRecoverApcbFail"
+	],
+	[
+		42297,
+		"PspDxeV2 ApcbAccCallBack entry"
+	],
+	[
+		42298,
+		"PspDxeV2 ApcbAccCallBack exit"
+	],
+	[
+		42304,
+		"PspfTpmPei entry"
+	],
+	[
+		42305,
+		"PspfTpmPei exit"
+	],
+	[
+		42306,
+		"PspfTpmPei memory callback entry"
+	],
+	[
+		42307,
+		"PspfTpmPei memory callback exit"
+	],
+	[
+		42308,
+		"PspfTpmDxe entry"
+	],
+	[
+		42309,
+		"PspfTpmDxe exit"
+	],
+	[
+		42310,
+		"PspdTpmPei entry"
+	],
+	[
+		42311,
+		"PspdTpmPei exit"
+	],
+	[
+		42312,
+		"HspfTpmPei entry"
+	],
+	[
+		42313,
+		"HspfTpmPei exit"
+	],
+	[
+		42314,
+		"HspfTpmPei memory callback entry"
+	],
+	[
+		42315,
+		"HspfTpmPei memory callback exit"
+	],
+	[
+		42316,
+		"HspfTpmDxe entry"
+	],
+	[
+		42317,
+		"HspfTpmDxe exit"
+	],
+	[
+		42385,
+		"PspP2Cmbox Command SpiGetAttrib Handling entry"
+	],
+	[
+		42386,
+		"PspP2Cmbox Command SpiSetAttrib Handling entry"
+	],
+	[
+		42387,
+		"PspP2Cmbox Command SpiGetBlockSize Handling entry"
+	],
+	[
+		42388,
+		"PspP2Cmbox Command SpiReadFV Handling entry"
+	],
+	[
+		42389,
+		"PspP2Cmbox Command SpiWriteFV Handling entry"
+	],
+	[
+		42390,
+		"PspP2Cmbox Command SpiEraseFV Handling entry"
+	],
+	[
+		42391,
+		"PspP2Cmbox Command MboxPspCmdRpmcIncMc entry"
+	],
+	[
+		42392,
+		"PspP2Cmbox Command TpMboxPspCmdRpmcReqMc entry"
+	],
+	[
+		42393,
+		"PspP2Cmbox Command TpMboxPspCmdArsStatus entry"
+	],
+	[
+		42398,
+		"PspP2Cmbox Command Handling exit"
+	],
+	[
+		42399,
+		"PspP2Cmbox Command Handling Fail exit"
+	],
+	[
+		42480,
+		"PspfTpm send TPM command entry"
+	],
+	[
+		42481,
+		"PspfTpm send TPM command exit"
+	],
+	[
+		42482,
+		"PspfTpm receive TPM command entry"
+	],
+	[
+		42483,
+		"PspfTpm receive TPM command exit"
+	],
+	[
+		42484,
+		"HspfTpm send TPM command entry"
+	],
+	[
+		42485,
+		"HspfTpm send TPM command exit"
+	],
+	[
+		42486,
+		"HspfTpm receive TPM command entry"
+	],
+	[
+		42487,
+		"HspfTpm receive TPM command exit"
+	],
+	[
+		42496,
+		"PSP C2P mailbox entry base [0xA600 | Cmd]"
+	],
+	[
+		42497,
+		"Before send C2P command MboxBiosCmdDramInfo"
+	],
+	[
+		42498,
+		"Before send C2P command MboxBiosCmdSmmInfo"
+	],
+	[
+		42499,
+		"Before send C2P command MboxBiosCmdSleep SxInfo"
+	],
+	[
+		42500,
+		"Before send C2P command MboxBiosCmdRsmInfo"
+	],
+	[
+		42501,
+		"Before send C2P command MboxBiosCmdQueryCap"
+	],
+	[
+		42502,
+		"Before send C2P command MboxBiosCmdBootDone"
+	],
+	[
+		42503,
+		"Before send C2P command MboxBiosCmdClearS3Sts"
+	],
+	[
+		42504,
+		"Before send C2P command MboxBiosCmdS3DataInfo"
+	],
+	[
+		42505,
+		"Before send C2P command MboxBiosCmdNop"
+	],
+	[
+		42516,
+		"Before send C2P command MboxBiosCmdHSTIQuery"
+	],
+	[
+		42519,
+		"Before send C2P command MboxBiosCmdClrSmmLock"
+	],
+	[
+		42520,
+		"Before send C2P command MboxBiosCmdPcieInfo"
+	],
+	[
+		42521,
+		"Before send C2P command MboxBiosCmdGetVersion"
+	],
+	[
+		42523,
+		"Before send C2P command MboxBiosCmdLockDFReg"
+	],
+	[
+		42525,
+		"Before send C2P command MboxBiosCmdSetApCsBase"
+	],
+	[
+		42526,
+		"Before send C2P command MboxBiosCmdKvmInfo"
+	],
+	[
+		42527,
+		"Before send C2P command MboxBiosCmdLockSpi"
+	],
+	[
+		42528,
+		"Before send C2P command MboxBiosCmdScreenOnGpio"
+	],
+	[
+		42529,
+		"Before send C2P command MboxBiosCmdSpiOpWhiteList"
+	],
+	[
+		42530,
+		"Before send C2P command MboxBiosCmdRasEinj"
+	],
+	[
+		42532,
+		"Before send C2P command MboxBiosCmdStartArs"
+	],
+	[
+		42533,
+		"Before send C2P command MboxBiosCmdStopArs"
+	],
+	[
+		42534,
+		"Before send C2P command MboxBiosCmdSetBootPartitionId"
+	],
+	[
+		42535,
+		"Before send C2P command MboxBiosCmdPspCapsQuery"
+	],
+	[
+		42536,
+		"Before send C2P command MboxBiosCmdArmorEnterSmmOnlyMode"
+	],
+	[
+		42537,
+		"Before send C2P command MboxBiosCmdArmorEnforceWhitelist"
+	],
+	[
+		42538,
+		"Before send C2P command MboxBiosCmdArmorExecuteSpiCommand"
+	],
+	[
+		42539,
+		"Before send C2P command MboxBiosCmdArmorSwitchCsMode"
+	],
+	[
+		42540,
+		"Before send C2P command MboxBiosCmdDrtmInfoId"
+	],
+	[
+		42541,
+		"Before send C2P command MboxBiosCmdLaterSplFuse"
+	],
+	[
+		42543,
+		"Before send C2P command MboxBiosCmdValidateManOsSignature"
+	],
+	[
+		42544,
+		"Before send C2P command MboxBiosCmdLockFCHReg"
+	],
+	[
+		42553,
+		"Before send C2P command MboxBiosCmdSetRpmcAddress"
+	],
+	[
+		42559,
+		"Before send C2P command MboxBiosCmdSendIvrsAcpiTable"
+	],
+	[
+		42560,
+		"Before send C2P command MboxBiosCmdTa"
+	],
+	[
+		42562,
+		"Before send C2P command MboxBiosCmdQueryTCGLog"
+	],
+	[
+		42624,
+		"PSP C2P mailbox exit base [0xA680 | Cmd]"
+	],
+	[
+		42625,
+		"Wait C2P command MboxBiosCmdDramInfo finished"
+	],
+	[
+		42626,
+		"Wait C2P command MboxBiosCmdSmmInfo finished"
+	],
+	[
+		42627,
+		"Wait C2P command MboxBiosCmdSleep SxInfo finished"
+	],
+	[
+		42628,
+		"Wait C2P command MboxBiosCmdRsmInfo finished"
+	],
+	[
+		42629,
+		"Wait C2P command MboxBiosCmdQueryCap finished"
+	],
+	[
+		42630,
+		"Wait C2P command MboxBiosCmdBootDone finished"
+	],
+	[
+		42631,
+		"Wait C2P command MboxBiosCmdClearS3Sts finished"
+	],
+	[
+		42632,
+		"Wait C2P command MboxBiosCmdS3DataInfo finished"
+	],
+	[
+		42633,
+		"Wait C2P command MboxBiosCmdNop finished"
+	],
+	[
+		42644,
+		"Wait C2P command MboxBiosCmdHSTIQuery finished"
+	],
+	[
+		42647,
+		"Wait C2P command MboxBiosCmdClrSmmLock finished"
+	],
+	[
+		42648,
+		"Wait C2P command MboxBiosCmdPcieInfo finished"
+	],
+	[
+		42649,
+		"Wait C2P command MboxBiosCmdGetVersion finished"
+	],
+	[
+		42651,
+		"Wait C2P command MboxBiosCmdLockDFReg finished"
+	],
+	[
+		42653,
+		"Wait C2P command MboxBiosCmdSetApCsBase finished"
+	],
+	[
+		42654,
+		"Wait C2P command MboxBiosCmdKvmInfo finished"
+	],
+	[
+		42655,
+		"Wait C2P command MboxBiosCmdLockSpi finished"
+	],
+	[
+		42656,
+		"Wait C2P command MboxBiosCmdScreenOnGpio finished"
+	],
+	[
+		42657,
+		"Wait C2P command MboxBiosCmdSpiOpWhiteList finished"
+	],
+	[
+		42658,
+		"Wait C2P command MboxBiosCmdRasEinj finished"
+	],
+	[
+		42660,
+		"Wait C2P command MboxBiosCmdStartArs finished"
+	],
+	[
+		42661,
+		"Wait C2P command MboxBiosCmdStopArs finished"
+	],
+	[
+		42662,
+		"Wait C2P command MboxBiosCmdSetBootPartitionId finished"
+	],
+	[
+		42663,
+		"Wait C2P command MboxBiosCmdPspCapsQuery finished"
+	],
+	[
+		42664,
+		"Wait C2P command MboxBiosCmdArmorEnterSmmOnlyMode finished"
+	],
+	[
+		42665,
+		"Wait C2P command MboxBiosCmdArmorEnforceWhitelist finished"
+	],
+	[
+		42666,
+		"Wait C2P command MboxBiosCmdArmorExecuteSpiCommand finished"
+	],
+	[
+		42667,
+		"Wait C2P command MboxBiosCmdArmorSwitchCsMode finished"
+	],
+	[
+		42668,
+		"Wait C2P command MboxBiosCmdDrtmInfoId finished"
+	],
+	[
+		42669,
+		"Wait C2P command MboxBiosCmdLaterSplFuse finished"
+	],
+	[
+		42671,
+		"Wait C2P command MboxBiosCmdValidateManOsSignature finished"
+	],
+	[
+		42672,
+		"Wait C2P command MboxBiosCmdLockFCHReg finished"
+	],
+	[
+		42681,
+		"Wait C2P command MboxBiosCmdSetRpmcAddress finished"
+	],
+	[
+		42687,
+		"Wait C2P command MboxBiosCmdSendIvrsAcpiTable finished"
+	],
+	[
+		42688,
+		"Wait C2P command MboxBiosCmdTa finished"
+	],
+	[
+		42690,
+		"Wait C2P command MboxBiosCmdQueryTCGLog finished"
+	],
+	[
+		43264,
+		"AmdNbioBase PEIM driver entry"
+	],
+	[
+		43265,
+		"AmdNbioBase PEIM driver exit"
+	],
+	[
+		43266,
+		"AmdNbioBase DXE driver entry"
+	],
+	[
+		43267,
+		"AmdNbioBase DXE driver exit"
+	],
+	[
+		43268,
+		"AmdNbioPcie PEIM driver entry"
+	],
+	[
+		43269,
+		"AmdNbioPcie PEIM driver exit"
+	],
+	[
+		43270,
+		"AmdNbioPcie DXE driver entry"
+	],
+	[
+		43271,
+		"AmdNbioPcie DXE driver exit"
+	],
+	[
+		43272,
+		"AmdNbioGfx PEIM driver entry"
+	],
+	[
+		43273,
+		"AmdNbioGfx PEIM driver exit"
+	],
+	[
+		43274,
+		"AmdNbioGfx DXE driver entry"
+	],
+	[
+		43275,
+		"AmdNbioGfx DXE driver exit"
+	],
+	[
+		43276,
+		"AmdNbioIommu DXE driver entry"
+	],
+	[
+		43277,
+		"AmdNbioIommu DXE driver exit"
+	],
+	[
+		43278,
+		"AmdNbioALIB DXE driver entry"
+	],
+	[
+		43279,
+		"AmdNbioALIB DXE driver exit"
+	],
+	[
+		43280,
+		"AmdSmuV8 PEIM driver entry"
+	],
+	[
+		43281,
+		"AmdSmuV8 PEIM driver exit"
+	],
+	[
+		43282,
+		"AmdSmuV8 DXE driver entry"
+	],
+	[
+		43283,
+		"AmdSmuV8 DXE driver exit"
+	],
+	[
+		43284,
+		"AmdSmuV9 PEIM driver entry"
+	],
+	[
+		43285,
+		"AmdSmuV9 PEIM driver exit"
+	],
+	[
+		43286,
+		"AmdSmuV9 DXE driver entry"
+	],
+	[
+		43287,
+		"AmdSmuV9 DXE driver exit"
+	],
+	[
+		43288,
+		"AmdSmuV10 PEIM driver entry"
+	],
+	[
+		43289,
+		"AmdSmuV10 PEIM driver exit"
+	],
+	[
+		43290,
+		"AmdSmuV10 DXE driver entry"
+	],
+	[
+		43291,
+		"AmdSmuV10 DXE driver exit"
+	],
+	[
+		43292,
+		"AmdSmuV13 PEIM driver entry"
+	],
+	[
+		43293,
+		"AmdSmuV13 PEIM driver exit"
+	],
+	[
+		43294,
+		"AmdSmuV13 DXE driver entry"
+	],
+	[
+		43295,
+		"AmdSmuV13 DXE driver exit"
+	],
+	[
+		43296,
+		"AmdNbioIommu PEIM driver entry"
+	],
+	[
+		43297,
+		"AmdNbioIommu PEIM driver exit"
+	],
+	[
+		43298,
+		"APCB DXE Entry"
+	],
+	[
+		43299,
+		"APCB DXE Exit"
+	],
+	[
+		43300,
+		"APCB SMM Entry"
+	],
+	[
+		43301,
+		"APCB SMM Exit"
+	],
+	[
+		43312,
+		"Early Exit"
+	],
+	[
+		43313,
+		"Early Exit"
+	],
+	[
+		43344,
+		"NbioTopologyConfigureCallback entry"
+	],
+	[
+		43345,
+		"NbioTopologyConfigureCallback exit"
+	],
+	[
+		43346,
+		"MemoryConfigDoneCallbackPpi entry"
+	],
+	[
+		43347,
+		"MemoryConfigDoneCallbackPpi exit"
+	],
+	[
+		43348,
+		"DxioInitializationCallbackPpi entry"
+	],
+	[
+		43349,
+		"DxioInitializationCallbackPpi exit"
+	],
+	[
+		43350,
+		"DispatchSmuV9Callback entry"
+	],
+	[
+		43351,
+		"DispatchSmuV9Callback exit"
+	],
+	[
+		43352,
+		"DispatchSmuV10Callback entry"
+	],
+	[
+		43353,
+		"DispatchSmuV10Callback exit"
+	],
+	[
+		43354,
+		"AmdPcieMiscInit Event entry"
+	],
+	[
+		43355,
+		"AmdPcieMiscInit Event exit"
+	],
+	[
+		43356,
+		"NbioBaseHookReadyToBoot Event entry"
+	],
+	[
+		43357,
+		"NbioBaseHookReadyToBoot Event exit"
+	],
+	[
+		43358,
+		"NbioBaseHookPciIO Event entry"
+	],
+	[
+		43359,
+		"NbioBaseHookPciIO Event exit"
+	],
+	[
+		43360,
+		"DispatchSmuV13Callback entry"
+	],
+	[
+		43361,
+		"DispatchSmuV13Callback exit"
+	],
+	[
+		43376,
+		"GnbEarlyInterfaceCZ entry"
+	],
+	[
+		43377,
+		"GnbEarlyInterfaceCZ exit"
+	],
+	[
+		43378,
+		"PcieConfigurationInit entry"
+	],
+	[
+		43379,
+		"PcieConfigurationInit exit"
+	],
+	[
+		43380,
+		"GnbEarlierInterfaceCZ entry"
+	],
+	[
+		43381,
+		"GnbEarlierInterfaceCZ exit"
+	],
+	[
+		43382,
+		"PcieEarlyInterfaceCZ entry"
+	],
+	[
+		43383,
+		"PcieEarlyInterfaceCZ exit"
+	],
+	[
+		43384,
+		"PciePostEarlyInterfaceCZ entry"
+	],
+	[
+		43385,
+		"PciePostEarlyInterfaceCZ exit"
+	],
+	[
+		43386,
+		"GfxConfigPostInterfaceCZ entry"
+	],
+	[
+		43387,
+		"GfxConfigPostInterfaceCZ exit"
+	],
+	[
+		43388,
+		"GfxPostInterfaceCZ entry"
+	],
+	[
+		43389,
+		"GfxPostInterfaceCZ exit"
+	],
+	[
+		43390,
+		"GnbPostInterfaceCZ entry"
+	],
+	[
+		43391,
+		"GnbPostInterfaceCZ exit"
+	],
+	[
+		43392,
+		"PciePostInterfaceCZ entry"
+	],
+	[
+		43393,
+		"PciePostInterfaceCZ exit"
+	],
+	[
+		43394,
+		"GnbEnvInterfaceCZ entry"
+	],
+	[
+		43395,
+		"GnbEnvInterfaceCZ exit"
+	],
+	[
+		43396,
+		"GfxConfigEnvInterface entry"
+	],
+	[
+		43397,
+		"GfxConfigEnvInterface exit"
+	],
+	[
+		43398,
+		"GfxEnvInterfaceCZ entry"
+	],
+	[
+		43399,
+		"GfxEnvInterfaceCZ exit"
+	],
+	[
+		43400,
+		"GfxMidInterfaceCZ entry"
+	],
+	[
+		43401,
+		"GfxMidInterfaceCZ exit"
+	],
+	[
+		43402,
+		"GfxIntInfoTableInterfaceCZ entry"
+	],
+	[
+		43403,
+		"GfxIntInfoTableInterfaceCZ exit"
+	],
+	[
+		43404,
+		"PcieMidInterfaceCZ entry"
+	],
+	[
+		43405,
+		"PcieMidInterfaceCZ exit"
+	],
+	[
+		43406,
+		"GnbMidInterfaceCZ entry"
+	],
+	[
+		43407,
+		"GnbMidInterfaceCZ exit"
+	],
+	[
+		43408,
+		"GnbSmuMidInterfaceCZ entry"
+	],
+	[
+		43409,
+		"GnbSmuMidInterfaceCZ exit"
+	],
+	[
+		43410,
+		"InvokeAmdInitLate entry"
+	],
+	[
+		43411,
+		"InvokeAmdInitLate exit"
+	],
+	[
+		43412,
+		"GnbSmuServiceRequestV8 entry"
+	],
+	[
+		43413,
+		"GnbSmuServiceRequestV8 exit"
+	],
+	[
+		44048,
+		"CCX IDS IDS_HOOK_CCX_AFTER_AP_LAUNCH"
+	],
+	[
+		44112,
+		"CCX PEI entry"
+	],
+	[
+		44113,
+		"CCX downcore entry"
+	],
+	[
+		44117,
+		"CCX DXE entry"
+	],
+	[
+		44118,
+		"CCX MP service callback entry"
+	],
+	[
+		44119,
+		"CCX Ready To Boot callback entry"
+	],
+	[
+		44120,
+		"CCX oc service callback entry"
+	],
+	[
+		44125,
+		"CCX SMM entry"
+	],
+	[
+		44144,
+		"CCX PEI start to launch APs for S3"
+	],
+	[
+		44145,
+		"CCX PEI end of launching APs for S3"
+	],
+	[
+		44176,
+		"CCX start to launch AP"
+	],
+	[
+		44177,
+		"CCX launch AP is ended"
+	],
+	[
+		44178,
+		"CCX launch AP abort"
+	],
+	[
+		44179,
+		"CCX MP service abort"
+	],
+	[
+		44180,
+		"CCX cac weights"
+	],
+	[
+		44181,
+		"CCX before install CcxDone"
+	],
+	[
+		44182,
+		"CCX after install CcxDone"
+	],
+	[
+		44256,
+		"CCX PEI exit"
+	],
+	[
+		44257,
+		"CCX downcore exit"
+	],
+	[
+		44261,
+		"CCX DXE exit"
+	],
+	[
+		44262,
+		"CCX MP service callback exit"
+	],
+	[
+		44263,
+		"CCX Ready To Boot callback exit"
+	],
+	[
+		44264,
+		"CCX OC service callback exit"
+	],
+	[
+		44269,
+		"CCX SMM exit"
+	],
+	[
+		44368,
+		"DF PEI entry"
+	],
+	[
+		44373,
+		"DF DXE entry"
+	],
+	[
+		44374,
+		"DF Ready to Boot entry"
+	],
+	[
+		44375,
+		"DF NbioSmuServicesPpiCallback entry"
+	],
+	[
+		44376,
+		"DF NbioSmuServicesProtocolCallback entry"
+	],
+	[
+		44377,
+		"DF SMM entry"
+	],
+	[
+		44512,
+		"DF PEI exit"
+	],
+	[
+		44517,
+		"DF DXE exit"
+	],
+	[
+		44518,
+		"DF Ready to Boot exit"
+	],
+	[
+		44519,
+		"DF NbioSmuServicesPpiCallback exit"
+	],
+	[
+		44520,
+		"DF NbioSmuServicesProtocolCallback exit"
+	],
+	[
+		44521,
+		"DF SMM exit"
+	],
+	[
+		44801,
+		"FCH InitReset dispatch point"
+	],
+	[
+		44806,
+		"FCH InitEnv dispatch point"
+	],
+	[
+		44807,
+		"FCH InitMid dispatch point"
+	],
+	[
+		44808,
+		"FCH InitLate dispatch point"
+	],
+	[
+		44811,
+		"FCH InitS3Early dispatch point"
+	],
+	[
+		44812,
+		"FCH InitS3Late dispatch point"
+	],
+	[
+		44813,
+		"FCH InitS3Early dispatch finished"
+	],
+	[
+		44814,
+		"FCH InitS3Late dispatch finished"
+	],
+	[
+		44816,
+		"FCH Pei Entry"
+	],
+	[
+		44817,
+		"FCH Pei Exit"
+	],
+	[
+		44818,
+		"FCH MultiFch Pei Entry"
+	],
+	[
+		44819,
+		"FCH MultiFch Pei Exit"
+	],
+	[
+		44820,
+		"FCH Dxe Entry"
+	],
+	[
+		44821,
+		"FCH Dxe Exit"
+	],
+	[
+		44822,
+		"FCH MultiFch Dxe Entry"
+	],
+	[
+		44823,
+		"FCH MultiFch Dxe Exit"
+	],
+	[
+		44824,
+		"FCH Smm Entry"
+	],
+	[
+		44825,
+		"FCH Smm Exit"
+	],
+	[
+		44832,
+		"FCH Smm Dispatcher Entry"
+	],
+	[
+		44833,
+		"FCH Smm Dispatcher Exit"
+	],
+	[
+		44864,
+		"FCH InitReset HwAcpi"
+	],
+	[
+		44865,
+		"FCH InitReset AB Link"
+	],
+	[
+		44866,
+		"FCH InitReset LPC"
+	],
+	[
+		44867,
+		"FCH InitReset SPI"
+	],
+	[
+		44868,
+		"FCH InitReset eSPI"
+	],
+	[
+		44869,
+		"FCH InitReset SD"
+	],
+	[
+		44870,
+		"FCH InitReset eMMC"
+	],
+	[
+		44871,
+		"FCH InitReset SATA"
+	],
+	[
+		44872,
+		"FCH InitReset USB"
+	],
+	[
+		44873,
+		"FCH InitReset xGbE"
+	],
+	[
+		44874,
+		"FCH InitReset USB Ready"
+	],
+	[
+		44879,
+		"FCH InitReset HwAcpiP"
+	],
+	[
+		44880,
+		"FCH InitEnv HwAcpi"
+	],
+	[
+		44881,
+		"FCH InitEnv AB Link"
+	],
+	[
+		44882,
+		"FCH InitEnv LPC"
+	],
+	[
+		44883,
+		"FCH InitEnv SPI"
+	],
+	[
+		44884,
+		"FCH InitEnv eSPI"
+	],
+	[
+		44885,
+		"FCH InitEnv SD"
+	],
+	[
+		44886,
+		"FCH InitEnv eMMC"
+	],
+	[
+		44887,
+		"FCH InitEnv SATA"
+	],
+	[
+		44888,
+		"FCH InitEnv USB"
+	],
+	[
+		44889,
+		"FCH InitEnv xGbE"
+	],
+	[
+		44895,
+		"FCH InitEnv HwAcpiP"
+	],
+	[
+		44896,
+		"FCH InitMid HwAcpi"
+	],
+	[
+		44897,
+		"FCH InitMid AB Link"
+	],
+	[
+		44898,
+		"FCH InitMid LPC"
+	],
+	[
+		44899,
+		"FCH InitMid SPI"
+	],
+	[
+		44900,
+		"FCH InitMid eSPI"
+	],
+	[
+		44901,
+		"FCH InitMid SD"
+	],
+	[
+		44902,
+		"FCH InitMid eMMC"
+	],
+	[
+		44903,
+		"FCH InitMid SATA"
+	],
+	[
+		44904,
+		"FCH InitMid USB"
+	],
+	[
+		44905,
+		"FCH InitMid xGbE"
+	],
+	[
+		44912,
+		"FCH InitLate HwAcpi"
+	],
+	[
+		44913,
+		"FCH InitLate AB Link"
+	],
+	[
+		44914,
+		"FCH InitLate LPC"
+	],
+	[
+		44915,
+		"FCH InitLate SPI"
+	],
+	[
+		44916,
+		"FCH InitLate eSPI"
+	],
+	[
+		44917,
+		"FCH InitLate SD"
+	],
+	[
+		44918,
+		"FCH InitLate eMMC"
+	],
+	[
+		44919,
+		"FCH InitLate SATA"
+	],
+	[
+		44920,
+		"FCH InitLate USB"
+	],
+	[
+		44921,
+		"FCH InitLate xGbE"
+	],
+	[
+		44922,
+		"FCH PT load FW Entry"
+	],
+	[
+		44923,
+		"FCH PT load FW Exit"
+	],
+	[
+		44924,
+		"FCH PT_Plus load FW Entry"
+	],
+	[
+		44925,
+		"FCH PT_Plus load FW Exit"
+	],
+	[
+		44928,
+		"FCH Device Enter D x Status"
+	],
+	[
+		44976,
+		"Bixby Pei Entry"
+	],
+	[
+		44977,
+		"Bixby Pei Exit"
+	],
+	[
+		44978,
+		"Bixby Dxe Entry"
+	],
+	[
+		44979,
+		"Bixby Dxe Exit"
+	],
+	[
+		44980,
+		"Bixby Smm Entry"
+	],
+	[
+		44981,
+		"Bixby Smm Exit"
+	],
+	[
+		44982,
+		"Bixby InitReset dispatch point"
+	],
+	[
+		44983,
+		"Bixby InitMid dispatch point"
+	],
+	[
+		44984,
+		"Bixby InitEnv dispatch point"
+	],
+	[
+		44985,
+		"Bixby InitLate dispatch point"
+	],
+	[
+		44986,
+		"Bixby InitS3Early dispatch point"
+	],
+	[
+		44987,
+		"Bixby InitS3Late dispatch point"
+	],
+	[
+		44988,
+		"Bixby InitS3Early dispatch finished"
+	],
+	[
+		44989,
+		"Bixby InitS3Late dispatch finished"
+	],
+	[
+		44990,
+		"Bixby InitReset SATA Entry"
+	],
+	[
+		44991,
+		"Bixby InitReset SATA Exit"
+	],
+	[
+		44992,
+		"Bixby InitMid SATA Entry"
+	],
+	[
+		44993,
+		"Bixby InitMid SATA Exit"
+	],
+	[
+		44994,
+		"Bixby InitEnv SATA Entry"
+	],
+	[
+		44995,
+		"Bixby InitEnv SATA Exit"
+	],
+	[
+		44996,
+		"Bixby InitLate SATA Entry"
+	],
+	[
+		44997,
+		"Bixby InitLate SATA Exit"
+	],
+	[
+		44998,
+		"Bixby InitReset USB Entry"
+	],
+	[
+		44999,
+		"Bixby InitReset USB Exit"
+	],
+	[
+		45000,
+		"Bixby InitMid USB Entry"
+	],
+	[
+		45001,
+		"Bixby InitMid USB Exit"
+	],
+	[
+		45002,
+		"Bixby InitEnv USB Entry"
+	],
+	[
+		45003,
+		"Bixby InitEnv USB Exit"
+	],
+	[
+		45004,
+		"Bixby InitLate USB Entry"
+	],
+	[
+		45005,
+		"Bixby InitLate USB Exit"
+	],
+	[
+		45006,
+		"Bixby InitEnv HwAcpiP"
+	],
+	[
+		45007,
+		"Bixby InitReset HwAcpiP"
+	],
+	[
+		45055,
+		"End of TP range for FCH"
+	],
+	[
+		45504,
+		"ABL 3 GMI/xGMI Initialization Stage 1 Warning"
+	],
+	[
+		45760,
+		"ABL 3 GMI/xGMI Initialization Stage 2 Warning"
+	],
+	[
+		46016,
+		"ABL 3 GMI/xGMI Initialization Stage 3 Warning"
+	],
+	[
+		46272,
+		"ABL 3 GMI/xGMI Initialization Stage 4 Warning"
+	],
+	[
+		46528,
+		"ABL 3 GMI/xGMI Initialization Stage 5 Warning"
+	],
+	[
+		46784,
+		"ABL 3 GMI/xGMI Initialization Stage 6 Warning"
+	],
+	[
+		57005,
+		"Undefined String"
+	],
+	[
+		57344,
+		"Entry used for range testing for @b Processor related TPs"
+	],
+	[
+		57345,
+		"Memory structure initialization (Public interface)"
+	],
+	[
+		57346,
+		"SPD Data processing  (Public interface)"
+	],
+	[
+		57347,
+		"Memory configuration  (Public interface) Phase 1"
+	],
+	[
+		57348,
+		"DRAM initialization"
+	],
+	[
+		57349,
+		"ProcMemSPDChecking"
+	],
+	[
+		57350,
+		"ProcMemModeChecking"
+	],
+	[
+		57351,
+		"Speed and TCL configuration"
+	],
+	[
+		57352,
+		"ProcMemSpdTiming"
+	],
+	[
+		57353,
+		"ProcMemDramMapping"
+	],
+	[
+		57354,
+		"ProcMemPlatformSpecificConfig"
+	],
+	[
+		57355,
+		"ProcMemPhyCompensation"
+	],
+	[
+		57356,
+		"ProcMemStartDcts"
+	],
+	[
+		57357,
+		"ProcMemBeforeDramInit (Public interface)"
+	],
+	[
+		57358,
+		"ProcMemPhyFenceTraining"
+	],
+	[
+		57359,
+		"ProcMemSynchronizeDcts"
+	],
+	[
+		57360,
+		"ProcMemSystemMemoryMapping"
+	],
+	[
+		57361,
+		"ProcMemMtrrConfiguration"
+	],
+	[
+		57362,
+		"ProcMemDramTraining"
+	],
+	[
+		57363,
+		"ProcMemBeforeAnyTraining(Public interface)"
+	],
+	[
+		57364,
+		"ABL Mem - PMU - Before PMU Firmware load"
+	],
+	[
+		57365,
+		"ABL Mem - PMU - After PMU Firmware load"
+	],
+	[
+		57366,
+		"ABL Mem - PMU Populate SRAM Timing"
+	],
+	[
+		57367,
+		"ABL Mem - PMU Populate SRAM Config"
+	],
+	[
+		57368,
+		"ABL Mem - PMU Write SRAM Msg Block"
+	],
+	[
+		57369,
+		"ABL Mem - Wait for Phy Cal Complete"
+	],
+	[
+		57370,
+		"ABL Mem - Phy Cal Complete"
+	],
+	[
+		57371,
+		"ABL Mem - PMU Start"
+	],
+	[
+		57372,
+		"ABL Mem - PMU Started"
+	],
+	[
+		57373,
+		"ABL Mem - PMU Waiting for Complete"
+	],
+	[
+		57374,
+		"ABL Mem - PMU Stage Dec Init"
+	],
+	[
+		57375,
+		"ABL Mem - PMU Stage Training Wr Lvl"
+	],
+	[
+		57376,
+		"ABL Mem - PMU Stage Training Rx En"
+	],
+	[
+		57377,
+		"ABL Mem - PMU Stage Training Rd Dqs"
+	],
+	[
+		57378,
+		"ABL Mem - PMU Stage Traning Rd 2D"
+	],
+	[
+		57379,
+		"ABL Mem - PMU Stage Training Wr 2D"
+	],
+	[
+		57380,
+		"ABL Mem - PMU Queue Empty"
+	],
+	[
+		57381,
+		"ABL Mem - PMU US message Start"
+	],
+	[
+		57382,
+		"ABL Mem - PMU US message End"
+	],
+	[
+		57383,
+		"ABL Mem - PMU Complete"
+	],
+	[
+		57384,
+		"ABL Mem - PMU - After PMU Training"
+	],
+	[
+		57385,
+		"ABL Mem - PMU - Before Disable PMU"
+	],
+	[
+		57386,
+		"ABL Mem - ProcMemTransmitDqsTraining"
+	],
+	[
+		57387,
+		"ABL Mem - Start write sweep"
+	],
+	[
+		57388,
+		"ABL Mem - Set Transmit DQ delay"
+	],
+	[
+		57389,
+		"ABL Mem - Write test pattern"
+	],
+	[
+		57390,
+		"ABL Mem - Read Test pattern"
+	],
+	[
+		57391,
+		"ABL Mem - Compare Test pattern"
+	],
+	[
+		57392,
+		"ABL Mem - Update results"
+	],
+	[
+		57393,
+		"ABL Mem - Start Find passing window"
+	],
+	[
+		57394,
+		"ABL Mem - ProcMemMaxRdLatencyTraining"
+	],
+	[
+		57395,
+		"ABL Mem - Start sweep"
+	],
+	[
+		57396,
+		"ABL Mem - Set delay"
+	],
+	[
+		57397,
+		"ABL Mem - Write test pattern"
+	],
+	[
+		57398,
+		"ABL Mem - Read Test pattern"
+	],
+	[
+		57399,
+		"ABL Mem - Compare Test pattern"
+	],
+	[
+		57400,
+		"ABL Mem - Online Spare init"
+	],
+	[
+		57401,
+		"ABL Mem - Chip select Interleave Init"
+	],
+	[
+		57402,
+		"ABL Mem - Node Interleave Init"
+	],
+	[
+		57403,
+		"ABL Mem - Channel Interleave Init"
+	],
+	[
+		57404,
+		"ABL Mem - ECC initialization"
+	],
+	[
+		57405,
+		"ABL Mem - Platform Specific Init"
+	],
+	[
+		57406,
+		"ABL Mem - Before callout for \"AgesaReadSpd\""
+	],
+	[
+		57407,
+		"ABL Mem - After callout for \"AgesaReadSpd\""
+	],
+	[
+		57408,
+		"ABL Mem - Before optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		57409,
+		"ABL Mem - After optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		57410,
+		"ABL Mem - Before optional callout \"AgesaHookBeforeDQSTraining\""
+	],
+	[
+		57411,
+		"ABL Mem - After optional callout \"AgesaHookBeforeDQSTraining\""
+	],
+	[
+		57412,
+		"ABL Mem - Before optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		57413,
+		"ABL Mem - After optional callout \"AgesaHookBeforeDramInit\""
+	],
+	[
+		57414,
+		"ABL Mem - After MemDataInit"
+	],
+	[
+		57415,
+		"ABL Mem - Before InitializeMCT"
+	],
+	[
+		57416,
+		"ABL Mem - Before LV DDR3"
+	],
+	[
+		57417,
+		"ABL Mem - Before InitMCT"
+	],
+	[
+		57418,
+		"ABL Mem - Before OtherTiming"
+	],
+	[
+		57419,
+		"ABL Mem - Before UMAMemTyping"
+	],
+	[
+		57420,
+		"ABL Mem - Before SetDqsEccTmgs"
+	],
+	[
+		57421,
+		"ABL Mem - Before MemClr"
+	],
+	[
+		57422,
+		"ABL Mem - Before On DIMM Thermal"
+	],
+	[
+		57423,
+		"ABL Mem - Before DMI"
+	],
+	[
+		57424,
+		"ABL MEM - End of phase 3 memory code"
+	],
+	[
+		57425,
+		"Entry point CPU init after training"
+	],
+	[
+		57426,
+		"Exit point CPU init after training"
+	],
+	[
+		57427,
+		"Entry point CPU APOB data init"
+	],
+	[
+		57428,
+		"Exit point CPU APOB data init"
+	],
+	[
+		57429,
+		"Entry point CPU Optimized boot init"
+	],
+	[
+		57430,
+		"Exit point CPU Optimized boot init"
+	],
+	[
+		57431,
+		"Entry point CPU APOB EDC info init"
+	],
+	[
+		57432,
+		"Exit point CPU APOB EDC info init"
+	],
+	[
+		57433,
+		"Entry point CPU APOB CCD map data init"
+	],
+	[
+		57434,
+		"Exit point CPU APOB CCD map data init"
+	],
+	[
+		57472,
+		"ProcMemSendMRS2"
+	],
+	[
+		57473,
+		"Sedding MRS3"
+	],
+	[
+		57474,
+		"Sending MRS1"
+	],
+	[
+		57475,
+		"Sending MRS0"
+	],
+	[
+		57476,
+		"Continuous Pattern Read"
+	],
+	[
+		57477,
+		"Continuous Pattern Write"
+	],
+	[
+		57478,
+		"Mem: 2d RdDqs Training begin"
+	],
+	[
+		57479,
+		"Mem: Before optional callout to platform BIOS to change External Vref during 2d Training"
+	],
+	[
+		57480,
+		"Mem: After optional callout to platform BIOS to change External Vref during 2d Training"
+	],
+	[
+		57481,
+		"Configure DCT For General use begin"
+	],
+	[
+		57482,
+		"Configure DCT For training begin"
+	],
+	[
+		57483,
+		"Configure DCT For Non-Explicit"
+	],
+	[
+		57484,
+		"Configure to Sync channels"
+	],
+	[
+		57485,
+		"Allocate C6 Storage"
+	],
+	[
+		57486,
+		"Before LV DDR4"
+	],
+	[
+		57487,
+		"Before LV DDR3"
+	],
+	[
+		57488,
+		"TP0x90"
+	],
+	[
+		57489,
+		"GNB earlier interface"
+	],
+	[
+		57490,
+		"GNB internal debug code"
+	],
+	[
+		57491,
+		"GNB internal debug code"
+	],
+	[
+		57492,
+		"GNB internal debug code"
+	],
+	[
+		57493,
+		"GNB internal debug code"
+	],
+	[
+		57494,
+		"GNB internal debug code"
+	],
+	[
+		57495,
+		"GNB internal debug code"
+	],
+	[
+		57496,
+		"GNB internal debug code"
+	],
+	[
+		57497,
+		"GNB internal debug code"
+	],
+	[
+		57498,
+		"GNB internal debug code"
+	],
+	[
+		57499,
+		"GNB internal debug code"
+	],
+	[
+		57500,
+		"GNB internal debug code"
+	],
+	[
+		57501,
+		"GNB internal debug code"
+	],
+	[
+		57502,
+		"GNB internal debug code"
+	],
+	[
+		57503,
+		"GNB internal debug code"
+	],
+	[
+		57504,
+		"TP0xA0"
+	],
+	[
+		57505,
+		"GNB internal debug code"
+	],
+	[
+		57506,
+		"GNB internal debug code"
+	],
+	[
+		57507,
+		"GNB internal debug code"
+	],
+	[
+		57508,
+		"GNB internal debug code"
+	],
+	[
+		57509,
+		"GNB internal debug code"
+	],
+	[
+		57510,
+		"GNB internal debug code"
+	],
+	[
+		57511,
+		"GNB internal debug code"
+	],
+	[
+		57512,
+		"GNB internal debug code"
+	],
+	[
+		57513,
+		"GNB internal debug code"
+	],
+	[
+		57514,
+		"GNB internal debug code"
+	],
+	[
+		57515,
+		"GNB internal debug code"
+	],
+	[
+		57516,
+		"GNB internal debug code"
+	],
+	[
+		57517,
+		"GNB internal debug code"
+	],
+	[
+		57518,
+		"GNB internal debug code"
+	],
+	[
+		57519,
+		"GNB internal debug code"
+	],
+	[
+		57520,
+		"Abl1Begin"
+	],
+	[
+		57521,
+		"ABL 1 Initialization"
+	],
+	[
+		57522,
+		"ABL 1 DF Early"
+	],
+	[
+		57523,
+		"ABL 1 DF Pre Training"
+	],
+	[
+		57524,
+		"ABL 1 Debug Synchronization"
+	],
+	[
+		57525,
+		"ABL 1 Error Detected"
+	],
+	[
+		57526,
+		"ABL 1 Global memory error detected"
+	],
+	[
+		57527,
+		"ABL 1 End"
+	],
+	[
+		57528,
+		"ABL 2 Begin"
+	],
+	[
+		57529,
+		"ABL 2 Initialization"
+	],
+	[
+		57530,
+		"ABL 2 After Training"
+	],
+	[
+		57531,
+		"ABL 2 Debug Synchronization"
+	],
+	[
+		57532,
+		"ABL 2 Error detected"
+	],
+	[
+		57533,
+		"ABL 2 Global memory error detected"
+	],
+	[
+		57534,
+		"ABL 2 End"
+	],
+	[
+		57535,
+		"ABL 3 Begin"
+	],
+	[
+		57536,
+		"ABL 3 Initialziation"
+	],
+	[
+		57537,
+		"Abl3ProgramUmcKeys"
+	],
+	[
+		57538,
+		"ABL 3 DF Finial Initalization"
+	],
+	[
+		57539,
+		"ABL 3 Execute Synchronization Function"
+	],
+	[
+		57540,
+		"ABL 3 Debug Synchronization Function"
+	],
+	[
+		57541,
+		"ABL 3 Error Detected"
+	],
+	[
+		57542,
+		"ABL 3 Global memroy error detected"
+	],
+	[
+		57543,
+		"ABL 4 Initialiation - cold boot"
+	],
+	[
+		57544,
+		"ABL 4 Memory test - cold boot"
+	],
+	[
+		57545,
+		"ABL 4 APOB Initialzation - cold boot"
+	],
+	[
+		57546,
+		"ABL 4 Finalize memory settings - cold boot"
+	],
+	[
+		57547,
+		"ABL 4 CPU Initialize Optimized Boot - cold boot"
+	],
+	[
+		57548,
+		"ABL 4 Gmi Pcie Training - cold boot"
+	],
+	[
+		57549,
+		"ABL 4 Cold boot End"
+	],
+	[
+		57550,
+		"ABL 4 Initialization - Resume boot"
+	],
+	[
+		57551,
+		"ABL 4 Resume End"
+	],
+	[
+		57552,
+		"ABL 4 End Cold/Resume boot"
+	],
+	[
+		57553,
+		"ABL 2 memory initialization"
+	],
+	[
+		57554,
+		"ABL 3 memory initialization"
+	],
+	[
+		57555,
+		"ABL 3 End"
+	],
+	[
+		57556,
+		"ABL 1 Enter Memory Flow"
+	],
+	[
+		57557,
+		"Memorry flow memory clock synchronization"
+	],
+	[
+		57568,
+		"Before IDS calls out to get IDS data"
+	],
+	[
+		57569,
+		"After IDS calls out to get IDS data"
+	],
+	[
+		57593,
+		"Failed PMU training."
+	],
+	[
+		57594,
+		"End of phase 1 memory code"
+	],
+	[
+		57595,
+		"End of phase 2 memory code"
+	],
+	[
+		57596,
+		"Abl0Begin"
+	],
+	[
+		57597,
+		"ABL 0 End"
+	],
+	[
+		57598,
+		"Abl0 Begin with Fatal Mode"
+	],
+	[
+		57599,
+		"ABL 0 End with Fatal Mode"
+	],
+	[
+		57600,
+		"ABL 7 End"
+	],
+	[
+		57601,
+		"ABL 7 Resume boot"
+	],
+	[
+		57602,
+		"ABL 6 End"
+	],
+	[
+		57603,
+		"ABL 6 Initialization"
+	],
+	[
+		57604,
+		"End of phase 1b memory code"
+	],
+	[
+		57605,
+		"ABL 1b memory initialization"
+	],
+	[
+		57606,
+		"ABL 6 Global memroy error detected"
+	],
+	[
+		57607,
+		"ABL 1b Debug Synchronization Function"
+	],
+	[
+		57608,
+		"ABL 4b Debug Synchronization Function"
+	],
+	[
+		57609,
+		"AblbBegin"
+	],
+	[
+		57610,
+		"Ab4bBegin"
+	],
+	[
+		57611,
+		"BSP encountered HMAC fail on APOB Header"
+	],
+	[
+		57612,
+		"ABL 18 End"
+	],
+	[
+		57613,
+		"ABL 18 Resume boot"
+	],
+	[
+		57614,
+		"ABL 15 End"
+	],
+	[
+		57615,
+		"ABL 15 Initialization"
+	],
+	[
+		57616,
+		"Before UMC based device initialization"
+	],
+	[
+		57617,
+		"After UMC based device initialization"
+	],
+	[
+		57792,
+		"ABL 3 GMI/xGMI Initialization Stage 1"
+	],
+	[
+		58016,
+		"ABL Eroor General ASSERT"
+	],
+	[
+		58017,
+		"Unknown Error"
+	],
+	[
+		58019,
+		"ABL Error Log Inig Error"
+	],
+	[
+		58020,
+		"ABL Error for On DIMM thermal Heap allocation error"
+	],
+	[
+		58021,
+		"ABL Error for memory test error"
+	],
+	[
+		58022,
+		"ABL Error while executing memory test error"
+	],
+	[
+		58023,
+		"ABL Error DDR Post Packge Repair Mem Auto Heap Alloc error"
+	],
+	[
+		58024,
+		"ABL Error for DDR Post Package repair Apob Heap Alloc error"
+	],
+	[
+		58025,
+		"ABL Error for DDR Post Package Repair No PPR Table Heap Aloc error"
+	],
+	[
+		58026,
+		"ABL Error for Ecc Mem Auto Aloc Error error"
+	],
+	[
+		58027,
+		"ABL Error for Soc Scan Heap Aloc error"
+	],
+	[
+		58028,
+		"ABL Error for Soc Scan No Die error"
+	],
+	[
+		58029,
+		"ABL Error for Nb Tech Heap Aloc error"
+	],
+	[
+		58030,
+		"ABL Error for No Nb Constructor error"
+	],
+	[
+		58032,
+		"ABL Error for No Tech Constructor error"
+	],
+	[
+		58033,
+		"ABL Error for ABL1b Auto Alocation error"
+	],
+	[
+		58034,
+		"ABL Error for ABL1b No NB Constructor error"
+	],
+	[
+		58035,
+		"ABL Error for ABL2 No Nb Constructor error"
+	],
+	[
+		58036,
+		"ABL Error for ABL3 Auto Allocation error"
+	],
+	[
+		58037,
+		"ABL Error for ABL3 No Nb Constructor error"
+	],
+	[
+		58038,
+		"ABL Error for ABL1b General error"
+	],
+	[
+		58039,
+		"ABL Error for ABL2 General error"
+	],
+	[
+		58040,
+		"ABL Error for ABL3 General error"
+	],
+	[
+		58041,
+		"ABL Error for Get Target Speed error"
+	],
+	[
+		58042,
+		"ABL Error for Flow P1 Family Support error"
+	],
+	[
+		58043,
+		"ABL Error for No Valid Ddr4 Dimms error"
+	],
+	[
+		58044,
+		"ABL Error for No Dimm Present error"
+	],
+	[
+		58045,
+		"ABL Error for Flow P2 Family Supprot error"
+	],
+	[
+		58046,
+		"ABL Error for Heap Deallocation for PMU Sram Msg Block error"
+	],
+	[
+		58047,
+		"ABL Error for DDR Recovery error"
+	],
+	[
+		58048,
+		"ABL 3 GMI/xGMI Initialization Stage 2"
+	],
+	[
+		58049,
+		"ABL Error for On Die Thermal error"
+	],
+	[
+		58050,
+		"ABL Error for Heap Allocation For Dct Struct Amd Ch Def structure error"
+	],
+	[
+		58051,
+		"ABL Error for Heap Allocation for PMU SRAM Msg block error"
+	],
+	[
+		58052,
+		"ABL Error for Heap Phy PLL lock Flure error"
+	],
+	[
+		58053,
+		"ABL Error for Pmu Training error"
+	],
+	[
+		58054,
+		"ABL Error for Failure to Load or Verify PMU FW error"
+	],
+	[
+		58055,
+		"ABL Error for Allocate for PMU SRAM Msg Block No Init error"
+	],
+	[
+		58056,
+		"ABL Error for Failure BIOS PMU FW Mismatch AGESA PMU FW version error"
+	],
+	[
+		58057,
+		"ABL Error for Agesa memory test error"
+	],
+	[
+		58058,
+		"ABL Error for Deallocate for PMU SRAM Msg Block error"
+	],
+	[
+		58059,
+		"ABL Error for Module Type Mismatch RDIMM error"
+	],
+	[
+		58060,
+		"ABL Error for Module type Mismatch LRDIMM error"
+	],
+	[
+		58061,
+		"ABL Error for MEm Auto NVDIM error"
+	],
+	[
+		58062,
+		"ABL Error for Unknowm Responce error"
+	],
+	[
+		58063,
+		"ABL Error for Over Clock Error RRW Test Results Error"
+	],
+	[
+		58064,
+		"ABL Error for Over Clock Error PMU Training Error"
+	],
+	[
+		58065,
+		"ABL Error for ABL1 General Error"
+	],
+	[
+		58066,
+		"ABL Error for ABL2 General Error"
+	],
+	[
+		58067,
+		"ABL Error for ABL3 General Error"
+	],
+	[
+		58068,
+		"ABL Error for ABL4 General Error"
+	],
+	[
+		58069,
+		"ABL Error over clock Mem Init Error"
+	],
+	[
+		58070,
+		"ABL Error over clock Mem Other Error"
+	],
+	[
+		58071,
+		"ABL Error for ABL6 General Error"
+	],
+	[
+		58072,
+		"ABL Error Event Log Error"
+	],
+	[
+		58073,
+		"ABL Error FATAL ABL1 Log Error"
+	],
+	[
+		58074,
+		"ABL Error FATAL ABL2 Log Error"
+	],
+	[
+		58075,
+		"ABL Error FATAL ABL3 Log Error"
+	],
+	[
+		58076,
+		"ABL Error FATAL ABL4 Log Error"
+	],
+	[
+		58077,
+		"ABL Error Slave Sync function execution Error"
+	],
+	[
+		58078,
+		"ABL Error Slave Sync communicaton with data set to master Error"
+	],
+	[
+		58079,
+		"ABL Error Slave broadcast communication from master to slave Error"
+	],
+	[
+		58080,
+		"ABL Error FATAL ABL6 Log Error"
+	],
+	[
+		58081,
+		"ABL Error Slave Offline Error"
+	],
+	[
+		58082,
+		"ABL Error Slave Informs Master Error Info Error"
+	],
+	[
+		58083,
+		"ABL Error Error Heap Locate for PMU SRAM Msg Block Error"
+	],
+	[
+		58084,
+		"ABL Error ABL2 Auto Error"
+	],
+	[
+		58085,
+		"ABL Error Flow P3 Family support Error"
+	],
+	[
+		58091,
+		"ABL Error MBIST Heap Allocation Error"
+	],
+	[
+		58092,
+		"ABL Error MBIST Results Error"
+	],
+	[
+		58093,
+		"ABL Error NO Dimm Smcus Info Error"
+	],
+	[
+		58094,
+		"ABL Error Por Max Freq Table Error"
+	],
+	[
+		58095,
+		"ABL Error Unsupproted DIMM Config Error"
+	],
+	[
+		58096,
+		"ABL Error No Ps Table Error"
+	],
+	[
+		58097,
+		"ABL Error Cad Bus Timing Not Found Error"
+	],
+	[
+		58098,
+		"ABL Error Data Bus Timing Not Found Error"
+	],
+	[
+		58099,
+		"ABL Error LrDIMM IBT Not Found Error"
+	],
+	[
+		58100,
+		"ABL Error Unsupprote Dimm Config Max Freq Error Error"
+	],
+	[
+		58101,
+		"ABL Error Mr0 Not Found Error"
+	],
+	[
+		58102,
+		"ABL Error Obt Pattern Not found Error"
+	],
+	[
+		58103,
+		"ABL Error Rc10 Op Speed Not FOund Error"
+	],
+	[
+		58104,
+		"ABL Error Rc2 Ibt Not Found Error"
+	],
+	[
+		58105,
+		"ABL Error Rtt Not Found Error"
+	],
+	[
+		58106,
+		"ABL Error Checksum ReStrt Results Error"
+	],
+	[
+		58107,
+		"ABL Error No Chipselect Results Error"
+	],
+	[
+		58108,
+		"ABL Error No Common Cas Latency Results Error"
+	],
+	[
+		58109,
+		"ABL Error Cas Latecncy exceeds Taa Max Error"
+	],
+	[
+		58110,
+		"ABL Error Nvdimm Arm Missmatch Power Policy Error"
+	],
+	[
+		58111,
+		"ABL Error Nvdimm Arm Missmatch Power Source Error"
+	],
+	[
+		58112,
+		"ABL Error ABL 1 Mem Init Error"
+	],
+	[
+		58113,
+		"ABL Error ABL 2 Mem Init Error"
+	],
+	[
+		58114,
+		"ABL Error ABL 4 Mem Init Error"
+	],
+	[
+		58115,
+		"ABL Error ABL 6 Mem Init Error"
+	],
+	[
+		58116,
+		"ABL Error ABL 1 error repor Error"
+	],
+	[
+		58117,
+		"ABL Error ABL 2 error repor Error"
+	],
+	[
+		58118,
+		"ABL Error ABL 3 error repor Error"
+	],
+	[
+		58119,
+		"ABL Error ABL 4 error repor Error"
+	],
+	[
+		58120,
+		"ABL Error ABL 6 error repor Error"
+	],
+	[
+		58122,
+		"ABL Error message slave sync function execution Error"
+	],
+	[
+		58123,
+		"ABL Error slave offline Error"
+	],
+	[
+		58124,
+		"ABL Error Sync Master Error"
+	],
+	[
+		58125,
+		"ABL Error Slave Informs Master Info Message Error"
+	],
+	[
+		58126,
+		"ABL Error Mix Hynix LRDIMM with other vendor LRDIMM in a channel"
+	],
+	[
+		58127,
+		"ABL Error General Assert Error"
+	],
+	[
+		58128,
+		"ABL ErrorNo Dimms On Any Channel in sysem"
+	],
+	[
+		58129,
+		"ABL Error for Shared Heap Aloc error"
+	],
+	[
+		58130,
+		"ABL Error for Main Heap Aloc error"
+	],
+	[
+		58131,
+		"ABL Error for Shared Heap loc error"
+	],
+	[
+		58132,
+		"ABL Error for Main Heap loc error"
+	],
+	[
+		58134,
+		"ABL Error No memory available in system"
+	],
+	[
+		58144,
+		"ABL Error Mixed Ecc and Non-Ecc DIMM in a channel"
+	],
+	[
+		58145,
+		"ABL Error Mixed 3DS and Non-3DS DIMM in a channel"
+	],
+	[
+		58146,
+		"ABL Error Mixed x4 and x8 DIMM in a channel"
+	],
+	[
+		58147,
+		"ABL Memory MBIST Rrw default test"
+	],
+	[
+		58148,
+		"ABL Memory MBIST Interface test"
+	],
+	[
+		58149,
+		"ABL Memory MBIST DataEye"
+	],
+	[
+		58150,
+		"ABL Memory Post Package Repair"
+	],
+	[
+		58151,
+		"ABL Error S0i3 DF restore buffer Error"
+	],
+	[
+		58152,
+		"ABL Error CPU OPN Mismatch in case of Multi Socket population"
+	],
+	[
+		58153,
+		"Recoverable APCB Checksum Error"
+	],
+	[
+		58154,
+		"Fatal APCB Checksum Error"
+	],
+	[
+		58155,
+		"ABL Error BIST Failure"
+	],
+	[
+		58156,
+		"ABL Memory Heal BIST Write"
+	],
+	[
+		58157,
+		"ABL Memory Heal BIST Read"
+	],
+	[
+		58158,
+		"ABL Error BIST Failure"
+	],
+	[
+		58304,
+		"ABL 3 GMI/xGMI Initialization Stage 3"
+	],
+	[
+		58560,
+		"ABL 3 GMI/xGMI Initialization Stage 4"
+	],
+	[
+		58816,
+		"ABL 3 GMI/xGMI Initialization Stage 5"
+	],
+	[
+		59072,
+		"ABL 3 GMI/xGMI Initialization Stage 6"
+	],
+	[
+		59328,
+		"ABL 3 GMI/xGMI Initialization Stage 7"
+	],
+	[
+		59584,
+		"ABL 3 GMI/xGMI Initialization Stage 8"
+	],
+	[
+		59840,
+		"ABL 3 GMI/xGMI Initialization Stage 9"
+	],
+	[
+		60096,
+		"ABL 3 GMI/xGMI Initialization Stage 10"
+	],
+	[
+		60352,
+		"ABL Error for RRW Test error"
+	],
+	[
+		61439,
+		"EndAgesas"
+	],
+	[
+		61888,
+		"ABL 3 GMI/xGMI Initialization Stage 2 Error"
+	],
+	[
+		62144,
+		"ABL 3 GMI/xGMI Initialization Stage 2 Error"
+	],
+	[
+		62400,
+		"ABL 3 GMI/xGMI Initialization Stage 3 Error"
+	],
+	[
+		62656,
+		"ABL 3 GMI/xGMI Initialization Stage 4 Error"
+	],
+	[
+		62912,
+		"ABL 3 GMI/xGMI Initialization Stage 5 Error"
+	],
+	[
+		63168,
+		"ABL 3 GMI/xGMI Initialization Stage 6 Error"
+	],
+	[
+		63936,
+		"ABL 3 GMI/xGMI Initialization Stage 9 Error"
+	],
+	[
+		64192,
+		"ABL 3 GMI/xGMI Initialization Stage 10 Error"
+	],
+	[
+		65535,
+		"Last defined AGESA PCs"
+	]
+]

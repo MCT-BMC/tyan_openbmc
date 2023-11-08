@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 using namespace phosphor::logging;
 using sdbusplus::exception::SdBusError;
 
-std::shared_ptr<sdbusplus::asio::connection> bus;
+std::shared_ptr<sdbusplus::asio::connection> conn;
 
 constexpr auto ROOT_PATH = "/";
 constexpr auto ROOT_INTERFACE = "org.freedesktop.DBus";

@@ -50,7 +50,7 @@ void propertyInitialize();
 std::vector<std::string> findRegisterPath();
 
 /**
- * @brief Get current timestamp in milliseconds.
+ * @brief Handler the interrupt for input path
  *
  * @param[in] lpcPath - Path for LPC reset register.
  * @param[in] interruptPath - Path for LPC interrupt.
@@ -58,9 +58,17 @@ std::vector<std::string> findRegisterPath();
 void interruptHandler(std::string lpcPath,std::string interruptPath);
 
 /**
- * @brief Get current timestamp in milliseconds.
+ * @brief Handler the input file exist or not
  * 
  * @param[in] io - io context.
  * @param[in] delay - Delay time in micro second.
  */
 void registerHandler(boost::asio::io_context& io,double delay);
+
+/**
+ * @brief Action for interrupt occurred.
+ *
+ * @param[in] lpcPath - Path for LPC reset register.
+ * @param[in] status - Status for handler getting.
+ */
+void interruptAction(std::string lpcPath, int status);

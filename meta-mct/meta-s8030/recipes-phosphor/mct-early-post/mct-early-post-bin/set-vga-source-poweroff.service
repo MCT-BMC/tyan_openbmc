@@ -1,0 +1,11 @@
+[Unit]
+Description=Set VGA source when DC power off
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/env set-vga-source-poweroff.sh
+SyslogIdentifier=set-vga-source-poweroff
+TimeoutSec=infinity
+
+[Install]
+WantedBy=sysinit.target

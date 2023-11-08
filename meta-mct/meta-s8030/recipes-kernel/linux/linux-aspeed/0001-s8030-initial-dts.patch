@@ -4,8 +4,8 @@ Date: Wed, 3 Jun 2020 15:09:29 +0800
 Subject: [PATCH] s8030 initial dts
 
 ---
- arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 345 +++++++++++++++++++++++++++++
- 1 file changed, 345 insertions(+)
+ arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts | 346 +++++++++++++++++++++++++++++
+ 1 file changed, 346 insertions(+)
  create mode 100755 arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
 
 diff --git a/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
@@ -13,7 +13,7 @@ new file mode 100755
 index 0000000..cbaceb2
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed-bmc-mct-s8030.dts
-@@ -0,0 +1,345 @@
+@@ -0,0 +1,346 @@
 +// SPDX-License-Identifier: GPL-2.0
 +// Copyright (c) 2017 Intel Corporation
 +/dts-v1/;
@@ -27,7 +27,7 @@ index 0000000..cbaceb2
 +
 +    chosen {
 +        stdout-path = &uart5;
-+        bootargs = "earlyprintk";
++        bootargs = "earlyprintk vt.global_cursor_default=0";
 +    };
 +
 +    memory {
@@ -39,16 +39,17 @@ index 0000000..cbaceb2
 +        #size-cells = <1>;
 +        ranges;
 +
-+        flash_memory: region@98000000 {
-+            no-map;
-+            reg = <0x98000000 0x04000000>; /* 64M */
-+        };
-+
-+        gfx_memory: framebuffer {
-+            size = <0x04000000>;
++        video_engine_memory: jpegbuffer {
++            size = <0x02000000>;    /* 32M */
 +            alignment = <0x01000000>;
 +            compatible = "shared-dma-pool";
 +            reusable;
++        };
++
++        gfx_memory: framebuffer@96000000 {
++            no-map;
++            compatible = "shared-dma-pool";
++            reg = <0x96000000 0x00800000>; /* 8M */
 +        };
 +    };
 +
@@ -220,11 +221,12 @@ index 0000000..cbaceb2
 +&gfx {
 +       status = "okay";
 +       memory-region = <&gfx_memory>;
++       select-dac-source = "default-mode";
 +};
 +
 +&video {
 +       status = "okay";
-+       memory-region = <&gfx_memory>;
++       memory-region = <&video_engine_memory>;
 +};
 +
 +&vhub {
@@ -262,8 +264,6 @@ index 0000000..cbaceb2
 +
 +&lpc_ctrl {
 +    status = "okay";
-+    memory-region = <&flash_memory>;
-+    flash = <&spi1>;
 +};
 +
 +&adc {
@@ -313,6 +313,7 @@ index 0000000..cbaceb2
 +            offset = <0x08>;
 +            bit-mask = <1>;
 +            bit-shift = <6>;
++            feature-enable = <0x01>;
 +        };
 +    };
 +};
