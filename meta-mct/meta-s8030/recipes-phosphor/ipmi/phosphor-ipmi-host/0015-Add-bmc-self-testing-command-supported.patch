@@ -1,0 +1,40 @@
+From 4e8a7e6795d8cc58db47e92b64188dd198dd03b6 Mon Sep 17 00:00:00 2001
+From: John Chung <john.chung@mic.com.tw>
+Date: Thu, 9 Nov 2023 01:19:30 +0000
+Subject: [PATCH] Add bmc self testing command supported
+
+Signed-off-by: John Chung <john.chung@mic.com.tw>
+---
+ apphandler.cpp | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/apphandler.cpp b/apphandler.cpp
+index 2430e8e..357d89e 100644
+--- a/apphandler.cpp
++++ b/apphandler.cpp
+@@ -691,9 +691,20 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
+     //      [2] 1b = Internal Use Area of BMC FRU corrupted.
+     //      [1] 1b = controller update 'boot block' firmware corrupted.
+     //      [0] 1b = controller operational firmware corrupted.
+-    constexpr uint8_t notImplemented = 0x56;
++    constexpr uint8_t passed = 0x55;
++    // constexpr uint8_t notImplemented = 0x56;
++    constexpr uint8_t deviceCorrupted = 0x57;
++
+     constexpr uint8_t zero = 0;
+-    return ipmi::responseSuccess(notImplemented, zero);
++    auto busp = getSdBus();
++
++    std::ifstream bootFinish("/run/booting-finish");
++    if(!bootFinish.good())
++    {
++        return ipmi::responseSuccess(deviceCorrupted, zero);
++    }
++
++    return ipmi::responseSuccess(passed, zero);
+ }
+ 
+ static constexpr size_t uuidBinaryLength = 16;
+-- 
+2.25.1
+

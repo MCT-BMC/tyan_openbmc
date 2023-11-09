@@ -16,6 +16,8 @@ SRC_URI = " \
            file://blinkUid.sh \
            file://sync-time-initial.py \
            file://sync-time-initial.service \
+           file://mct-bmc-booting-finish.service \
+           file://bmc-booting-finish.sh \
            "
 
 DEPENDS = "systemd"
@@ -25,6 +27,7 @@ SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE_${PN} = " \
                          initFruFlag.service \
                          sync-time-initial.service \
+                         mct-bmc-booting-finish.service \
                          "
 
 
@@ -35,4 +38,5 @@ do_install() {
     install -m 0755 ${S}relinkLan.sh ${D}/${sbindir}/
     install -m 0755 ${S}blinkUid.sh ${D}/${sbindir}/
     install -m 0755 ${S}sync-time-initial.py ${D}/${sbindir}/
+    install -m 0755 ${S}/bmc-booting-finish.sh ${D}/${sbindir}/
 }
