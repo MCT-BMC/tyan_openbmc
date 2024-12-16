@@ -33,6 +33,7 @@ SRC_URI += "file://0001-add-supported-pmbus-name-cffps1.patch \
             file://0040-s8030-not-connected-fio-board-show-no-reading.patch \
             file://0041-add-tmp411-to-sensor-types.patch \
             file://0042-Support-Dimm-temperature-sensor.patch \
+            file://0043-Add-the-checking-of-LPC-reset-before-get-DIMM-temper.patch \
             "
 
 SYSTEMD_SERVICE_${PN} += " xyz.openbmc_project.processorsensor.service"

@@ -1,0 +1,156 @@
+From bb1b67b814cec042ce331750f050cfe2a52a5941 Mon Sep 17 00:00:00 2001
+From: "henbin.chang" <henbin-chang@mic.com.tw>
+Date: Mon, 16 Dec 2024 15:47:09 +0800
+Subject: [PATCH] Add the checking of LPC reset before get DIMM temperature.
+
+---
+ include/Utils.hpp      |  7 +++++
+ src/DIMMTempSensor.cpp | 20 +++++++++++++-
+ src/Utils.cpp          | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 97 insertions(+), 1 deletion(-)
+
+diff --git a/include/Utils.hpp b/include/Utils.hpp
+index 8bebb7e..ef0625b 100755
+--- a/include/Utils.hpp
++++ b/include/Utils.hpp
+@@ -64,6 +64,13 @@ void createAssociation(
+ void findLimits(std::pair<double, double>& limits,
+                 const SensorBaseConfiguration* data);
+ 
++int readFileValue(std::string path);
++void writeFileValue(std::string path, int value);
++bool isLpcReset(void);
++void clrLpcReset(void);
++
++void setDIMMSensorStatus(std::shared_ptr<sdbusplus::asio::connection>& bus, uint32_t control);
++
+ enum class PowerState
+ {
+     on,
+diff --git a/src/DIMMTempSensor.cpp b/src/DIMMTempSensor.cpp
+index e0c0e9a..f2490b0 100755
+--- a/src/DIMMTempSensor.cpp
++++ b/src/DIMMTempSensor.cpp
+@@ -88,7 +88,8 @@ DIMMTempSensor::DIMMTempSensor(std::shared_ptr<sdbusplus::asio::connection>& con
+         enableMux = false;
+     }
+ 
+-    PowerDelayCounter = delayTime;
++    //PowerDelayCounter = delayTime;
++    PowerDelayCounter = 0;
+ 
+     setupPowerMatch(conn);
+     setupOwnerMatch(conn);
+@@ -206,6 +207,23 @@ void DIMMTempSensor::read(void)
+             setOwnerStatus(0x00);
+         }
+ 
++        if(isLpcReset())
++        {
++        if constexpr (debug)
++        {
++            std::cerr << "<LPC Reset occur>" << std::endl;
++        }
++            setOwnerStatus(0x00);
++            setDIMMSensorStatus(dbusConnection,0x00);
++            clrLpcReset();
++        }
++
++        if constexpr (debug)
++        {
++            std::cerr << "PowerDelayCounter=" << std::hex << static_cast<int>(PowerDelayCounter) << std::endl;
++            std::cerr << "getOwnerStatus()=" << std::hex << static_cast<int>(getOwnerStatus()) << std::endl;
++        }
++
+         if (getOwnerStatus() == 0x00)
+         {
+             updateValueInvalid(true);
+diff --git a/src/Utils.cpp b/src/Utils.cpp
+index 6f4903d..7c51fca 100755
+--- a/src/Utils.cpp
++++ b/src/Utils.cpp
+@@ -290,6 +290,7 @@ void setupOwnerMatch(const std::shared_ptr<sdbusplus::asio::connection>& conn)
+             if (findState != values.end())
+             {
+                 ownerStatus = std::get<uint32_t>(findState->second);
++                std::cerr << "ownerStatus=" << std::hex << ownerStatus << std::endl;
+             }
+         });
+ 
+@@ -398,3 +399,73 @@ void createInventoryAssoc(
+         std::array<std::string, 1>{
+             "xyz.openbmc_project.Inventory.Item.System"});
+ }
++
++/** @brief Read the value from specific path.
++ *
++ *  @param[in] path - Specific path for reading.
++ */
++int readFileValue(std::string path)
++{
++    std::fstream registerFile(path, std::ios_base::in);
++    int value;
++    registerFile >> value;
++    return value;
++}
++
++/** @brief Write the value for specific path.
++ *
++ *  @param[in] path - Specific path for writing.
++ *  @param[in] value - Value for writing.
++ */
++void writeFileValue(std::string path, int value)
++{
++    std::fstream registerFile(path, std::ios_base::out);
++
++    registerFile << value;
++}
++
++bool isLpcReset(void)
++{
++    std::string lpcPath = "/sys/bus/platform/drivers/aspeed-bmc-misc/1e789000.lpc-bmc:interrupt/lpc-rst";
++    int status = 0;
++    status = readFileValue(lpcPath);
++
++    if (status == 1)
++    {
++        return true;
++    }
++    else
++    {
++        return false;
++    }
++}
++
++void clrLpcReset(void)
++{
++    std::string lpcPath = "/sys/bus/platform/drivers/aspeed-bmc-misc/1e789000.lpc-bmc:interrupt/lpc-rst";
++    writeFileValue(lpcPath,0);
++}
++
++/**
++ * @brief Set sensor status.
++ *
++ * @param[in] bus - DBUS Bus Object.
++ * @param[in] signal - Send propertie.
++ * @param[in] control - DIMM sensor status.
++ */
++void setDIMMSensorStatus(std::shared_ptr<sdbusplus::asio::connection>& bus, uint32_t control)
++{
++    try
++    {
++        auto method =  bus->new_method_call(
++            status::busname, status::path, "org.freedesktop.DBus.Properties", "Set");
++        method.append(status::interface, status::property, sdbusplus::message::variant<uint32_t>(control));
++        bus->call(method);
++    }
++	catch (const sdbusplus::exception::exception& e)
++    {
++        std::cerr << "Failed to change sensor status exception name:" << e.name()
++                  << "and description:" << e.description()
++                  << " was thrown\n";
++    }
++}
+-- 
+2.7.4
+

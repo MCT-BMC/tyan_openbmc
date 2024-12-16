@@ -1,0 +1,25 @@
+From 7f63b35f7dfa52f05a6e465b1fb41078637f504c Mon Sep 17 00:00:00 2001
+From: "henbin.chang" <henbin-chang@mic.com.tw>
+Date: Mon, 16 Dec 2024 15:40:02 +0800
+Subject: [PATCH] Change LPC reset to use shared PCIe reset
+
+---
+ board/aspeed/ast-g5/ast-g5.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/board/aspeed/ast-g5/ast-g5.c b/board/aspeed/ast-g5/ast-g5.c
+index c6eb81b..68ebca1 100644
+--- a/board/aspeed/ast-g5/ast-g5.c
++++ b/board/aspeed/ast-g5/ast-g5.c
+@@ -86,6 +86,8 @@ int board_init(void)
+ 	Set_Default_UART_Route();
+ 	Disable_BMC_SPI_Multi_Function_Pin();
+ 	Set_VGA_source();
++       //Change to use PCIe reset pin for LPC reset
++       ast_scu_write(0x4000, 0x7c);
+ 	return 0;
+ }
+ 
+-- 
+2.7.4
+

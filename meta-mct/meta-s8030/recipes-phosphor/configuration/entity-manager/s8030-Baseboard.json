@@ -22,7 +22,7 @@
             "Address": "0x70",
             "DimmSlotNum": 16,
             "DimmGroupCounter": 2,
-            "DelayTime": 0,
+            "DelayTime": 180,
             "Name0": "P0_UMC0_CH_A0",
             "Name1": "P0_UMC1_CH_B0",
             "Name2": "P0_UMC3_CH_C0",
