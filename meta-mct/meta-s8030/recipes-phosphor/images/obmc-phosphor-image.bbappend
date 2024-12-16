@@ -26,7 +26,6 @@ OBMC_IMAGE_EXTRA_INSTALL_append_s8030 = " libgpiod \
                                           phosphor-host-postd \
                                           ethtool \
                                           mct-dcmi-power \
-                                          mct-register-monitor \
                                           mct-early-post-bin \
                                           mct-post-code-config \
                                           mct-env-manager \
